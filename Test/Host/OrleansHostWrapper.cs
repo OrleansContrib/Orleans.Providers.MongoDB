@@ -248,7 +248,17 @@ Where:
             }
 
             var config = ClusterConfiguration.LocalhostPrimarySilo();
-            config.AddMemoryStorageProvider();
+            config.LoadFromFile("OrleansConfiguration.xml");
+
+            //var config = ClusterConfiguration.LocalhostPrimarySilo();
+            //config.AddMemoryStorageProvider();
+
+            //            //MongoDB
+            //var props = new Dictionary<string, string>();
+            //props["Database"] = "orleanssamples";
+            //props["ConnectionString"] = "mongodb://localhost:27017/";
+            //config.Globals.RegisterStorageProvider<Samples.StorageProviders.MongoDBStorage>("TestStore", props);
+
             this.siloHost = new SiloHost(siloName, config);
 
             if (deploymentId != null)

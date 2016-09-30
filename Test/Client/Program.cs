@@ -30,7 +30,7 @@ internal class Program
         {
             try
             {
-                GrainClient.Initialize(ClientConfiguration.LocalhostSilo());
+                GrainClient.Initialize(ClientConfiguration.LoadFromFile(@".\ClientConfiguration.xml"));
                 initialized = GrainClient.IsInitialized;
             }
             catch (Exception ex)

@@ -34,8 +34,12 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Orleans, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.Core.1.2.0\lib\net451\Orleans.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\Orleans.Providers.MongoDB\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Orleans, Version=1.2.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.Core.1.2.3\lib\net451\Orleans.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -52,15 +56,16 @@
     <Compile Include="Properties\orleans.codegen.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.OrleansCodeGenerator.Build.1.2.0\build\Microsoft.Orleans.OrleansCodeGenerator.Build.targets" Condition="Exists('..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.OrleansCodeGenerator.Build.1.2.0\build\Microsoft.Orleans.OrleansCodeGenerator.Build.targets')" />
+  <Import Project="..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.OrleansCodeGenerator.Build.1.2.3\build\Microsoft.Orleans.OrleansCodeGenerator.Build.targets" Condition="Exists('..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.OrleansCodeGenerator.Build.1.2.3\build\Microsoft.Orleans.OrleansCodeGenerator.Build.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.OrleansCodeGenerator.Build.1.2.0\build\Microsoft.Orleans.OrleansCodeGenerator.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.OrleansCodeGenerator.Build.1.2.0\build\Microsoft.Orleans.OrleansCodeGenerator.Build.targets'))" />
+    <Error Condition="!Exists('..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.OrleansCodeGenerator.Build.1.2.3\build\Microsoft.Orleans.OrleansCodeGenerator.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.OrleansCodeGenerator.Build.1.2.3\build\Microsoft.Orleans.OrleansCodeGenerator.Build.targets'))" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

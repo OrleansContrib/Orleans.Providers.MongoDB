@@ -22,7 +22,10 @@ internal class Program
     /// </param>
     private static void Main(string[] args)
     {
-        using (var silo = new SiloHost("primary", ClusterConfiguration.LocalhostPrimarySilo()))
+        var config = ClusterConfiguration.LocalhostPrimarySilo();
+        config.LoadFromFile(@".\OrleansConfiguration.xml");
+
+        using (var silo = new SiloHost("primary", config))
         {
             silo.InitializeOrleansSilo();
 
