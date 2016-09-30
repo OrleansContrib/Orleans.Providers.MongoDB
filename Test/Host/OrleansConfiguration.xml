@@ -3,9 +3,13 @@
     <SystemStore SystemStoreType ="SqlServer"
                DeploymentId="OrleansTest"
                DataConnectionString="Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Orleans;Integrated Security=True;Pooling=False;Max Pool Size=200;Asynchronous Processing=True;MultipleActiveResultSets=True" AdoInvariant="System.Data.SqlClient" />
+    <StatisticsProviders>
+      <Provider Type="Orleans.Providers.SqlServer.SqlStatisticsPublisher" Name="MySQLStatsProvider" ConnectionString="Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Orleans;Integrated Security=True;Pooling=False;Max Pool Size=200;Asynchronous Processing=True;MultipleActiveResultSets=True" />
+    </StatisticsProviders>
   </Globals>
   <Defaults>
     <Networking Address="" Port="11111"/>
     <ProxyingGateway Address="" Port="30000"/>
+    <Statistics ProviderType="MySQLStatsProvider" WriteLogStatisticsToTable="true"/>
   </Defaults>
 </OrleansConfiguration>
