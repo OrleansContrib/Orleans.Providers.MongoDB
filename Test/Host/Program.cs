@@ -1,58 +1,42 @@
-namespace Orleans.Providers.MongoDB.Test.Host
-{
-    using System;
+#region Using
 
-    using Orleans;
-    using Orleans.Runtime.Configuration;
+using System;
+
+using Orleans.Runtime.Configuration;
+using Orleans.Runtime.Host;
+
+#endregion
+
+/// <summary>
+/// The program.
+/// </summary>
+internal class Program
+{
+    #region Other Methods
 
     /// <summary>
-    /// Orleans test silo host
+    /// The main.
     /// </summary>
-    public class Program
+    /// <param name="args">
+    /// The args.
+    /// </param>
+    private static void Main(string[] args)
     {
-        static void Main(string[] args)
+        using (var silo = new SiloHost("primary", ClusterConfiguration.LocalhostPrimarySilo()))
         {
-            // The Orleans silo environment is initialized in its own app domain in order to more
-            // closely emulate the distributed situation, when the client and the server cannot
-            // pass data via shared memory.
-            AppDomain hostDomain = AppDomain.CreateDomain("OrleansHost", null, new AppDomainSetup
+            silo.InitializeOrleansSilo();
+
+            var result = silo.StartOrleansSilo();
+            if (result)
             {
-                AppDomainInitializer = InitSilo,
-                AppDomainInitializerArguments = args,
-            });
-
-            var config = ClientConfiguration.LocalhostSilo();
-            GrainClient.Initialize(config);
-
-            // TODO: once the previous call returns, the silo is up and running.
-            //       This is the place your custom logic, for example calling client logic
-            //       or initializing an HTTP front end for accepting incoming requests.
-
-            Console.WriteLine("Orleans Silo is running.\nPress Enter to terminate...");
-            Console.ReadLine();
-
-            hostDomain.DoCallBack(ShutdownSilo);
-        }
-
-        static void InitSilo(string[] args)
-        {
-            hostWrapper = new OrleansHostWrapper(args);
-
-            if (!hostWrapper.Run())
-            {
-                Console.Error.WriteLine("Failed to initialize Orleans silo");
+                Console.WriteLine("silo running");
+                Console.ReadKey();
+                return;
             }
-        }
 
-        static void ShutdownSilo()
-        {
-            if (hostWrapper != null)
-            {
-                hostWrapper.Dispose();
-                GC.SuppressFinalize(hostWrapper);
-            }
+            Console.WriteLine("could not start silo");
         }
-
-        private static OrleansHostWrapper hostWrapper;
     }
+
+    #endregion
 }
