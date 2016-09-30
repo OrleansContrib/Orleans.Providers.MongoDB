@@ -5,6 +5,14 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orleans.Providers.MongoDB", "Orleans.Providers.MongoDB.csproj", "{E49725D0-D9E8-4F68-8FE3-919F062D3041}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{7A336DC5-203A-4E16-B3A4-C6E2B79DDBD0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orleans.Providers.MongoDB.Test.Host", "..\Test\Host\Orleans.Providers.MongoDB.Test.Host.csproj", "{4B8A18F9-E41A-426A-9268-AAC92A6C8DEB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orleans.Providers.MongoDB.Test.GrainInterfaces", "..\Test\GrainInterfaces\Orleans.Providers.MongoDB.Test.GrainInterfaces.csproj", "{91732FBF-D745-4B77-9664-A583D8AD5EF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orleans.Providers.MongoDB.Test.Grains", "..\Test\Grains\Orleans.Providers.MongoDB.Test.Grains.csproj", "{FF122DE7-FAB0-4605-B5AA-D8716CBCB6E9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,8 +23,25 @@ Global
 		{E49725D0-D9E8-4F68-8FE3-919F062D3041}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E49725D0-D9E8-4F68-8FE3-919F062D3041}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E49725D0-D9E8-4F68-8FE3-919F062D3041}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B8A18F9-E41A-426A-9268-AAC92A6C8DEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B8A18F9-E41A-426A-9268-AAC92A6C8DEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B8A18F9-E41A-426A-9268-AAC92A6C8DEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B8A18F9-E41A-426A-9268-AAC92A6C8DEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91732FBF-D745-4B77-9664-A583D8AD5EF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91732FBF-D745-4B77-9664-A583D8AD5EF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91732FBF-D745-4B77-9664-A583D8AD5EF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91732FBF-D745-4B77-9664-A583D8AD5EF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF122DE7-FAB0-4605-B5AA-D8716CBCB6E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF122DE7-FAB0-4605-B5AA-D8716CBCB6E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF122DE7-FAB0-4605-B5AA-D8716CBCB6E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF122DE7-FAB0-4605-B5AA-D8716CBCB6E9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4B8A18F9-E41A-426A-9268-AAC92A6C8DEB} = {7A336DC5-203A-4E16-B3A4-C6E2B79DDBD0}
+		{91732FBF-D745-4B77-9664-A583D8AD5EF2} = {7A336DC5-203A-4E16-B3A4-C6E2B79DDBD0}
+		{FF122DE7-FAB0-4605-B5AA-D8716CBCB6E9} = {7A336DC5-203A-4E16-B3A4-C6E2B79DDBD0}
 	EndGlobalSection
 EndGlobal
