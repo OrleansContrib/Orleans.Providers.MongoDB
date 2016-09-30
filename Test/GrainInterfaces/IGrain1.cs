@@ -7,6 +7,6 @@ namespace Orleans.Providers.MongoDB.Test.GrainInterfaces
     /// </summary>
 	public interface IGrain1 : IGrainWithGuidKey
     {
-
+         
     }
 }
