@@ -22,6 +22,7 @@ internal class Program
     /// </param>
     private static void Main(string[] args)
     {
+        // Todo: This configuration should not be called from the config file 
         var config = ClusterConfiguration.LocalhostPrimarySilo();
         config.LoadFromFile(@".\OrleansConfiguration.xml");
 

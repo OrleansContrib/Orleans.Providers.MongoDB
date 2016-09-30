@@ -30,6 +30,7 @@ internal class Program
         {
             try
             {
+                // Todo: This configuration should not be called from the config file
                 GrainClient.Initialize(ClientConfiguration.LoadFromFile(@".\ClientConfiguration.xml"));
                 initialized = GrainClient.IsInitialized;
             }
