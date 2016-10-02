@@ -6,8 +6,14 @@ using System.Threading.Tasks;
 
 namespace Orleans.Providers.MongoDB.Membership
 {
+    using global::MongoDB.Bson;
+    using global::MongoDB.Bson.Serialization.Attributes;
+
     public class MembershipTable
     {
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
+
         public string DeploymentId { get; set; }
 
         public string Address { get; set; }
@@ -24,8 +30,10 @@ namespace Orleans.Providers.MongoDB.Membership
 
         public string SuspectTimes { get; set; }
 
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime StartTime { get; set; }
 
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime IAmAliveTime { get; set; }
     }
 }

@@ -19,9 +19,12 @@ namespace Orleans.Providers.MongoDB.Membership
         /// </returns>
         Task InitMembershipVersionCollectionAsync(string deploymentId);
 
-
         Task<MembershipTableData> ReturnMembershipTableData(string deploymentId, string suspectingSilos);
 
         Task<MembershipTableData> ReturnRow(SiloAddress key, string deploymentId, string suspectingSilos);
+
+        Task<bool> InsertMembershipRow(string deploymentId, MembershipEntry entry, TableVersion tableVersion);
+
+        Task UpdateIAmAliveTimeAsyncTask(string deploymentId, SiloAddress siloAddress, DateTime iAmAliveTime);
     }
 }

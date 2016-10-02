@@ -147,8 +147,8 @@
             {
                 if (this.logger.IsVerbose)
                 {
-                    //this.logger.Verbose(
-                    //    "MongoMembershipTable.InsertRow aborted due to null check. MembershipEntry is null.");
+                    this.logger.Verbose(
+                        "MongoMembershipTable.InsertRow aborted due to null check. MembershipEntry is null.");
                 }
 
                 throw new ArgumentNullException("entry");
@@ -167,9 +167,7 @@
 
             try
             {
-                return
-                    await
-                    this.orleansQueries.InsertMembershipRowAsync(this.deploymentId, entry, tableVersion.VersionEtag);
+                return await this.repository.InsertMembershipRow(this.deploymentId, entry, tableVersion);
             }
             catch (Exception ex)
             {
@@ -216,9 +214,41 @@
         /// </summary>
         /// <param name="entry"></param>
         /// <returns>Task representing the successful execution of this operation. </returns>
-        public Task UpdateIAmAlive(MembershipEntry entry)
+        public async Task UpdateIAmAlive(MembershipEntry entry)
         {
-            throw new NotImplementedException();
+            if (this.logger.IsVerbose3)
+            {
+                this.logger.Verbose3(string.Format("MongoMembershipTable.UpdateIAmAlive called with entry {0}.", entry));
+            }
+
+            if (entry == null)
+            {
+                if (this.logger.IsVerbose)
+                {
+                    this.logger.Verbose(
+                        "MongoMembershipTable.UpdateIAmAlive aborted due to null check. MembershipEntry is null.");
+                }
+
+                throw new ArgumentNullException("entry");
+            }
+
+            try
+            {
+                await this.repository.UpdateIAmAliveTimeAsyncTask( 
+                        this.deploymentId,
+                        entry.SiloAddress,
+                        entry.IAmAliveTime);
+            }
+            catch (Exception ex)
+            {
+                if (this.logger.IsVerbose)
+                {
+                    this.logger.Verbose("MongoMembershipTable.UpdateIAmAlive failed: {0}", ex);
+                }
+
+                throw;
+            }
+
         }
 
         #endregion
@@ -245,15 +275,20 @@
         }
 
         /// <summary>
-        /// Specifies how often this IGatewayListProvider is refreshed, to have a bound on max staleness of its returned infomation.
+        /// Gets a value indicating whether is updatable.
         /// </summary>
-        public TimeSpan MaxStaleness { get; }
+        public bool IsUpdatable
+        {
+            get
+            {
+                return true;
+            }
+        }
 
         /// <summary>
-        /// Specifies whether this IGatewayListProvider ever refreshes its returned infomation, or always returns the same gw list.
-        /// (currently only the static config based StaticGatewayListProvider is not updatable. All others are.)
+        /// Gets the max staleness.
         /// </summary>
-        public bool IsUpdatable { get; }
+        public TimeSpan MaxStaleness { get; private set; }
 
         #endregion
 

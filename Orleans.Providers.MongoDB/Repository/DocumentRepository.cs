@@ -45,7 +45,7 @@
         /// </summary>
         public string DatabaseName { get; set; }
 
-        public async Task<DeleteResult> DeleteDocumentAsync(string mongoCollectionName, string key)
+        public async Task<DeleteResult> DeleteDocumentAsync(string mongoCollectionName, string keyName, string key)
         {
             if (string.IsNullOrEmpty(this.ConnectionString))
             {
@@ -68,13 +68,13 @@
                 throw new Exception("Invalid Collection");
             }
 
-            var builder = Builders<BsonDocument>.Filter.Eq("key", key);
+            var builder = Builders<BsonDocument>.Filter.Eq(keyName, key);
 
             return await collection.DeleteManyAsync(builder);
 
         }
 
-        public async Task SaveDocumentAsync(string mongoCollectionName, string key, BsonDocument document)
+        public async Task SaveDocumentAsync(string mongoCollectionName, string keyName, string key, BsonDocument document)
         {
             if (string.IsNullOrEmpty(this.ConnectionString))
             {
@@ -98,7 +98,7 @@
 
             var collection = this.ReturnOrCreateCollection(mongoCollectionName);
 
-            var builder = Builders<BsonDocument>.Filter.Eq("key", key);
+            var builder = Builders<BsonDocument>.Filter.Eq(keyName, key);
 
             var existing = await collection.Find(builder).FirstOrDefaultAsync();
 
@@ -115,7 +115,7 @@
             }
         }
 
-        public async Task<BsonDocument> FindDocumentAsync(string mongoCollectionName, string key)
+        public async Task<BsonDocument> FindDocumentAsync(string mongoCollectionName, string keyName, string key)
         {
             if (string.IsNullOrEmpty(this.ConnectionString))
             {
@@ -136,7 +136,7 @@
             if (collection == null)
                 return null;
 
-            var builder = Builders<BsonDocument>.Filter.Eq("key", key);
+            var builder = Builders<BsonDocument>.Filter.Eq(keyName, key);
 
             var result = await collection.Find(builder).FirstOrDefaultAsync();
 

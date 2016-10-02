@@ -9,6 +9,7 @@ namespace Orleans.Providers.MongoDB.Membership
     using System.Globalization;
     using System.Net;
     using System.Reflection;
+    using System.Threading;
 
     using global::MongoDB.Bson;
     using global::MongoDB.Driver;
@@ -31,22 +32,25 @@ namespace Orleans.Providers.MongoDB.Membership
         /// The membership version collection name.
         /// </summary>
         private static readonly string MembershipVersionCollectionName = "OrleansMembershipVersion";
+        private static readonly string MembershipVersionKeyName = "DeploymentId";
+
 
         private static readonly string MembershipCollectionName = "OrleansMembership";
 
         public async Task InitMembershipVersionCollectionAsync(string deploymentId)
         {
-            BsonDocument membershipVersionDocument = await this.FindDocumentAsync(MembershipVersionCollectionName, "DeploymentId");
+            BsonDocument membershipVersionDocument = await this.FindDocumentAsync(MembershipVersionCollectionName, MembershipVersionKeyName, deploymentId);
             if (membershipVersionDocument == null)
             {
                 membershipVersionDocument = new BsonDocument
                 {
                     ["DeploymentId"] = deploymentId,
-                    ["Timestamp"] = DateTime.UtcNow
+                    ["Timestamp"] = DateTime.UtcNow,
+                    ["Version"] = 1
                 };
-            }
 
-            await this.SaveDocumentAsync(MembershipVersionCollectionName, deploymentId, membershipVersionDocument);
+                await this.SaveDocumentAsync(MembershipVersionCollectionName, MembershipVersionKeyName, deploymentId, membershipVersionDocument);
+            }
         }
 
         public async Task<MembershipTableData> ReturnMembershipTableData(string deploymentId, string suspectingSilos)
@@ -65,7 +69,7 @@ namespace Orleans.Providers.MongoDB.Membership
 
         private async Task<MembershipTableData> ReturnMembershipTableData(List<MembershipTable> membershipList, string deploymentId, string suspectingSilos)
         {
-            var membershipVersion = await this.FindDocumentAsync(MembershipVersionCollectionName, deploymentId);
+            var membershipVersion = await this.FindDocumentAsync(MembershipVersionCollectionName, MembershipVersionKeyName, deploymentId);
             if (!membershipVersion.Contains("Version"))
             {
                 membershipVersion["Version"] = 1;
@@ -82,7 +86,7 @@ namespace Orleans.Providers.MongoDB.Membership
                 foreach (var membership in membershipList)
                 {
                     membershipEntries.Add(new Tuple<MembershipEntry, string>(Parse(membership, suspectingSilos), string.Empty));
-                }                
+                }
             }
 
             return new MembershipTableData(membershipEntries, new TableVersion(tableVersionEtag, tableVersionEtag.ToString()));
@@ -100,12 +104,12 @@ namespace Orleans.Providers.MongoDB.Membership
 
             parse.SiloAddress = SiloAddress.New(new IPEndPoint(IPAddress.Parse(entry.Address), entry.Port), entry.Generation);
 
-
+            // Todo: Why is there no SiloName?
             //if (!string.IsNullOrEmpty(siloName))
             //{
             //    parse.SiloName = tableEntry.SiloName;
             //}
-            
+
             parse.StartTime = entry.StartTime;
             parse.IAmAliveTime = entry.IAmAliveTime;
 
@@ -139,8 +143,84 @@ namespace Orleans.Providers.MongoDB.Membership
 
         public async Task<MembershipTableData> ReturnRow(SiloAddress key, string deploymentId, string suspectingSilos)
         {
-            List<MembershipTable> membershipList = Database.GetCollection<MembershipTable>(MembershipCollectionName).AsQueryable().Where(m => m.DeploymentId == deploymentId && m.Address == key.Endpoint.Address.ToString() && m.Port == key.Endpoint.Port && m.Generation == key.Generation).ToList();
+            List<MembershipTable> membershipList = Database.GetCollection<MembershipTable>(MembershipCollectionName).AsQueryable().Where(m => m.DeploymentId == deploymentId && m.Address == key.Endpoint.Address.MapToIPv6().ToString() && m.Port == key.Endpoint.Port && m.Generation == key.Generation).ToList();
             return await this.ReturnMembershipTableData(membershipList, deploymentId, suspectingSilos);
+        }
+
+        public async Task<bool> InsertMembershipRow(string deploymentId, MembershipEntry entry, TableVersion tableVersion)
+        {
+            // Todo: Use async
+
+            string address = entry.SiloAddress.Endpoint.Address.MapToIPv6().ToString();
+
+            var collection = Database.GetCollection<MembershipTable>(MembershipCollectionName);
+
+            var membershipDocument = collection.AsQueryable()
+                    .FirstOrDefault(
+                        m =>
+                        m.DeploymentId == deploymentId
+                        && m.Address == address
+                        && m.Port == entry.SiloAddress.Endpoint.Port && m.Generation == entry.SiloAddress.Generation);
+
+            if (membershipDocument == null)
+            {
+                // Todo: Handle as transaction
+                MembershipTable document = new MembershipTable
+                {
+                    DeploymentId = deploymentId,
+                    Address = address,
+                    Port = entry.SiloAddress.Endpoint.Port,
+                    Generation = entry.SiloAddress.Generation,
+                    HostName = entry.HostName,
+                    Status = (int)entry.Status,
+                    ProxyPort = entry.ProxyPort,
+                    StartTime = entry.StartTime,
+                    IAmAliveTime = entry.IAmAliveTime
+                };
+
+                if (entry.SuspectTimes.Count == 0)
+                {
+                    document.SuspectTimes = string.Empty;
+                }
+                else
+                {
+                    throw new Exception();
+                }
+
+                await collection.InsertOneAsync(document);
+
+                var versionDocument = await this.FindDocumentAsync(MembershipVersionCollectionName, MembershipVersionKeyName, deploymentId);
+
+                if (versionDocument != null)
+                {
+                    versionDocument["Version"] = versionDocument["Version"].AsInt32 + 1;
+                    versionDocument["Timestamp"] = DateTime.UtcNow;
+
+                    var builder = Builders<BsonDocument>.Filter.Eq(MembershipVersionKeyName, deploymentId);
+                    await this.ReturnOrCreateCollection(MembershipVersionCollectionName).ReplaceOneAsync(builder, versionDocument);
+
+
+                }
+                else
+                {
+                    
+                }
+            }
+            
+            return true;
+        }
+
+        public async Task UpdateIAmAliveTimeAsyncTask(string deploymentId, SiloAddress siloAddress, DateTime iAmAliveTime)
+        {
+            var collection = Database.GetCollection<MembershipTable>(MembershipCollectionName);
+            
+            var update = new UpdateDefinitionBuilder<MembershipTable>().Set(x => x.IAmAliveTime, iAmAliveTime);
+            var result = await collection.UpdateOneAsync(m =>
+                m.DeploymentId == deploymentId && m.Address == siloAddress.Endpoint.Address.MapToIPv6().ToString()
+                && m.Port == siloAddress.Endpoint.Port && m.Generation == siloAddress.Generation, update);
+
+            var success = result.ModifiedCount == 1;
+            
         }
 
         public MongoMembershipProviderRepository(string connectionsString, string databaseName)
