@@ -129,6 +129,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Orleans.Providers.MongoDB\Orleans.Providers.MongoDB.csproj">
+      <Project>{e49725d0-d9e8-4f68-8fe3-919f062d3041}</Project>
+      <Name>Orleans.Providers.MongoDB</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GrainInterfaces\Orleans.Providers.MongoDB.Test.GrainInterfaces.csproj">
       <Project>{91732fbf-d745-4b77-9664-a583d8ad5ef2}</Project>
       <Name>Orleans.Providers.MongoDB.Test.GrainInterfaces</Name>

@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
 
     using global::MongoDB.Bson;
+    using global::MongoDB.Driver;
 
     #endregion
 
@@ -24,34 +25,55 @@
         ///     Gets or sets the database.
         /// </summary>
         string DatabaseName { get; set; }
-
-        /// <summary>
-        ///     Gets or sets the mongo collection name.
-        /// </summary>
-        string MongoCollectionName { get; set; }
-
+        
         #endregion
 
         #region Public methods and operators
 
         /// <summary>
-        /// The add document.
+        /// The delete document async.
         /// </summary>
-        /// <param name="document">
-        /// The document.
+        /// <param name="mongoCollectionName">
+        /// The mongo collection name.
         /// </param>
-        void AddDocument(BsonDocument document);
+        /// <param name="key">
+        /// The key.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        Task<DeleteResult> DeleteDocumentAsync(string mongoCollectionName, string key);
 
         /// <summary>
-        /// The add document async.
+        /// The save document async.
         /// </summary>
+        /// <param name="mongoCollectionName">
+        /// The mongo collection name.
+        /// </param>
+        /// <param name="key">
+        /// The key.
+        /// </param>
         /// <param name="document">
         /// The document.
         /// </param>
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        Task AddDocumentAsync(BsonDocument document);
+        Task SaveDocumentAsync(string mongoCollectionName, string key, BsonDocument document);
+
+        /// <summary>
+        /// The find document async.
+        /// </summary>
+        /// <param name="mongoCollectionName">
+        /// The mongo collection name.
+        /// </param>
+        /// <param name="key">
+        /// The key.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        Task<BsonDocument> FindDocumentAsync(string mongoCollectionName, string key);
 
         #endregion
     }

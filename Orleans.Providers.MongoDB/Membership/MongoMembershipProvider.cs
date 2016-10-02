@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
+    using global::MongoDB.Bson;
     using global::MongoDB.Driver;
 
     using Orleans.Messaging;
@@ -19,7 +20,7 @@
         private string deploymentId;
         private TimeSpan maxStaleness;
         private Logger logger;
-        private IDocumentRepository repository;
+        private IMongoMembershipProviderRepository repository;
 
         #region Implementation of IMembershipTable
 
@@ -29,7 +30,7 @@
         /// <param name="globalConfiguration">the give global configuration</param>
         /// <param name="tryInitTableVersion">whether an attempt will be made to init the underlying table</param>
         /// <param name="traceLogger">the logger used by the membership table</param>
-        public Task InitializeMembershipTable(
+        public async Task InitializeMembershipTable(
             GlobalConfiguration globalConfiguration,
             bool tryInitTableVersion,
             TraceLogger traceLogger)
@@ -41,22 +42,20 @@
             {
                 this.logger.Verbose3("MongoMembershipTable.InitializeMembershipTable called.");
             }
-
-            this.repository = new DocumentRepository(globalConfiguration.DataConnectionString, MongoUrl.Create(globalConfiguration.DataConnectionString).DatabaseName, "MembershipEntry");
+            
+            this.repository = new MongoMembershipProviderRepository(globalConfiguration.DataConnectionString, MongoUrl.Create(globalConfiguration.DataConnectionString).DatabaseName);
 
             // even if I am not the one who created the table, 
             // try to insert an initial table version if it is not already there,
             // so we always have a first table version row, before this silo starts working.
-            //if (tryInitTableVersion)
-            //{
-            //    var wasCreated = await InitTableAsync();
-            //    if (wasCreated)
-            //    {
-            //        logger.Info("Created new table version row.");
-            //    }
-            //}
-
-            return TaskDone.Done;
+            if (tryInitTableVersion)
+            {
+                var wasCreated = await this.InitTableAsync();
+                if (wasCreated)
+                {
+                    this.logger.Info("Created new table version row.");
+                }
+            }
         }
 
         /// <summary>
@@ -78,9 +77,9 @@
         /// <param name="entry">The address of the silo whose membership information needs to be read.</param>
         /// <returns>The membership information for a given silo: MembershipTableData consisting one MembershipEntry entry and
         /// TableVersion, read atomically.</returns>
-        public Task<MembershipTableData> ReadRow(SiloAddress key)
+        public async Task<MembershipTableData> ReadRow(SiloAddress key)
         {
-            throw new NotImplementedException();
+            return await this.repository.ReturnRow(key, this.deploymentId, "");
         }
 
         /// <summary>
@@ -90,9 +89,27 @@
         /// </summary>
         /// <returns>The membership information for a given table: MembershipTableData consisting multiple MembershipEntry entries and
         /// TableVersion, all read atomically.</returns>
-        public Task<MembershipTableData> ReadAll()
+        public async Task<MembershipTableData> ReadAll()
         {
-            throw new NotImplementedException();
+            if (this.logger.IsVerbose3)
+            {
+                this.logger.Verbose3("MongoMembershipTable.ReadAll called.");
+            }
+
+            try
+            {
+                //Todo: Update Suspecting Silos
+                return await this.repository.ReturnMembershipTableData(this.deploymentId, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                if (this.logger.IsVerbose)
+                {
+                    this.logger.Verbose("MongoMembershipTable.ReadAll failed: {0}", ex);
+                }
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -110,9 +127,59 @@
         /// <param name="entry">MembershipEntry to be inserted.</param>
         /// <param name="tableVersion">The new TableVersion for this table, along with its etag.</param>
         /// <returns>True if the insert operation succeeded and false otherwise.</returns>
-        public Task<bool> InsertRow(MembershipEntry entry, TableVersion tableVersion)
+        public async Task<bool> InsertRow(MembershipEntry entry, TableVersion tableVersion)
         {
-            throw new NotImplementedException();
+            if (this.logger.IsVerbose3)
+            {
+                this.logger.Verbose3(
+                    string.Format(
+                        "MongoMembershipTable.InsertRow called with entry {0} and tableVersion {1}.",
+                        entry,
+                        tableVersion));
+            }
+
+            // The "tableVersion" parameter should always exist when inserting a row as Init should
+            // have been called and membership version created and read. This is an optimization to
+            // not to go through all the way to database to fail a conditional check on etag (which does
+            // exist for the sake of robustness) as mandated by Orleans membership protocol.
+            // Likewise, no update can be done without membership entry.
+            if (entry == null)
+            {
+                if (this.logger.IsVerbose)
+                {
+                    //this.logger.Verbose(
+                    //    "MongoMembershipTable.InsertRow aborted due to null check. MembershipEntry is null.");
+                }
+
+                throw new ArgumentNullException("entry");
+            }
+
+            if (tableVersion == null)
+            {
+                if (this.logger.IsVerbose)
+                {
+                    this.logger.Verbose(
+                        "MongoMembershipTable.InsertRow aborted due to null check. TableVersion is null ");
+                }
+
+                throw new ArgumentNullException("tableVersion");
+            }
+
+            try
+            {
+                return
+                    await
+                    this.orleansQueries.InsertMembershipRowAsync(this.deploymentId, entry, tableVersion.VersionEtag);
+            }
+            catch (Exception ex)
+            {
+                if (this.logger.IsVerbose)
+                {
+                    this.logger.Verbose("MongoMembershipTable.InsertRow failed: {0}", ex);
+                }
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -189,5 +256,29 @@
         public bool IsUpdatable { get; }
 
         #endregion
+
+        /// <summary>
+        /// The init table async.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        private async Task<bool> InitTableAsync()
+        {
+            try
+            {
+                await this.repository.InitMembershipVersionCollectionAsync(this.deploymentId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (this.logger.IsVerbose2)
+                {
+                    this.logger.Verbose2("Insert silo membership version failed: {0}", ex.ToString());
+                }
+
+                throw;
+            }
+        }
     }
 }
