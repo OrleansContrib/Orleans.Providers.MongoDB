@@ -1,17 +1,9 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IMongoMembershipProviderRepository.cs" company="">
-//   
-// </copyright>
-// <summary>
-//   The MongoMembershipProviderRepository interface.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
-
-namespace Orleans.Providers.MongoDB.Membership
+﻿namespace Orleans.Providers.MongoDB.Membership
 {
     #region Using
 
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
 
     using Orleans.Providers.MongoDB.Repository;

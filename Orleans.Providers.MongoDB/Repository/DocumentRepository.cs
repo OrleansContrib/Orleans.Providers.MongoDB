@@ -1,13 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DocumentRepository.cs" company="">
-//   
-// </copyright>
-// <summary>
-//   The document repository.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
-
-namespace Orleans.Providers.MongoDB.Repository
+﻿namespace Orleans.Providers.MongoDB.Repository
 {
     #region Using
 

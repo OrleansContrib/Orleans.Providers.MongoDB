@@ -20,7 +20,9 @@
         private string deploymentId;
         private TimeSpan maxStaleness;
         private Logger logger;
-        private IMongoMembershipProviderRepository repository;
+        private IMongoMembershipProviderRepository membershipRepository;
+
+        private IGatewayProviderRepository gatewayRepository;
 
         #region Implementation of IMembershipTable
 
@@ -43,7 +45,7 @@
                 this.logger.Verbose3("MongoMembershipTable.InitializeMembershipTable called.");
             }
             
-            this.repository = new MongoMembershipProviderRepository(globalConfiguration.DataConnectionString, MongoUrl.Create(globalConfiguration.DataConnectionString).DatabaseName);
+            this.membershipRepository = new MongoMembershipProviderRepository(globalConfiguration.DataConnectionString, MongoUrl.Create(globalConfiguration.DataConnectionString).DatabaseName);
 
             // even if I am not the one who created the table, 
             // try to insert an initial table version if it is not already there,
@@ -79,7 +81,7 @@
         /// TableVersion, read atomically.</returns>
         public async Task<MembershipTableData> ReadRow(SiloAddress key)
         {
-            return await this.repository.ReturnRow(key, this.deploymentId);
+            return await this.membershipRepository.ReturnRow(key, this.deploymentId);
         }
 
         /// <summary>
@@ -99,7 +101,7 @@
             try
             {
                 //Todo: Update Suspecting Silos
-                return await this.repository.ReturnMembershipTableData(this.deploymentId);
+                return await this.membershipRepository.ReturnMembershipTableData(this.deploymentId);
             }
             catch (Exception ex)
             {
@@ -167,7 +169,7 @@
 
             try
             {
-                return await this.repository.InsertMembershipRow(this.deploymentId, entry, tableVersion);
+                return await this.membershipRepository.InsertMembershipRow(this.deploymentId, entry, tableVersion);
             }
             catch (Exception ex)
             {
@@ -234,7 +236,7 @@
 
             try
             {
-                await this.repository.UpdateIAmAliveTimeAsyncTask( 
+                await this.membershipRepository.UpdateIAmAliveTimeAsyncTask( 
                         this.deploymentId,
                         entry.SiloAddress,
                         entry.IAmAliveTime);
@@ -262,16 +264,44 @@
         /// <param name="traceLogger">the logger to be used by the provider</param>
         public Task InitializeGatewayListProvider(ClientConfiguration clientConfiguration, TraceLogger traceLogger)
         {
-            throw new NotImplementedException();
+            this.logger = traceLogger;
+            if (this.logger.IsVerbose3)
+            {
+                this.logger.Verbose3("MongoMembershipTable.InitializeGatewayListProvider called.");
+            }
+
+            this.deploymentId = clientConfiguration.DeploymentId;
+            this.MaxStaleness = clientConfiguration.GatewayListRefreshPeriod;
+
+            this.gatewayRepository = new GatewayProviderRepository(clientConfiguration.DataConnectionString, MongoUrl.Create(clientConfiguration.DataConnectionString).DatabaseName);
+
+            return TaskDone.Done;
         }
 
         /// <summary>
         /// Returns the list of gateways (silos) that can be used by a client to connect to Orleans cluster.
         /// The Uri is in the form of: "gwy.tcp://IP:port/Generation". See Utils.ToGatewayUri and Utils.ToSiloAddress for more details about Uri format.
         /// </summary>
-        public Task<IList<Uri>> GetGateways()
+        public async Task<IList<Uri>> GetGateways()
         {
-            throw new NotImplementedException();
+            if (this.logger.IsVerbose3)
+            {
+                this.logger.Verbose3("MongoMembershipTable.GetGateways called.");
+            }
+
+            try
+            {
+                return await this.gatewayRepository.ReturnActiveGatewaysAsync(this.deploymentId);
+            }
+            catch (Exception ex)
+            {
+                if (this.logger.IsVerbose)
+                {
+                    this.logger.Verbose("MongoMembershipTable.Gateways failed {0}", ex);
+                }
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -302,7 +332,7 @@
         {
             try
             {
-                await this.repository.InitMembershipVersionCollectionAsync(this.deploymentId);
+                await this.membershipRepository.InitMembershipVersionCollectionAsync(this.deploymentId);
                 return true;
             }
             catch (Exception ex)

@@ -1,13 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="MongoMembershipProviderRepository.cs" company="">
-//   
-// </copyright>
-// <summary>
-//   The mongo membership provider repository.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
-
-namespace Orleans.Providers.MongoDB.Membership
+﻿namespace Orleans.Providers.MongoDB.Membership
 {
     #region Using
 
@@ -50,12 +41,14 @@ namespace Orleans.Providers.MongoDB.Membership
         #endregion
 
         #region Static Fields
-
-        /// <summary>
-        /// The membership collection name.
-        /// </summary>
-        private static readonly string MembershipCollectionName = "OrleansMembership";
-
+ 
+        public static string MembershipCollectionName
+        {
+            get
+            {
+                return "OrleansMembership";
+            }
+        }
         /// <summary>
         ///     The membership version collection name.
         /// </summary>
@@ -156,7 +149,7 @@ namespace Orleans.Providers.MongoDB.Membership
             TableVersion tableVersion)
         {
             // Todo: Use async
-            string address = entry.SiloAddress.Endpoint.Address.MapToIPv6().ToString();
+            string address = entry.SiloAddress.Endpoint.Address.MapToIPv4().ToString();
 
             var collection = Database.GetCollection<MembershipTable>(MembershipCollectionName);
 
@@ -261,7 +254,7 @@ namespace Orleans.Providers.MongoDB.Membership
                     .AsQueryable()
                     .Where(
                         m =>
-                        m.DeploymentId == deploymentId && m.Address == key.Endpoint.Address.MapToIPv6().ToString()
+                        m.DeploymentId == deploymentId && m.Address == key.Endpoint.Address.MapToIPv4().ToString()
                         && m.Port == key.Endpoint.Port && m.Generation == key.Generation)
                     .ToList();
             return await this.ReturnMembershipTableData(membershipList, deploymentId);
@@ -294,7 +287,7 @@ namespace Orleans.Providers.MongoDB.Membership
                 await
                 collection.UpdateOneAsync(
                     m =>
-                    m.DeploymentId == deploymentId && m.Address == siloAddress.Endpoint.Address.MapToIPv6().ToString()
+                    m.DeploymentId == deploymentId && m.Address == siloAddress.Endpoint.Address.MapToIPv4().ToString()
                     && m.Port == siloAddress.Endpoint.Port && m.Generation == siloAddress.Generation,
                     update);
 
@@ -369,8 +362,9 @@ namespace Orleans.Providers.MongoDB.Membership
         /// <returns>
         /// The <see cref="SiloAddress"/>.
         /// </returns>
-        private static SiloAddress GetSiloAddress(MembershipTable membershipData)
+        public static SiloAddress GetSiloAddress(MembershipTable membershipData)
         {
+            //Todo: Move this method to it's own class so it can be shared a bit more elogantly
             int port = membershipData.Port;
             int generation = membershipData.Generation;
             string address = membershipData.Address;

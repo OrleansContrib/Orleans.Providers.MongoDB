@@ -69,6 +69,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Membership\GatewayProviderRepository.cs" />
+    <Compile Include="Membership\IGatewayProviderRepository.cs" />
     <Compile Include="Membership\IMongoMembershipProviderRepository.cs" />
     <Compile Include="Membership\MembershipTable.cs" />
     <Compile Include="Membership\MongoMembershipProvider.cs" />
