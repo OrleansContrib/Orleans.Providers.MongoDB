@@ -79,7 +79,7 @@
         /// TableVersion, read atomically.</returns>
         public async Task<MembershipTableData> ReadRow(SiloAddress key)
         {
-            return await this.repository.ReturnRow(key, this.deploymentId, "");
+            return await this.repository.ReturnRow(key, this.deploymentId);
         }
 
         /// <summary>
@@ -99,7 +99,7 @@
             try
             {
                 //Todo: Update Suspecting Silos
-                return await this.repository.ReturnMembershipTableData(this.deploymentId, string.Empty);
+                return await this.repository.ReturnMembershipTableData(this.deploymentId);
             }
             catch (Exception ex)
             {
