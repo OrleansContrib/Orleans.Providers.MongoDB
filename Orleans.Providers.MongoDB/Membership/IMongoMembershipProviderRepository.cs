@@ -88,6 +88,23 @@
         /// </returns>
         Task UpdateIAmAliveTimeAsyncTask(string deploymentId, SiloAddress siloAddress, DateTime iAmAliveTime);
 
+        /// <summary>
+        /// The update membership row async.
+        /// </summary>
+        /// <param name="deploymentId">
+        /// The deployment id.
+        /// </param>
+        /// <param name="membershipEntry">
+        /// The membership entry.
+        /// </param>
+        /// <param name="etag">
+        /// The etag.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        Task<bool> UpdateMembershipRowAsync(string deploymentId, MembershipEntry membershipEntry, string etag);
+
         #endregion
     }
 }

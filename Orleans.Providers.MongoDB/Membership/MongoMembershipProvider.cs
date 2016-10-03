@@ -199,9 +199,58 @@
         /// <param name="etag">The etag  for the given MembershipEntry.</param>
         /// <param name="tableVersion">The new TableVersion for this table, along with its etag.</param>
         /// <returns>True if the update operation succeeded and false otherwise.</returns>
-        public Task<bool> UpdateRow(MembershipEntry entry, string etag, TableVersion tableVersion)
+        public async Task<bool> UpdateRow(MembershipEntry entry, string etag, TableVersion tableVersion)
         {
-            throw new NotImplementedException();
+            if (this.logger.IsVerbose3)
+            {
+                this.logger.Verbose3(
+                    string.Format(
+                        "MongoMembershipTable.UpdateRow called with entry {0}, etag {1} and tableVersion {2}.",
+                        entry,
+                        etag,
+                        tableVersion));
+            }
+
+            // The "tableVersion" parameter should always exist when updating a row as Init should
+            // have been called and membership version created and read. This is an optimization to
+            // not to go through all the way to database to fail a conditional check (which does
+            // exist for the sake of robustness) as mandated by Orleans membership protocol.
+            // Likewise, no update can be done without membership entry or an etag.
+            if (entry == null)
+            {
+                if (this.logger.IsVerbose)
+                {
+                    this.logger.Verbose(
+                        "MongoMembershipTable.UpdateRow aborted due to null check. MembershipEntry is null.");
+                }
+
+                throw new ArgumentNullException("entry");
+            }
+
+            if (tableVersion == null)
+            {
+                if (this.logger.IsVerbose)
+                {
+                    this.logger.Verbose(
+                        "MongoMembershipTable.UpdateRow aborted due to null check. TableVersion is null ");
+                }
+
+                throw new ArgumentNullException("tableVersion");
+            }
+
+            try
+            {
+                return await this.membershipRepository.UpdateMembershipRowAsync(this.deploymentId, entry, tableVersion.VersionEtag);
+            }
+            catch (Exception ex)
+            {
+                if (this.logger.IsVerbose)
+                {
+                    this.logger.Verbose("MongoMembershipTable.UpdateRow failed: {0}", ex);
+                }
+
+                throw;
+            }
         }
 
         /// <summary>

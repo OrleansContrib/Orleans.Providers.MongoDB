@@ -323,7 +323,8 @@
                                 Status = (SiloStatus)membershipData.Status,
                                 ProxyPort = membershipData.ProxyPort,
                                 StartTime = startTime.Value,
-                                IAmAliveTime = membershipData.IAmAliveTime
+                                IAmAliveTime = membershipData.IAmAliveTime,
+                                InstanceName = membershipData.HostName
                             };
 
                 string suspectingSilos = membershipData.SuspectTimes;
@@ -349,7 +350,7 @@
                     MembershipVersionKeyName,
                     membershipData.DeploymentId);
 
-            return Tuple.Create(entry, membershipVersionDocument["Version"].AsString);
+            return Tuple.Create(entry, membershipVersionDocument["Version"].AsInt32.ToString());
         }
 
         /// <summary>
@@ -415,5 +416,47 @@
         }
 
         #endregion
+
+        /// <summary>
+        /// The update membership row async.
+        /// </summary>
+        /// <param name="deploymentId">
+        /// The deployment id.
+        /// </param>
+        /// <param name="membershipEntry">
+        /// The membership entry.
+        /// </param>
+        /// <param name="etag">
+        /// The version.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        public async Task<bool> UpdateMembershipRowAsync(
+            string deploymentId,
+            MembershipEntry membershipEntry,
+            string etag)
+        {
+            await UpdateMembershipVersion(deploymentId, etag);
+
+            return true;
+        }
+
+        private static async Task UpdateMembershipVersion(string deploymentId, string version)
+        {
+            var collection = Database.GetCollection<BsonDocument>(MembershipVersionCollectionName);
+
+            var builder = Builders<BsonDocument>.Filter;
+            var filter = builder.Eq("DeploymentId", deploymentId) & builder.Eq("Version", Convert.ToInt32(version));
+
+            var result =
+                await
+                collection.UpdateOneAsync(
+                    filter,
+                    Builders<BsonDocument>.Update.Set("Version", Convert.ToInt32(version) + 1)
+                    .Set("Timestamp", DateTime.Now.ToUniversalTime()));
+
+            // Todo: Update Membership Table
+        }
     }
 }
