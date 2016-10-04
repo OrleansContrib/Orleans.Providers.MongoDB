@@ -7,19 +7,8 @@ using Orleans.Runtime.Host;
 
 #endregion
 
-/// <summary>
-/// The program.
-/// </summary>
 internal class Program
 {
-    #region Other Methods
-
-    /// <summary>
-    /// The main.
-    /// </summary>
-    /// <param name="args">
-    /// The args.
-    /// </param>
     private static void Main(string[] args)
     {
         // Todo: This configuration should not be called from the config file 
@@ -47,6 +36,4 @@ internal class Program
             Console.WriteLine("could not start silo");
         }
     }
-
-    #endregion
 }

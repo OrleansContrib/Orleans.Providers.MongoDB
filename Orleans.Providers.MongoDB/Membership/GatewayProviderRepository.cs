@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Orleans.Providers.MongoDB.Membership
+﻿namespace Orleans.Providers.MongoDB.Membership
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
+
     using global::MongoDB.Driver;
     using global::MongoDB.Driver.Linq;
 
@@ -39,16 +37,6 @@ namespace Orleans.Providers.MongoDB.Membership
             return MongoMembershipProviderRepository.GetSiloAddress(record, true).ToGatewayUri();
         }
 
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DocumentRepository"/> class.
-        /// </summary>
-        /// <param name="connectionsString">
-        /// The connections string.
-        /// </param>
-        /// <param name="databaseName">
-        /// The database name.
-        /// </param>
         public GatewayProviderRepository(string connectionsString, string databaseName)
             : base(connectionsString, databaseName)
         {

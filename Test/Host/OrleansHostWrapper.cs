@@ -1,50 +1,20 @@
 namespace Orleans.Providers.MongoDB.Test.Host
 {
-    #region Using
-
     using System;
     using System.Net;
 
     using Orleans.Runtime.Configuration;
     using Orleans.Runtime.Host;
 
-    #endregion
-
-    /// <summary>
-    /// The orleans host wrapper.
-    /// </summary>
     internal class OrleansHostWrapper : IDisposable
     {
-        #region Fields
-
-        /// <summary>
-        /// The silo host.
-        /// </summary>
         private SiloHost siloHost;
-
-        #endregion
-
-        #region Constructors and Destructors
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="OrleansHostWrapper"/> class.
-        /// </summary>
-        /// <param name="args">
-        /// The args.
-        /// </param>
         public OrleansHostWrapper(string[] args)
         {
             this.ParseArguments(args);
             this.Init();
         }
 
-        #endregion
-
-        #region Properties
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to debug.
-        /// </summary>
         public bool Debug
         {
             get
@@ -57,22 +27,11 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 this.siloHost.Debug = value;
             }
         }
-
-        #endregion
-
-        #region Public methods and operators
-
-        /// <summary>
-        /// The dispose method.
-        /// </summary>
         public void Dispose()
         {
             this.Dispose(true);
         }
 
-        /// <summary>
-        /// The print usage.
-        /// </summary>
         public void PrintUsage()
         {
             Console.WriteLine(@"USAGE: 
@@ -83,14 +42,6 @@ Where:
                     - Which deployment group this host instance should run in (optional)");
         }
 
-        /// <summary>
-        /// The method used to run the application.
-        /// </summary>
-        /// <returns>
-        /// The <see cref="bool"/>.
-        /// </returns>
-        /// <exception cref="SystemException">
-        /// </exception>
         public bool Run()
         {
             bool ok = false;
@@ -103,11 +54,7 @@ Where:
 
                 if (ok)
                 {
-                    Console.WriteLine(
-                        string.Format(
-                            "Successfully started Orleans silo '{0}' as a {1} node.",
-                            this.siloHost.Name,
-                            this.siloHost.Type));
+                    Console.WriteLine("Successfully started Orleans silo '{0}' as a {1} node.", this.siloHost.Name, this.siloHost.Type);
                 }
                 else
                 {
@@ -128,12 +75,6 @@ Where:
             return ok;
         }
 
-        /// <summary>
-        /// The method used to stop the application.
-        /// </summary>
-        /// <returns>
-        /// The <see cref="bool"/>.
-        /// </returns>
         public bool Stop()
         {
             bool ok = false;
@@ -142,7 +83,7 @@ Where:
             {
                 this.siloHost.StopOrleansSilo();
 
-                Console.WriteLine(string.Format("Orleans silo '{0}' shutdown.", this.siloHost.Name));
+                Console.WriteLine("Orleans silo '{0}' shutdown.", this.siloHost.Name);
             }
             catch (Exception exc)
             {
@@ -154,39 +95,17 @@ Where:
             return ok;
         }
 
-        #endregion
-
-        #region Other Methods
-
-        /// <summary>
-        /// The dispose method.
-        /// </summary>
-        /// <param name="dispose">
-        /// The dispose.
-        /// </param>
         protected virtual void Dispose(bool dispose)
         {
             this.siloHost.Dispose();
             this.siloHost = null;
         }
 
-        /// <summary>
-        /// The init method.
-        /// </summary>
         private void Init()
         {
             this.siloHost.LoadOrleansConfig();
         }
 
-        /// <summary>
-        /// The parse arguments method.
-        /// </summary>
-        /// <param name="args">
-        /// The args.
-        /// </param>
-        /// <returns>
-        /// The <see cref="bool"/>.
-        /// </returns>
         private bool ParseArguments(string[] args)
         {
             string deploymentId = null;
@@ -213,7 +132,8 @@ Where:
                             return false;
                     }
                 }
-                else if (a.Contains("="))
+
+                if (a.Contains("="))
                 {
                     string[] split = a.Split('=');
                     if (string.IsNullOrEmpty(split[1]))
@@ -250,15 +170,14 @@ Where:
             var config = ClusterConfiguration.LocalhostPrimarySilo();
             config.LoadFromFile("OrleansConfiguration.xml");
 
-            //var config = ClusterConfiguration.LocalhostPrimarySilo();
-            //config.AddMemoryStorageProvider();
+            // var config = ClusterConfiguration.LocalhostPrimarySilo();
+            // config.AddMemoryStorageProvider();
 
-            //            //MongoDB
-            //var props = new Dictionary<string, string>();
-            //props["Database"] = "orleanssamples";
-            //props["ConnectionString"] = "mongodb://localhost:27017/";
-            //config.Globals.RegisterStorageProvider<Samples.StorageProviders.MongoDBStorage>("TestStore", props);
-
+            // //MongoDB
+            // var props = new Dictionary<string, string>();
+            // props["Database"] = "orleanssamples";
+            // props["ConnectionString"] = "mongodb://localhost:27017/";
+            // config.Globals.RegisterStorageProvider<Samples.StorageProviders.MongoDBStorage>("TestStore", props);
             this.siloHost = new SiloHost(siloName, config);
 
             if (deploymentId != null)
@@ -268,7 +187,5 @@ Where:
 
             return true;
         }
-
-        #endregion
     }
 }

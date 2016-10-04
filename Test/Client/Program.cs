@@ -1,27 +1,12 @@
-﻿#region Using
-
-using System;
+﻿using System;
 using System.Threading;
 
 using Orleans;
 using Orleans.Providers.MongoDB.Test.GrainInterfaces;
 using Orleans.Runtime.Configuration;
 
-#endregion
-
-/// <summary>
-/// The program.
-/// </summary>
 internal class Program
 {
-    #region Other Methods
-
-    /// <summary>
-    /// The main.
-    /// </summary>
-    /// <param name="args">
-    /// The args.
-    /// </param>
     private static void Main(string[] args)
     {
         // initialize the grain client, with some retry logic
@@ -50,6 +35,4 @@ internal class Program
         Console.WriteLine(response);
         Console.ReadKey();
     }
-
-    #endregion
 }

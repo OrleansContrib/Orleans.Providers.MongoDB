@@ -1,23 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Orleans.Providers.MongoDB.Membership
+﻿namespace Orleans.Providers.MongoDB.Membership
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
+
     public interface IGatewayProviderRepository
     {
-        /// <summary>
-        /// The return active gateways async.
-        /// </summary>
-        /// <param name="deploymentId">
-        /// The deployment id.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
         Task<List<Uri>> ReturnActiveGatewaysAsync(string deploymentId);
-
     }
 }

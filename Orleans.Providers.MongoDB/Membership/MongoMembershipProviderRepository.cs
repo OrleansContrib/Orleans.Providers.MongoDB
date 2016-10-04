@@ -1,7 +1,5 @@
 ﻿namespace Orleans.Providers.MongoDB.Membership
 {
-    #region Using
-
     using System;
     using System.Collections.Generic;
     using System.Globalization;
@@ -15,32 +13,16 @@
     using Orleans.Providers.MongoDB.Repository;
     using Orleans.Runtime;
 
-    #endregion
-
     /// <summary>
     /// The mongo membership provider repository.
     /// </summary>
     public class MongoMembershipProviderRepository : DocumentRepository, IMongoMembershipProviderRepository
     {
-        #region Constants
-
         // Todo: Not sure why I can't see (Orleans.Runtime.LogFormatter.ParseDate
-
-        /// <summary>
-        /// The dat e_ format.
-        /// </summary>
         private const string DATE_FORMAT = "yyyy-MM-dd " + TIME_FORMAT;
 
                              // Example: 2010-09-02 09:50:43.341 GMT - Variant of UniversalSorta­bleDateTimePat­tern
-
-        /// <summary>
-        /// The tim e_ format.
-        /// </summary>
         private const string TIME_FORMAT = "HH:mm:ss.fff 'GMT'"; // Example: 09:50:43.341 GMT
-
-        #endregion
-
-        #region Static Fields
  
         public static string MembershipCollectionName
         {
@@ -49,61 +31,21 @@
                 return "OrleansMembership";
             }
         }
-        /// <summary>
-        ///     The membership version collection name.
-        /// </summary>
+
         private static readonly string MembershipVersionCollectionName = "OrleansMembershipVersion";
 
-        /// <summary>
-        /// The membership version key name.
-        /// </summary>
         private static readonly string MembershipVersionKeyName = "DeploymentId";
 
-        #endregion
-
-        #region Constructors and Destructors
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MongoMembershipProviderRepository"/> class.
-        /// </summary>
-        /// <param name="connectionsString">
-        /// The connections string.
-        /// </param>
-        /// <param name="databaseName">
-        /// The database name.
-        /// </param>
         public MongoMembershipProviderRepository(string connectionsString, string databaseName)
             : base(connectionsString, databaseName)
         {
         }
 
-        #endregion
-
-        #region Public methods and operators
-
-        /// <summary>
-        /// The parse date.
-        /// </summary>
-        /// <param name="dateStr">
-        /// The date str.
-        /// </param>
-        /// <returns>
-        /// The <see cref="DateTime"/>.
-        /// </returns>
         public static DateTime ParseDate(string dateStr)
         {
             return DateTime.ParseExact(dateStr, DATE_FORMAT, CultureInfo.InvariantCulture);
         }
 
-        /// <summary>
-        /// The init membership version collection async.
-        /// </summary>
-        /// <param name="deploymentId">
-        /// The deployment id.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
         public async Task InitMembershipVersionCollectionAsync(string deploymentId)
         {
             BsonDocument membershipVersionDocument =
@@ -126,23 +68,6 @@
             }
         }
 
-        /// <summary>
-        /// The insert membership row.
-        /// </summary>
-        /// <param name="deploymentId">
-        /// The deployment id.
-        /// </param>
-        /// <param name="entry">
-        /// The entry.
-        /// </param>
-        /// <param name="tableVersion">
-        /// The table version.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
-        /// <exception cref="Exception">
-        /// </exception>
         public async Task<bool> InsertMembershipRow(
             string deploymentId,
             MembershipEntry entry,
@@ -201,25 +126,11 @@
                         this.ReturnOrCreateCollection(MembershipVersionCollectionName)
                             .ReplaceOneAsync(builder, versionDocument);
                 }
-                else
-                {
-                }
             }
 
             return true;
         }
 
-        /// <summary>
-        /// The return membership table data.
-        /// </summary>
-        /// <param name="deploymentId">
-        /// The deployment id.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
-        /// <exception cref="ArgumentException">
-        /// </exception>
         public async Task<MembershipTableData> ReturnMembershipTableData(string deploymentId)
         {
             if (string.IsNullOrEmpty(this.ConnectionString))
@@ -235,18 +146,6 @@
             return await this.ReturnMembershipTableData(membershipList, deploymentId);
         }
 
-        /// <summary>
-        /// The return row.
-        /// </summary>
-        /// <param name="key">
-        /// The key.
-        /// </param>
-        /// <param name="deploymentId">
-        /// The deployment id.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
         public async Task<MembershipTableData> ReturnRow(SiloAddress key, string deploymentId)
         {
             List<MembershipTable> membershipList =
@@ -260,21 +159,6 @@
             return await this.ReturnMembershipTableData(membershipList, deploymentId);
         }
 
-        /// <summary>
-        /// The update i am alive time async task.
-        /// </summary>
-        /// <param name="deploymentId">
-        /// The deployment id.
-        /// </param>
-        /// <param name="siloAddress">
-        /// The silo address.
-        /// </param>
-        /// <param name="iAmAliveTime">
-        /// The i am alive time.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
         public async Task UpdateIAmAliveTimeAsyncTask(
             string deploymentId,
             SiloAddress siloAddress,
@@ -294,19 +178,6 @@
             var success = result.ModifiedCount == 1;
         }
 
-        #endregion
-
-        #region Other Methods
-
-        /// <summary>
-        /// The parse.
-        /// </summary>
-        /// <param name="membershipData">
-        /// The membership data.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
         internal async Task<Tuple<MembershipEntry, string>> Parse(MembershipTable membershipData)
         {
             // TODO: This is a bit of hack way to check in the current version if there's membership data or not, but if there's a start time, there's member.            
@@ -355,8 +226,7 @@
         
         public static SiloAddress GetSiloAddress(MembershipTable membershipData, bool useProxyPort = false)
         {
-            //Todo: Move this method to it's own class so it can be shared a bit more elogantly
-
+            // Todo: Move this method to it's own class so it can be shared a bit more elogantly
 
             int port = membershipData.Port;
 
@@ -371,18 +241,6 @@
             return siloAddress;
         }
 
-        /// <summary>
-        /// The return membership table data.
-        /// </summary>
-        /// <param name="membershipList">
-        /// The membership list.
-        /// </param>
-        /// <param name="deploymentId">
-        /// The deployment id.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
         private async Task<MembershipTableData> ReturnMembershipTableData(
             List<MembershipTable> membershipList,
             string deploymentId)
@@ -413,23 +271,6 @@
                 new TableVersion(tableVersionEtag, tableVersionEtag.ToString()));
         }
 
-        #endregion
-
-        /// <summary>
-        /// The update membership row async.
-        /// </summary>
-        /// <param name="deploymentId">
-        /// The deployment id.
-        /// </param>
-        /// <param name="membershipEntry">
-        /// The membership entry.
-        /// </param>
-        /// <param name="etag">
-        /// The version.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
         public async Task<bool> UpdateMembershipRowAsync(
             string deploymentId,
             MembershipEntry membershipEntry,
@@ -466,7 +307,7 @@
                 {
                     suspectingSilos = string.Format(
                         "{0}@{1},{2} |",
-                        suspectTime.Item1.Endpoint.ToString(),
+                        suspectTime.Item1.Endpoint,
                         suspectTime.Item1.Generation,
                         suspectTime.Item2.ToUniversalTime().ToString(DATE_FORMAT));
                 }

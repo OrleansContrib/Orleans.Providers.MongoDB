@@ -1,40 +1,15 @@
 ﻿namespace Orleans.Providers.MongoDB.Repository
 {
-    #region Using
-
     using System;
     using System.Threading.Tasks;
 
     using global::MongoDB.Bson;
     using global::MongoDB.Driver;
 
-    #endregion
-
-    /// <summary>
-    ///     The document repository.
-    /// </summary>
     public class DocumentRepository : IDocumentRepository
     {
-        #region Static Fields
-
-        /// <summary>
-        ///     The database.
-        /// </summary>
         protected static IMongoDatabase Database;
 
-        #endregion
-
-        #region Constructors and Destructors
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DocumentRepository"/> class.
-        /// </summary>
-        /// <param name="connectionsString">
-        /// The connections string.
-        /// </param>
-        /// <param name="databaseName">
-        /// The database name.
-        /// </param>
         public DocumentRepository(string connectionsString, string databaseName)
         {
             this.ConnectionString = connectionsString;
@@ -43,43 +18,10 @@
             Database = client.GetDatabase(this.DatabaseName);
         }
 
-        #endregion
-
-        #region Properties
-
-        /// <summary>
-        ///     Gets or sets the connection string.
-        /// </summary>
         public string ConnectionString { get; set; }
 
-        /// <summary>
-        ///     Gets or sets the database.
-        /// </summary>
         public string DatabaseName { get; set; }
 
-        #endregion
-
-        #region Public methods and operators
-
-        /// <summary>
-        /// The delete document async.
-        /// </summary>
-        /// <param name="mongoCollectionName">
-        /// The mongo collection name.
-        /// </param>
-        /// <param name="keyName">
-        /// The key name.
-        /// </param>
-        /// <param name="key">
-        /// The key.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
-        /// <exception cref="ArgumentException">
-        /// </exception>
-        /// <exception cref="Exception">
-        /// </exception>
         public async Task<DeleteResult> DeleteDocumentAsync(string mongoCollectionName, string keyName, string key)
         {
             if (string.IsNullOrEmpty(this.ConnectionString))
@@ -108,23 +50,6 @@
             return await collection.DeleteManyAsync(builder);
         }
 
-        /// <summary>
-        /// The find document async.
-        /// </summary>
-        /// <param name="mongoCollectionName">
-        /// The mongo collection name.
-        /// </param>
-        /// <param name="keyName">
-        /// The key name.
-        /// </param>
-        /// <param name="key">
-        /// The key.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
-        /// <exception cref="ArgumentException">
-        /// </exception>
         public async Task<BsonDocument> FindDocumentAsync(string mongoCollectionName, string keyName, string key)
         {
             if (string.IsNullOrEmpty(this.ConnectionString))
@@ -156,26 +81,6 @@
             return result;
         }
 
-        /// <summary>
-        /// The save document async.
-        /// </summary>
-        /// <param name="mongoCollectionName">
-        /// The mongo collection name.
-        /// </param>
-        /// <param name="keyName">
-        /// The key name.
-        /// </param>
-        /// <param name="key">
-        /// The key.
-        /// </param>
-        /// <param name="document">
-        /// The document.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
-        /// <exception cref="ArgumentException">
-        /// </exception>
         public async Task SaveDocumentAsync(
             string mongoCollectionName,
             string keyName,
@@ -219,19 +124,6 @@
             }
         }
 
-        #endregion
-
-        #region Other Methods
-
-        /// <summary>
-        /// The return or create collection.
-        /// </summary>
-        /// <param name="mongoCollectionName">
-        /// The mongo collection name.
-        /// </param>
-        /// <returns>
-        /// The <see cref="IMongoCollection"/>.
-        /// </returns>
         protected IMongoCollection<BsonDocument> ReturnOrCreateCollection(string mongoCollectionName)
         {
             var collection = Database.GetCollection<BsonDocument>(mongoCollectionName);
@@ -240,7 +132,5 @@
             collection = Database.GetCollection<BsonDocument>(mongoCollectionName);
             return collection;
         }
-
-        #endregion
     }
 }
