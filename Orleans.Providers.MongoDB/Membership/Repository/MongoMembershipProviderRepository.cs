@@ -1,4 +1,4 @@
-﻿namespace Orleans.Providers.MongoDB.Membership
+﻿namespace Orleans.Providers.MongoDB.Membership.Repository
 {
     using System;
     using System.Collections.Generic;

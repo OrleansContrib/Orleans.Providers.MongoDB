@@ -7,6 +7,7 @@
     using global::MongoDB.Driver;
 
     using Orleans.Messaging;
+    using Orleans.Providers.MongoDB.Membership.Repository;
     using Orleans.Runtime;
     using Orleans.Runtime.Configuration;
 

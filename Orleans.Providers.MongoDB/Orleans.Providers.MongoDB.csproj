@@ -69,12 +69,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Membership\GatewayProviderRepository.cs" />
-    <Compile Include="Membership\IGatewayProviderRepository.cs" />
-    <Compile Include="Membership\IMongoMembershipProviderRepository.cs" />
+    <Compile Include="Membership\Repository\GatewayProviderRepository.cs" />
+    <Compile Include="Membership\Repository\IGatewayProviderRepository.cs" />
+    <Compile Include="Membership\Repository\IMongoMembershipProviderRepository.cs" />
     <Compile Include="Membership\MembershipTable.cs" />
     <Compile Include="Membership\MongoMembershipProvider.cs" />
-    <Compile Include="Membership\MongoMembershipProviderRepository.cs" />
+    <Compile Include="Membership\Repository\MongoMembershipProviderRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\DocumentRepository.cs" />
     <Compile Include="Repository\IDocumentRepository.cs" />
