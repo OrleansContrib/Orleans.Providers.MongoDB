@@ -11,6 +11,10 @@
     using Orleans.Runtime;
     using Orleans.Runtime.Configuration;
 
+    /// <summary>
+    /// The mongo membership provider. It is used to manage cluster members as well as provide gateway
+    /// servers
+    /// </summary>
     public class MongoMembershipProvider : IMembershipTable, IGatewayListProvider
     {
         private string deploymentId;
@@ -25,15 +29,15 @@
             bool tryInitTableVersion,
             TraceLogger traceLogger)
         {
-            this.logger = traceLogger;
-            this.deploymentId = globalConfiguration.DeploymentId;
+            logger = traceLogger;
+            deploymentId = globalConfiguration.DeploymentId;
 
-            if (this.logger.IsVerbose3)
+            if (logger.IsVerbose3)
             {
-                this.logger.Verbose3("MongoMembershipTable.InitializeMembershipTable called.");
+                logger.Verbose3("MongoMembershipTable.InitializeMembershipTable called.");
             }
             
-            this.membershipRepository = new MongoMembershipProviderRepository(globalConfiguration.DataConnectionString, MongoUrl.Create(globalConfiguration.DataConnectionString).DatabaseName);
+            membershipRepository = new MongoMembershipProviderRepository(globalConfiguration.DataConnectionString, MongoUrl.Create(globalConfiguration.DataConnectionString).DatabaseName);
 
             // even if I am not the one who created the table, 
             // try to insert an initial table version if it is not already there,
@@ -43,7 +47,7 @@
                 var wasCreated = await this.InitTableAsync();
                 if (wasCreated)
                 {
-                    this.logger.Info("Created new table version row.");
+                    logger.Info("Created new table version row.");
                 }
             }
         }
@@ -53,11 +57,44 @@
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Returns a membership corresponding to a SiloAddress for a deployment. If the corresponding membership version doesn't contain a version number,
+        /// it is set to 1.
+        /// </summary>
+        /// <param name="key">
+        /// The key.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
         public async Task<MembershipTableData> ReadRow(SiloAddress key)
         {
-            return await this.membershipRepository.ReturnRow(key, this.deploymentId);
+            if (this.logger.IsVerbose3)
+            {
+                logger.Verbose3("MongoMembershipTable.ReadRow called.");
+            }
+
+            try
+            {
+                return await this.membershipRepository.ReturnRow(key, this.deploymentId);
+            }
+            catch (Exception ex)
+            {
+                if (this.logger.IsVerbose)
+                {
+                    logger.Verbose("MongoMembershipTable.ReadRow failed: {0}", ex);
+                }
+
+                throw;
+            }
         }
 
+        /// <summary>
+        /// Returns all the memberships for a deploymentId
+        /// </summary>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
         public async Task<MembershipTableData> ReadAll()
         {
             if (this.logger.IsVerbose3)
@@ -67,8 +104,7 @@
 
             try
             {
-                // Todo: Update Suspecting Silos
-                return await this.membershipRepository.ReturnMembershipTableData(this.deploymentId);
+                return await membershipRepository.ReturnAllRows(this.deploymentId);
             }
             catch (Exception ex)
             {
@@ -81,6 +117,20 @@
             }
         }
 
+        /// <summary>
+        /// Insert a membership as well as version if one does not exist
+        /// </summary>
+        /// <param name="entry">
+        /// The entry.
+        /// </param>
+        /// <param name="tableVersion">
+        /// The table version.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// </exception>
         public async Task<bool> InsertRow(MembershipEntry entry, TableVersion tableVersion)
         {
             if (this.logger.IsVerbose3)
@@ -134,6 +184,23 @@
             }
         }
 
+        /// <summary>
+        /// Update a Membership.
+        /// </summary>
+        /// <param name="entry">
+        /// The entry.
+        /// </param>
+        /// <param name="etag">
+        /// The etag.
+        /// </param>
+        /// <param name="tableVersion">
+        /// The table version.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// </exception>
         public async Task<bool> UpdateRow(MembershipEntry entry, string etag, TableVersion tableVersion)
         {
             if (this.logger.IsVerbose3)
@@ -188,6 +255,17 @@
             }
         }
 
+        /// <summary>
+        /// Update I am alive.
+        /// </summary>
+        /// <param name="entry">
+        /// The entry.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// </exception>
         public async Task UpdateIAmAlive(MembershipEntry entry)
         {
             if (this.logger.IsVerbose3)
@@ -225,6 +303,18 @@
 
         }
 
+        /// <summary>
+        /// The initialize gateway list provider.
+        /// </summary>
+        /// <param name="clientConfiguration">
+        /// The client configuration.
+        /// </param>
+        /// <param name="traceLogger">
+        /// The trace logger.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
         public Task InitializeGatewayListProvider(ClientConfiguration clientConfiguration, TraceLogger traceLogger)
         {
             this.logger = traceLogger;
@@ -241,6 +331,12 @@
             return TaskDone.Done;
         }
 
+        /// <summary>
+        /// Returns the active gateways.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
         public async Task<IList<Uri>> GetGateways()
         {
             if (this.logger.IsVerbose3)
@@ -273,6 +369,12 @@
 
         public TimeSpan MaxStaleness { get; private set; }
 
+        /// <summary>
+        /// Init Membership.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
         private async Task<bool> InitTableAsync()
         {
             try

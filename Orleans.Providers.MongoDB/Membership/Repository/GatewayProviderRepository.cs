@@ -34,7 +34,7 @@
 
         internal static Uri ReturnGatewayUri(MembershipTable record)
         {
-            return MongoMembershipProviderRepository.GetSiloAddress(record, true).ToGatewayUri();
+            return MongoMembershipProviderRepository.ReturnSiloAddress(record, true).ToGatewayUri();
         }
 
         public GatewayProviderRepository(string connectionsString, string databaseName)
