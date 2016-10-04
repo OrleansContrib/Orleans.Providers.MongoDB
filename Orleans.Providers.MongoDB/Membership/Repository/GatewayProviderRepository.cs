@@ -12,7 +12,16 @@
 
     public class GatewayProviderRepository : DocumentRepository, IGatewayProviderRepository
     {
-        public async Task<List<Uri>> ReturnActiveGatewaysAsync(string deploymentId)
+        /// <summary>
+        /// Returns active gateways.
+        /// </summary>
+        /// <param name="deploymentId">
+        /// The deployment id.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        public Task<List<Uri>> ReturnActiveGatewaysAsync(string deploymentId)
         {
             var collection = Database.GetCollection<MembershipTable>(MongoMembershipProviderRepository.MembershipCollectionName);
 
@@ -29,14 +38,32 @@
                 results.Add(ReturnGatewayUri(gateway));
             }
 
-            return results;
+            return Task.FromResult(results);
         }
 
+        /// <summary>
+        /// Return gateway uri.
+        /// </summary>
+        /// <param name="record">
+        /// The record.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Uri"/>.
+        /// </returns>
         internal static Uri ReturnGatewayUri(MembershipTable record)
         {
             return MongoMembershipProviderRepository.ReturnSiloAddress(record, true).ToGatewayUri();
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GatewayProviderRepository"/> class.
+        /// </summary>
+        /// <param name="connectionsString">
+        /// The connections string.
+        /// </param>
+        /// <param name="databaseName">
+        /// The database name.
+        /// </param>
         public GatewayProviderRepository(string connectionsString, string databaseName)
             : base(connectionsString, databaseName)
         {
