@@ -108,6 +108,17 @@
         /// </returns>
         Task<bool> UpdateMembershipRowAsync(string deploymentId, MembershipEntry membershipEntry, string etag);
 
+        /// <summary>
+        /// Deletes all memberships for a deployment.
+        /// </summary>
+        /// <param name="deploymentId">
+        /// The deployment id.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        Task DeleteMembershipTableEntriesAsync(string deploymentId);
+
         #endregion
     }
 }

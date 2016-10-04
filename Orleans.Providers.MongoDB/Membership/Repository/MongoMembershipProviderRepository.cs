@@ -497,5 +497,53 @@
 
             return string.Empty;
         }
+
+        /// <summary>
+        /// Deletes all memberships for a deployment as well as it version entry.
+        /// </summary>
+        /// <param name="deploymentId">
+        /// The deployment id.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        public async Task DeleteMembershipTableEntriesAsync(string deploymentId)
+        {
+            var version = DeleteVersionAsync(deploymentId);
+            var membership = DeleteMembershipAsync(deploymentId);
+
+            await Task.WhenAll(version, membership);
+        }
+
+        /// <summary>
+        /// Deletes all memberships for a deployment.
+        /// </summary>
+        /// <param name="deploymentId">
+        /// The deployment id.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        private static async Task DeleteMembershipAsync(string deploymentId)
+        {
+            var collection = Database.GetCollection<MembershipTable>(MembershipCollectionName);
+            await collection.DeleteOneAsync(m => m.DeploymentId == deploymentId);
+        }
+
+        /// <summary>
+        /// Deletes version for deployment.
+        /// </summary>
+        /// <param name="deploymentId">
+        /// The deployment id.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        private async Task DeleteVersionAsync(string deploymentId)
+        {
+            var versionCollection = this.ReturnOrCreateCollection(MembershipVersionCollectionName);
+            var builder = Builders<BsonDocument>.Filter.Eq(MembershipVersionKeyName, deploymentId);
+            await versionCollection.DeleteOneAsync(builder);
+        }
     }
 }

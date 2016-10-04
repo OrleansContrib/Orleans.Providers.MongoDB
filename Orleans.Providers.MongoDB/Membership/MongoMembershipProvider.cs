@@ -52,9 +52,28 @@
             }
         }
 
-        public Task DeleteMembershipTableEntries(string deploymentId)
+        public async Task DeleteMembershipTableEntries(string deploymentId)
         {
-            throw new NotImplementedException();
+            if (this.logger.IsVerbose3)
+            {
+                this.logger.Verbose3(
+                    string.Format(
+                        "MongoMembershipTable.DeleteMembershipTableEntries called with deploymentId {0}.",
+                        deploymentId));
+            }
+            try
+            {
+                await this.membershipRepository.DeleteMembershipTableEntriesAsync(deploymentId);
+            }
+            catch (Exception ex)
+            {
+                if (this.logger.IsVerbose)
+                {
+                    this.logger.Verbose("MongoMembershipTable.DeleteMembershipTableEntries failed: {0}", ex);
+                }
+
+                throw;
+            }
         }
 
         /// <summary>
