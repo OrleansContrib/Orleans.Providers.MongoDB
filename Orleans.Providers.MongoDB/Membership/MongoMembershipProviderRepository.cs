@@ -352,21 +352,19 @@
 
             return Tuple.Create(entry, membershipVersionDocument["Version"].AsInt32.ToString());
         }
-
-        /// <summary>
-        /// This method is for compatibility with membership tables that
-        ///     do not contain a SiloName field
-        /// </summary>
-        /// <param name="membershipData">
-        /// The membership Data.
-        /// </param>
-        /// <returns>
-        /// The <see cref="SiloAddress"/>.
-        /// </returns>
-        public static SiloAddress GetSiloAddress(MembershipTable membershipData)
+        
+        public static SiloAddress GetSiloAddress(MembershipTable membershipData, bool useProxyPort = false)
         {
             //Todo: Move this method to it's own class so it can be shared a bit more elogantly
+
+
             int port = membershipData.Port;
+
+            if (useProxyPort)
+            {
+                port = membershipData.ProxyPort;
+            }
+
             int generation = membershipData.Generation;
             string address = membershipData.Address;
             var siloAddress = SiloAddress.New(new IPEndPoint(IPAddress.Parse(address), port), generation);
@@ -437,12 +435,49 @@
             MembershipEntry membershipEntry,
             string etag)
         {
-            await UpdateMembershipVersion(deploymentId, etag);
+            await UpdateVersion(deploymentId, etag);
+
+            // Todo: Update Membership Table
+            var collection = Database.GetCollection<MembershipTable>(MembershipCollectionName);
+
+            string suspecttimes = ReturnStringFromSuspectTimes(membershipEntry);
+
+            var update = new UpdateDefinitionBuilder<MembershipTable>()
+                .Set(x => x.Status, (int)membershipEntry.Status)            
+                .Set(x => x.SuspectTimes, suspecttimes)
+                .Set(x => x.IAmAliveTime, membershipEntry.IAmAliveTime);
+
+            var result = await collection.UpdateOneAsync(
+               m => m.DeploymentId == deploymentId && m.Address == membershipEntry.SiloAddress.Endpoint.Address.MapToIPv4().ToString()
+               && m.Port == membershipEntry.SiloAddress.Endpoint.Port && m.Generation == membershipEntry.SiloAddress.Generation, 
+               update);
+
+            var success = result.ModifiedCount == 1;
 
             return true;
         }
 
-        private static async Task UpdateMembershipVersion(string deploymentId, string version)
+        private static string ReturnStringFromSuspectTimes(MembershipEntry membershipEntry)
+        {
+            if (membershipEntry.SuspectTimes != null)
+            {
+                string suspectingSilos = string.Empty;
+                foreach (var suspectTime in membershipEntry.SuspectTimes)
+                {
+                    suspectingSilos = string.Format(
+                        "{0}@{1},{2} |",
+                        suspectTime.Item1.Endpoint.ToString(),
+                        suspectTime.Item1.Generation,
+                        suspectTime.Item2.ToUniversalTime().ToString(DATE_FORMAT));
+                }
+
+                return suspectingSilos.TrimEnd('|').TrimEnd(' ');
+            }
+
+            return string.Empty;
+        }
+
+        private static async Task UpdateVersion(string deploymentId, string version)
         {
             var collection = Database.GetCollection<BsonDocument>(MembershipVersionCollectionName);
 
@@ -455,8 +490,6 @@
                     filter,
                     Builders<BsonDocument>.Update.Set("Version", Convert.ToInt32(version) + 1)
                     .Set("Timestamp", DateTime.Now.ToUniversalTime()));
-
-            // Todo: Update Membership Table
         }
     }
 }

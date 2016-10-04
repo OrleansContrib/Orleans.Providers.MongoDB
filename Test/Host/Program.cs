@@ -31,6 +31,7 @@ internal class Program
             // Init Mongo Membership
             silo.Config.Globals.LivenessType = GlobalConfiguration.LivenessProviderType.Custom;
             silo.Config.Globals.MembershipTableAssembly = "Orleans.Providers.MongoDB";
+
             silo.Config.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Disabled;
 
             silo.InitializeOrleansSilo();

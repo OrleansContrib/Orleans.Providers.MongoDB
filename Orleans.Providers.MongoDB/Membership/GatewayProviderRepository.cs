@@ -36,7 +36,7 @@ namespace Orleans.Providers.MongoDB.Membership
 
         internal static Uri ReturnGatewayUri(MembershipTable record)
         {
-            return MongoMembershipProviderRepository.GetSiloAddress(record).ToGatewayUri();
+            return MongoMembershipProviderRepository.GetSiloAddress(record, true).ToGatewayUri();
         }
 
 

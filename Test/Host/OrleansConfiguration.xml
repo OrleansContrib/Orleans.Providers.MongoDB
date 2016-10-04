@@ -13,6 +13,8 @@
       <Provider Type="Orleans.Providers.SqlServer.SqlStatisticsPublisher" Name="MySQLStatsProvider" ConnectionString="Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Orleans;Integrated Security=True;Pooling=False;Max Pool Size=200;Asynchronous Processing=True;MultipleActiveResultSets=True" />
     </StatisticsProviders>
     -->
+    <!--<SeedNode Address="localhost" Port="11111" />-->
+  
   </Globals>
   <Defaults>
     <Networking Address="" Port="11111"/>
