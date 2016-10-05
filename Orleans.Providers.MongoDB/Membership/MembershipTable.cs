@@ -14,6 +14,9 @@
     /// </summary>
     public class MembershipTable
     {
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
+
         public string Address { get; set; }
 
         public string DeploymentId { get; set; }
@@ -24,9 +27,6 @@
 
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime IAmAliveTime { get; set; }
-
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
 
         public int Port { get; set; }
 

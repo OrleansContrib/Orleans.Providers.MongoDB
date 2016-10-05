@@ -27,10 +27,14 @@ internal class Program
         }
 
         // get a reference to the grain from the grain factory
-        var grain = GrainClient.GrainFactory.GetGrain<IHelloWorldGrain>(1);
+        var helloWorldGrain = GrainClient.GrainFactory.GetGrain<IHelloWorldGrain>(1);
 
         // call the grain
-        var response = grain.SayHello("World").Result;
+        var response = helloWorldGrain.SayHello("World").Result;
+
+        var reminderGrain = GrainClient.GrainFactory.GetGrain<INewsReminderGrain>(1);
+
+        reminderGrain.StartReminder("TestReminder", TimeSpan.FromMinutes(10));
 
         Console.WriteLine(response);
         Console.ReadKey();

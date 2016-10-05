@@ -23,6 +23,11 @@ internal class Program
 
             silo.Config.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Disabled;
 
+            // Todo: Enable MongoReminderTable
+            silo.Config.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Custom;
+            silo.Config.Globals.ReminderTableAssembly = "Orleans.Providers.MongoDB";
+
+
             silo.InitializeOrleansSilo();
 
             var result = silo.StartOrleansSilo();
