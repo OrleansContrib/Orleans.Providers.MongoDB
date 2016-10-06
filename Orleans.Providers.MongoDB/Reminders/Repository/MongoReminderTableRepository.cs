@@ -22,7 +22,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
 
         }
 
-        public Task<ReminderTableData> ReadRangeRowsKey1(string serviceId, uint beginHash, uint endHash)
+        public Task<ReminderTableData> ReadRangeRowsKey1Async(string serviceId, uint beginHash, uint endHash)
         {
             var collection = ReturnOrCreateRemindersCollection();
 
@@ -34,7 +34,34 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
             return this.ProcessRemindersList(reminders);
         }
 
-        public Task<ReminderTableData> ReadRangeRowsKey2(string serviceId, uint beginHash, uint endHash)
+        public Task<ReminderEntry> ReadReminderRowAsync(string serviceId, GrainReference grainRef, string reminderName)
+        {
+            var collection = ReturnOrCreateRemindersCollection();
+
+            var reminder =
+                collection.AsQueryable()
+                    .FirstOrDefault(
+                        r =>
+                        r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString()
+                        && r.ReminderName == reminderName);
+
+            return Task.FromResult(Parse(reminder));
+        }
+
+        public async Task<ReminderTableData> ReadReminderRowsAsync(string serviceId, GrainReference grainRef)
+        {
+            var collection = ReturnOrCreateRemindersCollection();
+
+            var reminders =
+                collection.AsQueryable()
+                    .Where(
+                        r =>
+                        r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString()).ToList();
+            
+            return await this.ProcessRemindersList(reminders);
+        }
+
+        public Task<ReminderTableData> ReadRangeRowsKey2Async(string serviceId, uint beginHash, uint endHash)
         {
             var collection = ReturnOrCreateRemindersCollection();
 
@@ -91,6 +118,26 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
             // Todo: Create Indexs
 
             return collection;
+        }
+
+        public async Task<bool> RemoveRowAsync(string serviceId, GrainReference grainRef, string reminderName, string eTag)
+        {
+            var collection = ReturnOrCreateRemindersCollection();
+
+            var result = await
+                collection.DeleteOneAsync(
+                    r =>
+                    r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString() && r.ReminderName == reminderName
+                    && r.Version == Convert.ToInt64(eTag));
+
+            return result.DeletedCount > 0;
+        }
+
+        public async Task RemoveReminderRowsAsync(string serviceId)
+        {
+            var collection = ReturnOrCreateRemindersCollection();
+
+            await collection.DeleteManyAsync(r => r.ServiceId == serviceId);
         }
 
         public async Task<string> UpsertReminderRowAsync(

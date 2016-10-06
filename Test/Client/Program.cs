@@ -35,6 +35,7 @@ internal class Program
         var reminderGrain = GrainClient.GrainFactory.GetGrain<INewsReminderGrain>(1);
 
         reminderGrain.StartReminder("TestReminder", TimeSpan.FromMinutes(10));
+        reminderGrain.RemoveReminder("TestReminder");
 
         Console.WriteLine(response);
         Console.ReadKey();

@@ -11,8 +11,9 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
 
     public interface IMongoReminderTableRepository : IDocumentRepository
     {
-        Task<ReminderTableData> ReadRangeRowsKey1(string serviceId, uint beginHash, uint endHash);
-        Task<ReminderTableData> ReadRangeRowsKey2(string serviceId, uint beginHash, uint endHash);
+        Task<ReminderTableData> ReadRangeRowsKey1Async(string serviceId, uint beginHash, uint endHash);
+        Task<ReminderTableData> ReadRangeRowsKey2Async(string serviceId, uint beginHash, uint endHash);
+        Task<ReminderEntry> ReadReminderRowAsync(string serviceId, GrainReference grainRef, string reminderName);
 
         Task<string> UpsertReminderRowAsync(
             string serviceId,
@@ -20,5 +21,11 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
             string reminderName,
             DateTime startTime,
             TimeSpan period);
+
+        Task<bool> RemoveRowAsync(string serviceId, GrainReference grainRef, string reminderName, string eTag);
+
+        Task<ReminderTableData> ReadReminderRowsAsync(string serviceId, GrainReference grainRef);
+
+        Task RemoveReminderRowsAsync(string serviceId);
     }
 }

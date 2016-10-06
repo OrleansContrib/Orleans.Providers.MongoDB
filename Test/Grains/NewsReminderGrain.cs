@@ -38,15 +38,10 @@ namespace Orleans.Providers.MongoDB.Test.Grains
             return base.RegisterOrUpdateReminder(reminderName, dueTime, period);
         }
 
-        /// <summary>
-        /// Unregisters a previously registered reminder.
-        /// </summary>
-        /// <param name="reminder">Reminder to unregister.</param>
-        /// <returns>Completion promise for this operation.</returns>
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-        protected virtual Task UnregisterReminder(IGrainReminder reminder)
+        public async Task RemoveReminder(string reminder)
         {
-            return base.UnregisterReminder(reminder);
+            var reminderType = await base.GetReminder(reminder);
+            await base.UnregisterReminder(reminderType);
         }
 
         public async Task<IGrainReminder> StartReminder(string reminderName, TimeSpan? p = null)
