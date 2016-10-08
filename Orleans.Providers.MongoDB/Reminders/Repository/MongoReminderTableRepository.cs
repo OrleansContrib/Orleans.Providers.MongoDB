@@ -86,18 +86,21 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
 
         private ReminderEntry Parse(RemindersTable reminder)
         {
-            string grainId = reminder.GrainId;
-
-            if (!string.IsNullOrEmpty(grainId))
+            if (reminder != null)
             {
-                return new ReminderEntry
+                string grainId = reminder.GrainId;
+
+                if (!string.IsNullOrEmpty(grainId))
                 {
-                    GrainRef = GrainReference.FromKeyString(grainId),
-                    ReminderName = reminder.ReminderName,
-                    StartAt = reminder.StartTime,
-                    Period = TimeSpan.FromMilliseconds(reminder.Period),
-                    ETag = reminder.Version.ToString()
-                };
+                    return new ReminderEntry
+                               {
+                                   GrainRef = GrainReference.FromKeyString(grainId),
+                                   ReminderName = reminder.ReminderName,
+                                   StartAt = reminder.StartTime,
+                                   Period = TimeSpan.FromMilliseconds(reminder.Period),
+                                   ETag = reminder.Version.ToString()
+                               };
+                }
             }
 
             return null;
@@ -131,6 +134,18 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
                     && r.Version == Convert.ToInt64(eTag));
 
             return result.DeletedCount > 0;
+        }
+
+        public async Task<ReminderTableData> ReadReminderRowAsync(string serviceId, GrainReference grainRef)
+        {
+            var collection = ReturnOrCreateRemindersCollection();
+
+            var reminders = collection.AsQueryable()
+                    .Where(
+                        r =>
+                        r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString()).ToList();
+
+            return await this.ProcessRemindersList(reminders);
         }
 
         public async Task RemoveReminderRowsAsync(string serviceId)

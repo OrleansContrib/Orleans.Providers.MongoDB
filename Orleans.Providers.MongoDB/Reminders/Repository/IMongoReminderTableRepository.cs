@@ -14,6 +14,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
         Task<ReminderTableData> ReadRangeRowsKey1Async(string serviceId, uint beginHash, uint endHash);
         Task<ReminderTableData> ReadRangeRowsKey2Async(string serviceId, uint beginHash, uint endHash);
         Task<ReminderEntry> ReadReminderRowAsync(string serviceId, GrainReference grainRef, string reminderName);
+        Task<ReminderTableData> ReadReminderRowAsync(string serviceId, GrainReference grainRef);
 
         Task<string> UpsertReminderRowAsync(
             string serviceId,

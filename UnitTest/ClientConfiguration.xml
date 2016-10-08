@@ -1,0 +1,18 @@
+﻿<ClientConfiguration xmlns="urn:orleans">
+  <!-- SqlServer 
+  <SystemStore SystemStoreType ="SqlServer"
+             DeploymentId="OrleansTest"
+             DataConnectionString="Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Orleans;Integrated Security=True;Pooling=False;Max Pool Size=200;Asynchronous Processing=True;MultipleActiveResultSets=True" AdoInvariant="System.Data.SqlClient" />
+             
+             <StatisticsProviders>
+    <Provider Type="Orleans.Providers.SqlServer.SqlStatisticsPublisher" Name="SQL" ConnectionString="Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Orleans;Integrated Security=True;Pooling=False;Max Pool Size=200;Asynchronous Processing=True;MultipleActiveResultSets=True" />
+  </StatisticsProviders>
+  <Statistics ProviderType="MySQLStatsProvider" WriteLogStatisticsToTable="true"/>
+  
+  <GatewayProvider ProviderType="SqlServer"/>
+             -->
+
+  <SystemStore SystemStoreType="Custom" CustomGatewayProviderAssemblyName="Orleans.Providers.MongoDB" DataConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" DeploymentId="OrleansTest" />
+  <!--<GatewayProvider ProviderType="Custom"/>-->
+
+</ClientConfiguration>

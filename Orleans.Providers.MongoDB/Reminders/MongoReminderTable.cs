@@ -34,9 +34,29 @@
             return TaskDone.Done;
         }
 
-        public Task<ReminderTableData> ReadRows(GrainReference key)
+        public async Task<ReminderTableData> ReadRows(GrainReference key)
         {
-            throw new NotImplementedException();
+            if (this.logger.IsVerbose3)
+            {
+                this.logger.Verbose3(
+                    string.Format(
+                        "ReminderTable.ReadRows called with serviceId {0}.",
+                        this.serviceId));
+            }
+
+            try
+            {
+                return await this.repository.ReadReminderRowAsync(this.serviceId, key);
+            }
+            catch (Exception ex)
+            {
+                if (this.logger.IsVerbose)
+                {
+                    this.logger.Verbose("ReminderTable.ReadRows failed: {0}", ex);
+                }
+
+                throw;
+            }
         }
 
         /// <summary>
