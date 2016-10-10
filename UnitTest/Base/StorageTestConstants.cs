@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace Orleans.Providers.MongoDB.UnitTest.Base
 {
+    using Orleans.TestingHost;
+
     public static class StorageTestConstants
     {
         // Set DefaultStorageDataConnectionString to your actual Azure Storage DataConnectionString, or load if from OrleansTestSecrets

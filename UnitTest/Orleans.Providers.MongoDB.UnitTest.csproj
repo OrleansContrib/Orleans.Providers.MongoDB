@@ -111,21 +111,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Base\OrleansTestSecrets.cs" />
-    <Compile Include="Base\SiloHandle.cs" />
     <Compile Include="Base\StorageTestConstants.cs" />
-    <Compile Include="Base\TestCluster.cs" />
-    <Compile Include="Base\RuntimeInterfaceConstants.cs" />
     <Compile Include="Base\SafeRandom.cs" />
-    <Compile Include="Base\TestClusterOptions.cs" />
     <Compile Include="Base\TestConstants.cs" />
-    <Compile Include="Base\TestingSiloOptions.cs" />
-    <Compile Include="Base\TestingUtils.cs" />
-    <Compile Include="Base\ThreadSafeRandom.cs" />
     <Compile Include="Membership\LogFormatter.cs" />
     <Compile Include="Membership\MembershipTableTestsBase.cs" />
     <Compile Include="Membership\MongoDbServerMembershipTableTests.cs" />
-    <Compile Include="Membership\SiloInstanceTableTestConstants.cs" />
+    <Compile Include="Base\SiloInstanceTableTestConstants.cs" />
     <Compile Include="Reminders\IReminderTestGrain2.cs" />
     <Compile Include="Reminders\ReminderTests_Mongo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
