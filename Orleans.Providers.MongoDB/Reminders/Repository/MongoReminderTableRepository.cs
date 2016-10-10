@@ -14,8 +14,11 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
 
     public class MongoReminderTableRepository : DocumentRepository, IMongoReminderTableRepository
     {
-        private string remindersCollectionName = "OrleansReminder";
-
+        private const string RemindersCollectionName = "OrleansReminder";
+        private const string ServiceId = "ServiceId";
+        private const string GrainId = "GrainId";
+        private const string ReminderName = "ReminderName";
+        
         public MongoReminderTableRepository(string connectionsString, string databaseName)
             : base(connectionsString, databaseName)
         {
@@ -108,15 +111,15 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
 
         private IMongoCollection<RemindersTable> ReturnOrCreateRemindersCollection()
         {
-            var collection = Database.GetCollection<RemindersTable>(remindersCollectionName);
+            var collection = Database.GetCollection<RemindersTable>(RemindersCollectionName);
 
             if (collection != null)
             {
                 return collection;
             }
 
-            Database.CreateCollection(remindersCollectionName);
-            collection = Database.GetCollection<RemindersTable>(remindersCollectionName);
+            Database.CreateCollection(RemindersCollectionName);
+            collection = Database.GetCollection<RemindersTable>(RemindersCollectionName);
 
             // Todo: Create Indexs
 
@@ -157,10 +160,10 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
 
         public async Task InitTables()
         {
-            if (!await base.CollectionExistsAsync(this.remindersCollectionName))
+            if (!await base.CollectionExistsAsync(RemindersCollectionName))
             {
                 // Create Index
-                await base.ReturnOrCreateCollection(this.remindersCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending("ServiceId").Ascending("GrainId").Ascending("ReminderName"), new CreateIndexOptions { Unique = true });
+                await base.ReturnOrCreateCollection(RemindersCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(ServiceId).Ascending(GrainId).Ascending(ReminderName), new CreateIndexOptions { Unique = true });
             }
         }
 

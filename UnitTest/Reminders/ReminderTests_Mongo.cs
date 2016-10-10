@@ -30,10 +30,10 @@
                 this.Globals.ReminderTableAssembly = "Orleans.Providers.MongoDB";
 
                 var n = new NodeConfiguration
-                            {
-                                SiloName = "Primary",
-                                ProxyGatewayEndpoint = this.Defaults.ProxyGatewayEndpoint,
-                                Port = this.Defaults.Port
+                {
+                    SiloName = "Primary",
+                    ProxyGatewayEndpoint = this.Defaults.ProxyGatewayEndpoint,
+                    Port = this.Defaults.Port
                 };
                 this.Overrides.Add(new KeyValuePair<string, NodeConfiguration>(n.SiloName, n));
             }
@@ -53,29 +53,13 @@
         [TestMethod]
         public async Task Rem_Sql_Basic_StopByRef()
         {
-            try
-            {
-                await Test_Reminders_Basic_StopByRef();
-            }
-            catch (Exception ex)
-            {
-                
-                throw;
-            }
+            await Test_Reminders_Basic_StopByRef();
         }
 
         [TestMethod]
         public async Task Rem_Sql_Basic_ListOps()
         {
-            try
-            {
-                await Test_Reminders_Basic_ListOps();
-            }
-            catch (Exception ex)
-            {
-                
-                throw;
-            }
+            await Test_Reminders_Basic_ListOps();
         }
 
         //[TestMethod]
@@ -94,14 +78,7 @@
         [TestMethod]
         public async Task Rem_Sql_ReminderNotFound()
         {
-            try
-            {
-                await Test_Reminders_ReminderNotFound();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            await Test_Reminders_ReminderNotFound();
         }
 
     }
