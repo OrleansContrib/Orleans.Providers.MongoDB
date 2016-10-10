@@ -17,7 +17,7 @@
     /// <summary>
     /// The mongo membership provider repository.
     /// </summary>
-    public class MongoMembershipProviderRepository : DocumentRepository, IMongoMembershipProviderRepository
+    public class MongoMembershipRepository : DocumentRepository, IMongoMembershipRepository
     {
         /// <summary>
         /// Gets the membership collection name.
@@ -41,7 +41,7 @@
         private static readonly string MembershipVersionKeyName = "DeploymentId";
         private static readonly string MembershipKeyName = "DeploymentId";
 
-        public MongoMembershipProviderRepository(string connectionsString, string databaseName)
+        public MongoMembershipRepository(string connectionsString, string databaseName)
             : base(connectionsString, databaseName)
         {
         }
@@ -128,7 +128,7 @@
 
                 if (await UpdateVersion(deploymentId, Convert.ToInt32(tableVersion.VersionEtag), tableVersion.Version))
                 {
-                    MembershipTable document = new MembershipTable
+                    MembershipCollection document = new MembershipCollection
                                                    {
                                                        DeploymentId = deploymentId,
                                                        Address = address,
@@ -246,8 +246,8 @@
                 throw new ArgumentException("ConnectionString may not be empty");
             }
 
-            List<MembershipTable> membershipList =
-                Database.GetCollection<MembershipTable>(MembershipCollectionName)
+            List<MembershipCollection> membershipList =
+                Database.GetCollection<MembershipCollection>(MembershipCollectionName)
                     .AsQueryable()
                     .Where(m => m.DeploymentId == deploymentId).ToList();
 
@@ -268,8 +268,8 @@
         /// </returns>
         public async Task<MembershipTableData> ReturnRow(SiloAddress key, string deploymentId)
         {
-            List<MembershipTable> membershipList =
-                Database.GetCollection<MembershipTable>(MembershipCollectionName)
+            List<MembershipCollection> membershipList =
+                Database.GetCollection<MembershipCollection>(MembershipCollectionName)
                     .AsQueryable()
                     .Where(
                         m =>
@@ -316,7 +316,7 @@
         {
             var collection = await ReturnCollection();
 
-            var update = new UpdateDefinitionBuilder<MembershipTable>().Set(x => x.IAmAliveTime, iAmAliveTime);
+            var update = new UpdateDefinitionBuilder<MembershipCollection>().Set(x => x.IAmAliveTime, iAmAliveTime);
             var result =
                 await
                 collection.UpdateOneAsync(
@@ -337,7 +337,7 @@
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        internal async Task<Tuple<MembershipEntry, string>> Parse(MembershipTable membershipData)
+        internal async Task<Tuple<MembershipEntry, string>> Parse(MembershipCollection membershipData)
         {
             // TODO: This is a bit of hack way to check in the current version if there's membership data or not, but if there's a start time, there's member.            
             DateTime? startTime = membershipData.StartTime;
@@ -395,7 +395,7 @@
         /// <returns>
         /// The <see cref="SiloAddress"/>.
         /// </returns>
-        public static SiloAddress ReturnSiloAddress(MembershipTable membershipData, bool useProxyPort = false)
+        public static SiloAddress ReturnSiloAddress(MembershipCollection membershipData, bool useProxyPort = false)
         {
             // Todo: Move this method to it's own class so it can be shared a bit more elogantly
             int port = membershipData.Port;
@@ -424,7 +424,7 @@
         /// The <see cref="Task"/>.
         /// </returns>
         private async Task<MembershipTableData> ReturnMembershipTableData(
-            List<MembershipTable> membershipList,
+            List<MembershipCollection> membershipList,
             string deploymentId)
         {
             var membershipVersion = await this.FindDocumentAsync(MembershipVersionCollectionName, MembershipVersionKeyName, deploymentId);
@@ -475,7 +475,7 @@
 
             string suspecttimes = ReturnStringFromSuspectTimes(membershipEntry);
 
-            var update = new UpdateDefinitionBuilder<MembershipTable>()
+            var update = new UpdateDefinitionBuilder<MembershipCollection>()
                 .Set(x => x.Status, (int)membershipEntry.Status)            
                 .Set(x => x.SuspectTimes, suspecttimes)
                 .Set(x => x.IAmAliveTime, membershipEntry.IAmAliveTime);
@@ -560,9 +560,9 @@
             await collection.DeleteOneAsync(m => m.DeploymentId == deploymentId);
         }
 
-        private async static Task<IMongoCollection<MembershipTable>> ReturnCollection()
+        private async static Task<IMongoCollection<MembershipCollection>> ReturnCollection()
         {
-            var collection = Database.GetCollection<MembershipTable>(MembershipCollectionName);
+            var collection = Database.GetCollection<MembershipCollection>(MembershipCollectionName);
             return collection;
         }
 

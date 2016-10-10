@@ -23,10 +23,10 @@
         /// </returns>
         public Task<List<Uri>> ReturnActiveGatewaysAsync(string deploymentId)
         {
-            var collection = Database.GetCollection<MembershipTable>(MongoMembershipProviderRepository.MembershipCollectionName);
+            var collection = Database.GetCollection<MembershipCollection>(MongoMembershipRepository.MembershipCollectionName);
 
             // Todo: This should be async 
-            List<MembershipTable> gateways =
+            List<MembershipCollection> gateways =
                 collection.AsQueryable()
                     .Where(m => m.DeploymentId == deploymentId && m.Status == (int)SiloStatus.Active && m.ProxyPort > 0)
                     .ToList();
@@ -50,9 +50,9 @@
         /// <returns>
         /// The <see cref="Uri"/>.
         /// </returns>
-        internal static Uri ReturnGatewayUri(MembershipTable record)
+        internal static Uri ReturnGatewayUri(MembershipCollection record)
         {
-            return MongoMembershipProviderRepository.ReturnSiloAddress(record, true).ToGatewayUri();
+            return MongoMembershipRepository.ReturnSiloAddress(record, true).ToGatewayUri();
         }
 
         /// <summary>

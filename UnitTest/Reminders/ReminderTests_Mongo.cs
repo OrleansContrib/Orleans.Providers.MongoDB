@@ -51,13 +51,13 @@
         }
 
         [TestMethod]
-        public async Task Rem_Sql_Basic_StopByRef()
+        public async Task Rem_MongoDB_Basic_StopByRef()
         {
             await Test_Reminders_Basic_StopByRef();
         }
 
         [TestMethod]
-        public async Task Rem_Sql_Basic_ListOps()
+        public async Task Rem_MongoDB_Basic_ListOps()
         {
             await Test_Reminders_Basic_ListOps();
         }
@@ -76,7 +76,7 @@
         //}
 
         [TestMethod]
-        public async Task Rem_Sql_ReminderNotFound()
+        public async Task Rem_MongoDB_ReminderNotFound()
         {
             await Test_Reminders_ReminderNotFound();
         }

@@ -12,7 +12,7 @@
     /// <summary>
     /// The membership table.
     /// </summary>
-    public class MembershipTable
+    public class MembershipCollection
     {
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }

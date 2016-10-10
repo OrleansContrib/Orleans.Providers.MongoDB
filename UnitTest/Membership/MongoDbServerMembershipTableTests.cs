@@ -50,12 +50,12 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
 
         protected override IMembershipTable CreateMembershipTable(Logger logger)
         {
-            return new MongoMembershipProvider {};
+            return new MongoMembershipTable {};
         }
 
         protected override IGatewayListProvider CreateGatewayListProvider(Logger logger)
         {
-            return new MongoMembershipProvider();
+            return new MongoMembershipTable();
         }
 
         //protected override string GetAdoInvariant()

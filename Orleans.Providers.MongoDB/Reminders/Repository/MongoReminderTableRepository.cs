@@ -76,7 +76,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
             return this.ProcessRemindersList(reminders);
         }
 
-        private Task<ReminderTableData> ProcessRemindersList(List<RemindersTable> reminders)
+        private Task<ReminderTableData> ProcessRemindersList(List<RemindersCollection> reminders)
         {
             List<ReminderEntry> reminderEntryList = new List<ReminderEntry>();
             foreach (var reminder in reminders)
@@ -87,7 +87,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
             return Task.FromResult(new ReminderTableData(reminderEntryList));
         }
 
-        private ReminderEntry Parse(RemindersTable reminder)
+        private ReminderEntry Parse(RemindersCollection reminder)
         {
             if (reminder != null)
             {
@@ -109,9 +109,9 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
             return null;
         }
 
-        private IMongoCollection<RemindersTable> ReturnOrCreateRemindersCollection()
+        private IMongoCollection<RemindersCollection> ReturnOrCreateRemindersCollection()
         {
-            var collection = Database.GetCollection<RemindersTable>(RemindersCollectionName);
+            var collection = Database.GetCollection<RemindersCollection>(RemindersCollectionName);
 
             if (collection != null)
             {
@@ -119,7 +119,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
             }
 
             Database.CreateCollection(RemindersCollectionName);
-            collection = Database.GetCollection<RemindersTable>(RemindersCollectionName);
+            collection = Database.GetCollection<RemindersCollection>(RemindersCollectionName);
 
             // Todo: Create Indexs
 
@@ -188,7 +188,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
                 // Insert
                 await
                     collection.InsertOneAsync(
-                        new RemindersTable
+                        new RemindersCollection
                             {
                                 ServiceId = serviceId,
                                 GrainId = grainRef.ToKeyString(),
@@ -206,7 +206,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
                 reminder.Version++;
 
                 // Update
-                var update = new UpdateDefinitionBuilder<RemindersTable>()
+                var update = new UpdateDefinitionBuilder<RemindersCollection>()
                 .Set(x => x.StartTime, startTime)
                 .Set(x => x.Period, period.TotalMilliseconds)
                 .Set(x => x.GrainHash, grainRef.GetUniformHashCode())

@@ -13,7 +13,7 @@
     /// <summary>
     /// The MongoMembershipProviderRepository interface.
     /// </summary>
-    internal interface IMongoMembershipProviderRepository : IDocumentRepository
+    internal interface IMongoMembershipRepository : IDocumentRepository
     {
         #region Public methods and operators
 

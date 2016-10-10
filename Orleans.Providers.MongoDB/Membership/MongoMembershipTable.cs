@@ -15,12 +15,12 @@
     /// The mongo membership provider. It is used to manage cluster members as well as provide gateway
     /// servers
     /// </summary>
-    public class MongoMembershipProvider : IMembershipTable, IGatewayListProvider
+    public class MongoMembershipTable : IMembershipTable, IGatewayListProvider
     {
         private string deploymentId;
         private TimeSpan maxStaleness;
         private Logger logger;
-        private IMongoMembershipProviderRepository membershipRepository;
+        private IMongoMembershipRepository membershipRepository;
 
         private IGatewayProviderRepository gatewayRepository;
 
@@ -37,7 +37,7 @@
                 logger.Verbose3("MongoMembershipTable.InitializeMembershipTable called.");
             }
             
-            membershipRepository = new MongoMembershipProviderRepository(globalConfiguration.DataConnectionString, MongoUrl.Create(globalConfiguration.DataConnectionString).DatabaseName);
+            membershipRepository = new MongoMembershipRepository(globalConfiguration.DataConnectionString, MongoUrl.Create(globalConfiguration.DataConnectionString).DatabaseName);
 
             // even if I am not the one who created the table, 
             // try to insert an initial table version if it is not already there,

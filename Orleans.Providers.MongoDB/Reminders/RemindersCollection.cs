@@ -9,7 +9,7 @@ namespace Orleans.Providers.MongoDB.Reminders
     using global::MongoDB.Bson;
     using global::MongoDB.Bson.Serialization.Attributes;
 
-    public class RemindersTable
+    public class RemindersCollection
     {
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
