@@ -61,7 +61,7 @@
         /// </returns>
         public static DateTime ParseDate(string dateStr)
         {
-            return DateTime.ParseExact(dateStr, DATE_FORMAT, CultureInfo.InvariantCulture);
+            return DateTime.ParseExact(dateStr.Trim(), DATE_FORMAT, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -131,33 +131,56 @@
             if (membershipDocument == null)
             {
                 // Todo: Handle as transaction
-                MembershipTable document = new MembershipTable
-                                               {
-                                                   DeploymentId = deploymentId,
-                                                   Address = address,
-                                                   Port = entry.SiloAddress.Endpoint.Port,
-                                                   Generation = entry.SiloAddress.Generation,
-                                                   HostName = entry.HostName,
-                                                   Status = (int)entry.Status,
-                                                   ProxyPort = entry.ProxyPort,
-                                                   StartTime = entry.StartTime,
-                                                   IAmAliveTime = entry.IAmAliveTime
-                                               };
 
-                if (entry.SuspectTimes.Count == 0)
+                if (await UpdateVersion(deploymentId, Convert.ToInt32(tableVersion.VersionEtag), tableVersion.Version))
                 {
-                    document.SuspectTimes = string.Empty;
-                }
-                else
-                {
-                    throw new Exception();
+                    MembershipTable document = new MembershipTable
+                                                   {
+                                                       DeploymentId = deploymentId,
+                                                       Address = address,
+                                                       Port = entry.SiloAddress.Endpoint.Port,
+                                                       Generation = entry.SiloAddress.Generation,
+                                                       HostName = entry.HostName,
+                                                       Status = (int)entry.Status,
+                                                       ProxyPort = entry.ProxyPort,
+                                                       StartTime = entry.StartTime,
+                                                       IAmAliveTime = entry.IAmAliveTime
+                                                   };
+
+                    if (entry.SuspectTimes == null || entry.SuspectTimes.Count == 0)
+                    {
+                        document.SuspectTimes = string.Empty;
+                    }
+                    else
+                    {
+                        document.SuspectTimes = ReturnStringFromSuspectTimes(entry);
+                    }
+
+                    if (!collection.AsQueryable().Any(
+                        r => r.DeploymentId == document.DeploymentId 
+                        && r.Address == document.Address
+                        && r.Port == document.Port
+                        && r.Generation == document.Generation
+                        && r.HostName == document.HostName
+                        && r.Status == document.Status
+                        && r.ProxyPort == document.ProxyPort
+                        && r.StartTime == document.StartTime
+                        && r.IAmAliveTime == document.IAmAliveTime))
+                    {
+                        await collection.InsertOneAsync(document);
+                    }
+                    else
+                    {
+                        return false;
+                    }
+
+                    return true;
                 }
 
-                await collection.InsertOneAsync(document);
-                await this.UpdateVersion(deploymentId);
+                return false;
             }
 
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -169,16 +192,18 @@
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        private async Task UpdateVersion(string deploymentId)
-        {
-            var versionDocument =
-                await this.FindDocumentAsync(MembershipVersionCollectionName, MembershipVersionKeyName, deploymentId);
+        //private async Task<bool> UpdateVersion(string deploymentId)
+        //{
+        //    var versionDocument =
+        //        await this.FindDocumentAsync(MembershipVersionCollectionName, MembershipVersionKeyName, deploymentId);
 
-            if (versionDocument != null)
-            {
-                await UpdateVersion(deploymentId, Convert.ToString(versionDocument["Version"].AsInt32));
-            }
-        }
+        //    if (versionDocument != null)
+        //    {
+        //        return await UpdateVersion(deploymentId, Convert.ToString(versionDocument["Version"].AsInt32));
+        //    }
+
+        //    return false;
+        //}
 
         /// <summary>
         /// Update the membership version.
@@ -192,19 +217,21 @@
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        private static async Task UpdateVersion(string deploymentId, string version)
+        private static async Task<bool> UpdateVersion(string deploymentId, int perviousVersion, int newVersion)
         {
             var collection = Database.GetCollection<BsonDocument>(MembershipVersionCollectionName);
 
             var builder = Builders<BsonDocument>.Filter;
-            var filter = builder.Eq("DeploymentId", deploymentId) & builder.Eq("Version", Convert.ToInt32(version));
+            var filter = builder.Eq("DeploymentId", deploymentId) & builder.Eq("Version", perviousVersion);
 
             var result =
                 await
                 collection.UpdateOneAsync(
                     filter,
-                    Builders<BsonDocument>.Update.Set("Version", Convert.ToInt32(version) + 1)
+                    Builders<BsonDocument>.Update.Set("Version", newVersion)
                     .Set("Timestamp", DateTime.Now.ToUniversalTime()));
+
+            return result.ModifiedCount > 0;
         }
 
         /// <summary>
@@ -449,7 +476,7 @@
             MembershipEntry membershipEntry,
             string etag)
         {
-            await UpdateVersion(deploymentId, etag);
+            bool verionUpdateResult = await UpdateVersion(deploymentId, Convert.ToInt32(etag), Convert.ToInt32(etag) + 1);
             var collection = Database.GetCollection<MembershipTable>(MembershipCollectionName);
 
             string suspecttimes = ReturnStringFromSuspectTimes(membershipEntry);
@@ -464,9 +491,18 @@
                && m.Port == membershipEntry.SiloAddress.Endpoint.Port && m.Generation == membershipEntry.SiloAddress.Generation, 
                update);
 
-            var success = result.ModifiedCount == 1;
+            bool returnResult = verionUpdateResult || result.ModifiedCount > 0;
 
-            return true;
+            //if (!returnResult)
+            //{
+            //    // There is an requirement that even though the same data has been updated,
+            //    // an update should return true. The Mongo drivers detect that the same data is being passed and therefore
+            //    // ModifiedCount is 0. I've Added this extra step to meet the requirement
+
+            //    returnResult = result.MatchedCount > 0;
+            //}
+
+            return  returnResult;
         }
 
         /// <summary>
@@ -485,7 +521,7 @@
                 string suspectingSilos = string.Empty;
                 foreach (var suspectTime in membershipEntry.SuspectTimes)
                 {
-                    suspectingSilos = string.Format(
+                    suspectingSilos += string.Format(
                         "{0}@{1},{2} |",
                         suspectTime.Item1.Endpoint,
                         suspectTime.Item1.Generation,

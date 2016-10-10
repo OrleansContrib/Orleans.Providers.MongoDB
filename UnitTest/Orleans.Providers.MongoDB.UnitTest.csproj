@@ -76,8 +76,16 @@
       <HintPath>..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.OrleansHost.1.2.4\lib\net451\OrleansHost.exe</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="OrleansProviders, Version=1.2.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.OrleansProviders.1.2.4\lib\net451\OrleansProviders.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="OrleansRuntime, Version=1.2.4.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.OrleansRuntime.1.2.4\lib\net451\OrleansRuntime.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="OrleansTestingHost, Version=1.2.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.TestingHost.1.2.4\lib\net451\OrleansTestingHost.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -110,11 +118,14 @@
     <Compile Include="Base\RuntimeInterfaceConstants.cs" />
     <Compile Include="Base\SafeRandom.cs" />
     <Compile Include="Base\TestClusterOptions.cs" />
-    <Compile Include="Base\TestConfigurationExtensions.cs" />
     <Compile Include="Base\TestConstants.cs" />
     <Compile Include="Base\TestingSiloOptions.cs" />
     <Compile Include="Base\TestingUtils.cs" />
     <Compile Include="Base\ThreadSafeRandom.cs" />
+    <Compile Include="Membership\LogFormatter.cs" />
+    <Compile Include="Membership\MembershipTableTestsBase.cs" />
+    <Compile Include="Membership\MongoDbServerMembershipTableTests.cs" />
+    <Compile Include="Membership\SiloInstanceTableTestConstants.cs" />
     <Compile Include="Reminders\IReminderTestGrain2.cs" />
     <Compile Include="Reminders\ReminderTests_Mongo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
