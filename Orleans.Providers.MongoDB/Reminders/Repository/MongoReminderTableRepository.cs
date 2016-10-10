@@ -155,6 +155,15 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
             await collection.DeleteManyAsync(r => r.ServiceId == serviceId);
         }
 
+        public async Task InitTables()
+        {
+            if (!await base.CollectionExistsAsync(this.remindersCollectionName))
+            {
+                // Create Index
+                await base.ReturnOrCreateCollection(this.remindersCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending("ServiceId").Ascending("GrainId").Ascending("ReminderName"), new CreateIndexOptions { Unique = true });
+            }
+        }
+
         public async Task<string> UpsertReminderRowAsync(
             string serviceId,
             GrainReference grainRef,

@@ -44,6 +44,7 @@
         /// The membership version key name.
         /// </summary>
         private static readonly string MembershipVersionKeyName = "DeploymentId";
+        private static readonly string MembershipKeyName = "DeploymentId";
 
         public MongoMembershipProviderRepository(string connectionsString, string databaseName)
             : base(connectionsString, databaseName)
@@ -92,6 +93,18 @@
                         MembershipVersionKeyName,
                         deploymentId,
                         membershipVersionDocument);
+
+                if (!await base.CollectionExistsAsync(MembershipCollectionName))
+                {
+                    await base.ReturnOrCreateCollection(MembershipVersionCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(m => m[MembershipVersionKeyName]));
+                    await base.ReturnOrCreateCollection(MembershipCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(m => m[MembershipKeyName]));
+                }
+
+                //Database.CreateCollection(MembershipCollectionName);
+                //collection = Database.GetCollection<MembershipTable>(MembershipCollectionName);
+
+                //// Todo: This might be overkill
+                //await collection.Indexes.CreateOneAsync(Builders<MembershipTable>.IndexKeys.Ascending(m => m.DeploymentId));
             }
         }
 
@@ -119,7 +132,7 @@
         {
             string address = ReturnAddress(entry.SiloAddress.Endpoint.Address);
 
-            var collection = Database.GetCollection<MembershipTable>(MembershipCollectionName);
+            var collection = await ReturnCollection();
 
             var membershipDocument =
                 collection.AsQueryable()
@@ -320,7 +333,7 @@
             SiloAddress siloAddress,
             DateTime iAmAliveTime)
         {
-            var collection = Database.GetCollection<MembershipTable>(MembershipCollectionName);
+            var collection = await ReturnCollection();
 
             var update = new UpdateDefinitionBuilder<MembershipTable>().Set(x => x.IAmAliveTime, iAmAliveTime);
             var result =
@@ -477,7 +490,7 @@
             string etag)
         {
             bool verionUpdateResult = await UpdateVersion(deploymentId, Convert.ToInt32(etag), Convert.ToInt32(etag) + 1);
-            var collection = Database.GetCollection<MembershipTable>(MembershipCollectionName);
+            var collection = await ReturnCollection();
 
             string suspecttimes = ReturnStringFromSuspectTimes(membershipEntry);
 
@@ -562,8 +575,14 @@
         /// </returns>
         private static async Task DeleteMembershipAsync(string deploymentId)
         {
-            var collection = Database.GetCollection<MembershipTable>(MembershipCollectionName);
+            var collection = await ReturnCollection();
             await collection.DeleteOneAsync(m => m.DeploymentId == deploymentId);
+        }
+
+        private async static Task<IMongoCollection<MembershipTable>> ReturnCollection()
+        {
+            var collection = Database.GetCollection<MembershipTable>(MembershipCollectionName);
+            return collection;
         }
 
         /// <summary>

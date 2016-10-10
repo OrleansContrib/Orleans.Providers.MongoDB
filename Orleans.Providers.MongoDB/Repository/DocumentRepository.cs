@@ -1,6 +1,7 @@
 ﻿namespace Orleans.Providers.MongoDB.Repository
 {
     using System;
+    using System.Linq;
     using System.Threading.Tasks;
 
     using global::MongoDB.Bson;
@@ -21,6 +22,15 @@
         public string ConnectionString { get; set; }
 
         public string DatabaseName { get; set; }
+
+        public async Task<bool> CollectionExistsAsync(string collectionName)
+        {
+            var filter = new BsonDocument("name", collectionName);
+            //filter by collection name
+            var collections = await Database.ListCollectionsAsync(new ListCollectionsOptions { Filter = filter });
+            //check for existence
+            return (await collections.ToListAsync()).Any();
+        }
 
         public async Task<DeleteResult> DeleteDocumentAsync(string mongoCollectionName, string keyName, string key)
         {
@@ -127,7 +137,12 @@
         protected IMongoCollection<BsonDocument> ReturnOrCreateCollection(string mongoCollectionName)
         {
             var collection = Database.GetCollection<BsonDocument>(mongoCollectionName);
-            if (collection != null) return collection;
+            if (collection != null)
+            {
+                return collection;
+            }
+
+            // Todo: This doesn't actually work. A collection is always returned, so this code never runs
             Database.CreateCollection(mongoCollectionName);
             collection = Database.GetCollection<BsonDocument>(mongoCollectionName);
             return collection;

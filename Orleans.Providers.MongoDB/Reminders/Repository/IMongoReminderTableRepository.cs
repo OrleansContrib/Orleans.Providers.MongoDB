@@ -28,5 +28,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
         Task<ReminderTableData> ReadReminderRowsAsync(string serviceId, GrainReference grainRef);
 
         Task RemoveReminderRowsAsync(string serviceId);
+
+        Task InitTables();
     }
 }

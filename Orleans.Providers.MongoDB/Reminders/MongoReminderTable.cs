@@ -17,7 +17,7 @@
 
         private TraceLogger logger;
 
-        public Task Init(GlobalConfiguration config, TraceLogger traceLogger)
+        public async Task Init(GlobalConfiguration config, TraceLogger traceLogger)
         {
             this.serviceId = config.ServiceId.ToString();
             this.logger = traceLogger;
@@ -30,8 +30,7 @@
             }
 
             this.repository = new MongoReminderTableRepository(connectionString, MongoUrl.Create(config.DataConnectionString).DatabaseName);
-
-            return TaskDone.Done;
+            await this.repository.InitTables();
         }
 
         public async Task<ReminderTableData> ReadRows(GrainReference key)
