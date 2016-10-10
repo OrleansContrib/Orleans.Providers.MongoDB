@@ -58,7 +58,8 @@ Update ClientConfiguration.xml in the Client application.
 ```xml
 <ClientConfiguration xmlns="urn:orleans">
   <SystemStore SystemStoreType="Custom" CustomGatewayProviderAssemblyName="Orleans.Providers.MongoDB" DataConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" DeploymentId="OrleansTest" />
-</ClientConfiguration>```
+</ClientConfiguration>
+```
 Add the following to the Client startup
 
 ```cs
