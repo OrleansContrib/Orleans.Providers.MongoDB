@@ -28,23 +28,23 @@ Update OrleansConfiguration.xml in the Host application.
 Add the following to the Host startup
 
 ```cs
-        var config = ClusterConfiguration.LocalhostPrimarySilo();
-        config.LoadFromFile(@".\OrleansConfiguration.xml");
+var config = ClusterConfiguration.LocalhostPrimarySilo();
+config.LoadFromFile(@".\OrleansConfiguration.xml");
 
-        using (var silo = new SiloHost("primary", config))
-        {
-            // Init Mongo Membership
-            silo.Config.Globals.LivenessType = GlobalConfiguration.LivenessProviderType.Custom;
-            silo.Config.Globals.MembershipTableAssembly = "Orleans.Providers.MongoDB";
-            
-            // Disable Reminder Service
-            //silo.Config.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Disabled;
-            silo.Config.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Custom;
-            silo.Config.Globals.ReminderTableAssembly = "Orleans.Providers.MongoDB";
-            
-            silo.InitializeOrleansSilo();
-            var result = silo.StartOrleansSilo();
-        }
+using (var silo = new SiloHost("primary", config))
+{
+    // Init Mongo Membership
+    silo.Config.Globals.LivenessType = GlobalConfiguration.LivenessProviderType.Custom;
+    silo.Config.Globals.MembershipTableAssembly = "Orleans.Providers.MongoDB";
+
+    // Disable Reminder Service
+    //silo.Config.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Disabled;
+    silo.Config.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Custom;
+    silo.Config.Globals.ReminderTableAssembly = "Orleans.Providers.MongoDB";
+
+    silo.InitializeOrleansSilo();
+    var result = silo.StartOrleansSilo();
+}
 ```
 
 
