@@ -83,6 +83,7 @@
     <Compile Include="Reminders\Repository\MongoReminderTableRepository.cs" />
     <Compile Include="Repository\DocumentRepository.cs" />
     <Compile Include="Repository\IDocumentRepository.cs" />
+    <Compile Include="Statistics\MongoStatisticsPublisher.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
