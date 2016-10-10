@@ -21,9 +21,10 @@ internal class Program
             silo.Config.Globals.LivenessType = GlobalConfiguration.LivenessProviderType.Custom;
             silo.Config.Globals.MembershipTableAssembly = "Orleans.Providers.MongoDB";
 
-            //silo.Config.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Disabled;
+            // Disale reminder service
+            // silo.Config.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Disabled;
 
-            // Todo: Enable MongoReminderTable
+            //Enable Reminder Service
             silo.Config.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Custom;
             silo.Config.Globals.ReminderTableAssembly = "Orleans.Providers.MongoDB";
 
