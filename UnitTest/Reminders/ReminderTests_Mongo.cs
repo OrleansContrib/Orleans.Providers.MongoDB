@@ -62,18 +62,18 @@
             await Test_Reminders_Basic_ListOps();
         }
 
-        [TestMethod]
-        public async Task Rem_Sql_1J_MultiGrainMultiReminders()
-        {
-            try
-            {
-                await Test_Reminders_1J_MultiGrainMultiReminders();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
+        //[TestMethod]
+        //public async Task Rem_Sql_1J_MultiGrainMultiReminders()
+        //{
+        //    try
+        //    {
+        //        await Test_Reminders_1J_MultiGrainMultiReminders();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw;
+        //    }
+        //}
 
         [TestMethod]
         public async Task Rem_MongoDB_ReminderNotFound()
