@@ -28,7 +28,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
 
         public static DateTime ParseDate(string dateStr)
         {
-            return DateTime.ParseExact(dateStr, DATE_FORMAT, CultureInfo.InvariantCulture);
+            return DateTime.ParseExact(dateStr.Trim(), DATE_FORMAT, CultureInfo.InvariantCulture);
         }
 
         /// <summary>

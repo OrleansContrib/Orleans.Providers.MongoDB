@@ -557,7 +557,7 @@
         private static async Task DeleteMembershipAsync(string deploymentId)
         {
             var collection = await ReturnCollection();
-            await collection.DeleteOneAsync(m => m.DeploymentId == deploymentId);
+            await collection.DeleteManyAsync(m => m.DeploymentId == deploymentId);
         }
 
         private async static Task<IMongoCollection<MembershipCollection>> ReturnCollection()

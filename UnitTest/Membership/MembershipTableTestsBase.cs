@@ -64,13 +64,7 @@ namespace UnitTests.MembershipTests
             globalConfiguration.MembershipTableAssembly = clusterConfiguration.Globals.MembershipTableAssembly;
             globalConfiguration.ReminderServiceType = clusterConfiguration.Globals.ReminderServiceType;
             globalConfiguration.DeploymentId = clusterConfiguration.Globals.DeploymentId;
-            //var globalConfiguration = new GlobalConfiguration
-            //{
-            //    DeploymentId = deploymentId,
-            //    AdoInvariant = GetAdoInvariant(),
-            //    DataConnectionString = clusterConfiguration.Globals.DataConnectionString
-            //};
-
+            
             membershipTable = CreateMembershipTable(logger);
             membershipTable.InitializeMembershipTable(globalConfiguration, IsTrue, logger).WithTimeout(TimeSpan.FromMinutes(1)).Wait();
 
