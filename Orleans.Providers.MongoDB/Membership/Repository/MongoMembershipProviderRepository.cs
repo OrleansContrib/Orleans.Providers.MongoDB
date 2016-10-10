@@ -11,6 +11,7 @@
     using global::MongoDB.Driver;
 
     using Orleans.Providers.MongoDB.Repository;
+    using Orleans.Providers.MongoDB.UnitTest.Membership;
     using Orleans.Runtime;
 
     /// <summary>
@@ -18,12 +19,6 @@
     /// </summary>
     public class MongoMembershipProviderRepository : DocumentRepository, IMongoMembershipProviderRepository
     {
-        // Todo: Not sure why I can't see (Orleans.Runtime.LogFormatter.ParseDate
-        private const string DATE_FORMAT = "yyyy-MM-dd " + TIME_FORMAT;
-
-                             // Example: 2010-09-02 09:50:43.341 GMT - Variant of UniversalSorta­bleDateTimePat­tern
-        private const string TIME_FORMAT = "HH:mm:ss.fff 'GMT'"; // Example: 09:50:43.341 GMT
-
         /// <summary>
         /// Gets the membership collection name.
         /// </summary>
@@ -49,20 +44,6 @@
         public MongoMembershipProviderRepository(string connectionsString, string databaseName)
             : base(connectionsString, databaseName)
         {
-        }
-
-        /// <summary>
-        /// The parse date.
-        /// </summary>
-        /// <param name="dateStr">
-        /// The date str.
-        /// </param>
-        /// <returns>
-        /// The <see cref="DateTime"/>.
-        /// </returns>
-        public static DateTime ParseDate(string dateStr)
-        {
-            return DateTime.ParseExact(dateStr.Trim(), DATE_FORMAT, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -387,7 +368,7 @@
                                     var split = s.Split(',');
                                     return new Tuple<SiloAddress, DateTime>(
                                         SiloAddress.FromParsableString(split[0]),
-                                        ParseDate(split[1]));
+                                        LogFormatter.ParseDate(split[1]));
                                 }));
                 }
             }
@@ -538,7 +519,7 @@
                         "{0}@{1},{2} |",
                         suspectTime.Item1.Endpoint,
                         suspectTime.Item1.Generation,
-                        suspectTime.Item2.ToUniversalTime().ToString(DATE_FORMAT));
+                        suspectTime.Item2.ToUniversalTime().ToString(LogFormatter.DATE_FORMAT));
                 }
 
                 return suspectingSilos.TrimEnd('|').TrimEnd(' ');

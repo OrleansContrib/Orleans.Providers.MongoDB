@@ -114,7 +114,6 @@
     <Compile Include="Base\StorageTestConstants.cs" />
     <Compile Include="Base\SafeRandom.cs" />
     <Compile Include="Base\TestConstants.cs" />
-    <Compile Include="Membership\LogFormatter.cs" />
     <Compile Include="Membership\MembershipTableTestsBase.cs" />
     <Compile Include="Membership\MongoDbServerMembershipTableTests.cs" />
     <Compile Include="Base\SiloInstanceTableTestConstants.cs" />

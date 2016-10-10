@@ -69,6 +69,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LogFormatter.cs" />
     <Compile Include="Membership\Repository\GatewayProviderRepository.cs" />
     <Compile Include="Membership\Repository\IGatewayProviderRepository.cs" />
     <Compile Include="Membership\Repository\IMongoMembershipProviderRepository.cs" />
