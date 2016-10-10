@@ -39,6 +39,8 @@ using (var silo = new SiloHost("primary", config))
 
     // Disable Reminder Service
     //silo.Config.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Disabled;
+    
+    // Enable Reminder Service
     silo.Config.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Custom;
     silo.Config.Globals.ReminderTableAssembly = "Orleans.Providers.MongoDB";
 
