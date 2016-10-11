@@ -53,6 +53,13 @@ namespace UnitTests.Grains
         public async Task<IGrainReminder> StartReminder(string reminderName, TimeSpan? p = null, bool validate = false)
         {
             TimeSpan usePeriod = p ?? period;
+
+            // This is a hack to set the minimum reminder period to 10 sec
+            var ass = Assembly.GetAssembly(typeof(ClientConfiguration));
+            var type = ass.GetType("Orleans.Runtime.Constants");
+            var field = type.GetField("MinReminderPeriod");
+            field.SetValue(null, TimeSpan.FromSeconds(10));
+            
             logger.Info("Starting reminder {0}.", reminderName);
             IGrainReminder r = null;
             if (validate)
@@ -190,7 +197,7 @@ namespace UnitTests.Grains
 
         public static TimeSpan GetDefaultPeriod(Logger log)
         {
-            int period = 60; // Seconds
+            int period = 10; // Seconds
 
             ClusterConfiguration config = new ClusterConfiguration();
             config.LoadFromFile("ClientConfiguration.xml");
@@ -400,6 +407,12 @@ namespace UnitTests.Grains
 
         public async Task<bool> StartReminder(string reminderName)
         {
+            var ass = Assembly.GetAssembly(typeof(ClientConfiguration));
+            var type = ass.GetType("Orleans.Runtime.Constants");
+            var field = type.GetField("MinReminderPeriod");
+            field.SetValue(null, TimeSpan.FromSeconds(10));
+            var a = field.GetValue(null);
+
             logger.Info("Starting reminder {0}.", reminderName);
             IGrainReminder r = await RegisterOrUpdateReminder(reminderName, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(3));
             logger.Info("Started reminder {0}. It shouldn't have succeeded!", r);
