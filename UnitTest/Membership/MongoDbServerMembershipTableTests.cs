@@ -58,18 +58,6 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
             return new MongoMembershipTable();
         }
 
-        //protected override string GetAdoInvariant()
-        //{
-        //    return AdoNetInvariants.InvariantNameSqlServer;
-        //}
-
-        //protected override string GetConnectionString()
-        //{
-        //    return
-        //        RelationalStorageForTesting.SetupInstance(GetAdoInvariant(), testDatabaseName)
-        //            .Result.CurrentConnectionString;
-        //}
-
         [TestMethod]
         public void MembershipTable_MongoDB_Init()
         {
