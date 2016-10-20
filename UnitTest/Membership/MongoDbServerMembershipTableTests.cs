@@ -31,7 +31,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
                 this.Globals.LivenessType = GlobalConfiguration.LivenessProviderType.Custom;
                 this.Globals.MembershipTableAssembly = "Orleans.Providers.MongoDB";
                 this.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Disabled;
-        
+
                 var n = new NodeConfiguration
                 {
                     SiloName = "Primary",
@@ -50,7 +50,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
 
         protected override IMembershipTable CreateMembershipTable(Logger logger)
         {
-            return new MongoMembershipTable {};
+            return new MongoMembershipTable { };
         }
 
         protected override IGatewayListProvider CreateGatewayListProvider(Logger logger)
@@ -108,15 +108,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
         [TestMethod]
         public async Task MembershipTable_MongoDB_UpdateRow()
         {
-            try
-            {
-                await MembershipTable_UpdateRow();
-            }
-            catch (Exception ex)
-            {
-                
-                throw;
-            }
+            await MembershipTable_UpdateRow();
         }
 
         [TestMethod]

@@ -27,7 +27,7 @@
         public async Task InitializeMembershipTable(
             GlobalConfiguration globalConfiguration,
             bool tryInitTableVersion,
-            TraceLogger traceLogger)
+            Logger traceLogger)
         {
             logger = traceLogger;
             deploymentId = globalConfiguration.DeploymentId;
@@ -334,7 +334,7 @@
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        public Task InitializeGatewayListProvider(ClientConfiguration clientConfiguration, TraceLogger traceLogger)
+        public Task InitializeGatewayListProvider(ClientConfiguration clientConfiguration, Logger traceLogger)
         {
             this.logger = traceLogger;
             if (this.logger.IsVerbose3)

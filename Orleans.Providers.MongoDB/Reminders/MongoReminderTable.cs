@@ -15,9 +15,9 @@
         private IMongoReminderTableRepository repository;
         private string serviceId;
 
-        private TraceLogger logger;
+        private Logger logger;
 
-        public async Task Init(GlobalConfiguration config, TraceLogger traceLogger)
+        public async Task Init(GlobalConfiguration config, Logger traceLogger)
         {
             this.serviceId = config.ServiceId.ToString();
             this.logger = traceLogger;

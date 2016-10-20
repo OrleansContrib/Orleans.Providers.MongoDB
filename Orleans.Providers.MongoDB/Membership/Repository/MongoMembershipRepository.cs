@@ -11,7 +11,6 @@
     using global::MongoDB.Driver;
 
     using Orleans.Providers.MongoDB.Repository;
-    using Orleans.Providers.MongoDB.UnitTest.Membership;
     using Orleans.Runtime;
 
     /// <summary>
@@ -354,7 +353,7 @@
                                 ProxyPort = membershipData.ProxyPort,
                                 StartTime = startTime.Value,
                                 IAmAliveTime = membershipData.IAmAliveTime,
-                                InstanceName = membershipData.HostName
+                                SiloName = membershipData.HostName
                             };
 
                 string suspectingSilos = membershipData.SuspectTimes;
@@ -367,8 +366,8 @@
                                 {
                                     var split = s.Split(',');
                                     return new Tuple<SiloAddress, DateTime>(
-                                        SiloAddress.FromParsableString(split[0]),
-                                        LogFormatter.ParseDate(split[1]));
+                                        SiloAddress.FromParsableString(split[0].Trim()),
+                                        LogFormatter.ParseDate(split[1].Trim()));
                                 }));
                 }
             }
@@ -519,7 +518,7 @@
                         "{0}@{1},{2} |",
                         suspectTime.Item1.Endpoint,
                         suspectTime.Item1.Generation,
-                        suspectTime.Item2.ToUniversalTime().ToString(LogFormatter.DATE_FORMAT));
+                        LogFormatter.PrintDate(suspectTime.Item2.ToUniversalTime()));
                 }
 
                 return suspectingSilos.TrimEnd('|').TrimEnd(' ');

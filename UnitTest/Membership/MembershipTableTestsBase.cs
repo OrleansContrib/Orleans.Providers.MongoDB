@@ -19,11 +19,12 @@ namespace UnitTests.MembershipTests
     using Orleans.Providers.MongoDB.UnitTest.Membership;
     using Orleans.Providers.MongoDB.UnitTest.Reminders;
     using Orleans.TestingHost;
+    using Orleans.TestingHost.Utils;
 
     public abstract class MembershipTableTestsBase : IDisposable
     {
         private static readonly string hostName = Dns.GetHostName();
-        private readonly TraceLogger logger;
+        private readonly Logger logger;
         private readonly IMembershipTable membershipTable;
         private readonly IGatewayListProvider gatewayListProvider;
         private readonly string deploymentId;
@@ -34,12 +35,14 @@ namespace UnitTests.MembershipTests
 
         protected MembershipTableTestsBase(ClusterConfiguration clusterConfiguration)
         {
-            ConstructorInfo loggerGlobalConfiguration = typeof(TraceLogger).GetConstructors
+            ConstructorInfo loggerGlobalConfiguration = typeof(Logger).GetConstructors
            (BindingFlags.Instance | BindingFlags.NonPublic)[0];
 
             //logger = (TraceLogger)loggerGlobalConfiguration.Invoke(new object[] { GetType().Name, TraceLogger.LoggerType.Application });
 
-            logger = (TraceLogger)loggerGlobalConfiguration.Invoke(new object[] {});
+            //logger = (TraceLogger)loggerGlobalConfiguration.Invoke(new object[] {});
+
+            this.logger = new NoOpTestLogger();
 
             //LogManager.Initialize(new NodeConfiguration());
             //logger = LogManager.GetLogger(GetType().Name, TraceLogger.LoggerType.Application);
