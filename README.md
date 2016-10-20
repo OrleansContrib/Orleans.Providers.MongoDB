@@ -1,5 +1,5 @@
 # Orleans.Providers.MongoDB
-> This project is in progress and is not ready for production yet
+> This project is in progress and is not ready for production yet. I have implemented the same unit tests used to test Sql Reminders & Memberships. I am currently doing further tests by implementing the providers in a project. Once I'm happy with these I will continue with the rest of the Providers.  
 
 A MongoDb implementation of the Orleans Provider model. Currently the Membership(IMembershipTable & IGatewayListProvider) and Reminder(IReminderTable) providers have been implemented.
 
