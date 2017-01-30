@@ -1,5 +1,5 @@
 # Orleans.Providers.MongoDB
-> The MongoStatisticsPublisher is currently being tested and not recommended for production usage. The Membership, Gateway and reminder providers are ready for production usage.
+> The MongoStatisticsPublisher is currently being tested and not recommended for production usage. The Membership, Gateway and Reminder providers are ready for production usage.
 
 A MongoDb implementation of the Orleans Provider model. Currently the Membership(IMembershipTable & IGatewayListProvider) and Reminder(IReminderTable) providers have been implemented.
 
@@ -27,7 +27,8 @@ Update OrleansConfiguration.xml in the Host application.
   <Defaults>
     <Networking Address="" Port="11111"/>
     <ProxyingGateway Address="" Port="30000"/>
-    <Statistics ProviderType="MongoStatisticsPublisher" WriteLogStatisticsToTable="true"/>
+    <!--WriteLogStatisticsToTable should not be true in a production enviroment. Typically only used by Orleans developers-->
+    <Statistics ProviderType="MongoStatisticsPublisher" WriteLogStatisticsToTable="false"/>
   </Defaults>
 </OrleansConfiguration>
 ```
@@ -64,6 +65,9 @@ Update ClientConfiguration.xml in the Client application.
 ```xml
 <ClientConfiguration xmlns="urn:orleans">
   <SystemStore SystemStoreType="Custom" CustomGatewayProviderAssemblyName="Orleans.Providers.MongoDB" DataConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" DeploymentId="OrleansTest" />
+  <StatisticsProviders>
+    <Provider Type="Orleans.Providers.MongoDB.Statistics.MongoStatisticsPublisher" Name="MongoStatisticsPublisher" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" />
+  </StatisticsProviders>
 </ClientConfiguration>
 ```
 Add the following to the Client startup
