@@ -19,7 +19,7 @@ Update OrleansConfiguration.xml in the Host application.
     -->
     <SystemStore SystemStoreType="None" DataConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" DeploymentId="OrleansTest" />
 
-<StatisticsProviders>
+	<StatisticsProviders>
       <Provider Type="Orleans.Providers.MongoDB.Statistics.MongoStatisticsPublisher" Name="MongoStatisticsPublisher" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" />
     </StatisticsProviders>
 
