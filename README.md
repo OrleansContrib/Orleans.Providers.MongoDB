@@ -79,4 +79,5 @@ initialized = GrainClient.IsInitialized;
 
 ## Todo
 
+- Test MongoStatisticsPublisher
 - Create Nuget Package
