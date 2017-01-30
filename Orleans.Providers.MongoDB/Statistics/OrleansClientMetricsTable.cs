@@ -17,7 +17,7 @@
 
         public int Port { get; set; }
 
-        public int Generation { get; set; }
+        public long Generation { get; set; }
 
         public string HostName { get; set; }
 
@@ -56,5 +56,6 @@
         {
             this.DateTime = DateTime.Now;
         }
+
     }
 }

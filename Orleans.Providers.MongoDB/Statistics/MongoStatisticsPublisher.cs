@@ -57,7 +57,7 @@
         public async Task Init(string name, IProviderRuntime providerRuntime, IProviderConfiguration config)
         {
             this.Name = name;
-            this.logger = providerRuntime.GetLogger("SqlStatisticsPublisher");
+            this.logger = providerRuntime.GetLogger("MongoStatisticsPublisher");
 
             this.repository = new MongoStatisticsPublisherRepository(config.Properties["ConnectionString"], MongoUrl.Create(config.Properties["ConnectionString"]).DatabaseName);
         }
@@ -132,25 +132,35 @@
         {
             if (this.logger != null && this.logger.IsVerbose3)
                 this.logger.Verbose3(
-                    "SqlStatisticsPublisher.ReportMetrics (client) called with data: {0}.",
+                    "MongoStatisticsPublisher.ReportMetrics (client) called with data: {0}.",
                     metricsData);
             try
             {
+                int gateWayPort = 0;
+
+                if (this.gateway != null)
+                {
+                    gateWayPort = this.gateway.Port;
+                }
+
                 await this.repository.UpsertReportClientMetricsAsync(
                         new OrleansClientMetricsTable
                             {
                                 DeploymentId = this.deploymentId,
                                 ClientId = this.clientId,
                                 Address = this.clientAddress.MapToIPv4().ToString(),
-                                HostName = this.hostName
-                            }, 
+                                HostName = this.hostName,
+                                GatewayPort = gateWayPort,
+                                //Port = this.siloAddress.,
+                                Generation = this.generation
+                        }, 
                             metricsData);
             }
             catch (Exception ex)
             {
                 if (this.logger != null && this.logger.IsVerbose)
                 {
-                    this.logger.Verbose("SqlStatisticsPublisher.ReportMetrics (client) failed: {0}", ex);
+                    this.logger.Verbose("MongoStatisticsPublisher.ReportMetrics (client) failed: {0}", ex);
                 }
 
                 throw;
@@ -166,6 +176,7 @@
             IPEndPoint gateway,
             string hostName)
         {
+            this.gateway = gateway;
             return TaskDone.Done;
         }
 
@@ -176,22 +187,32 @@
         /// <returns>Task for database operation</returns>
         public async Task ReportMetrics(ISiloPerformanceMetrics metricsData)
         {
-            if (this.logger != null && this.logger.IsVerbose3) this.logger.Verbose3("SqlStatisticsPublisher.ReportMetrics (silo) called with data: {0}.", metricsData);
+            if (this.logger != null && this.logger.IsVerbose3) this.logger.Verbose3("MongoStatisticsPublisher.ReportMetrics (silo) called with data: {0}.", metricsData);
             try
             {
+                int gateWayPort = 0;
+
+                if (this.gateway != null)
+                {
+                    gateWayPort = this.gateway.Port;
+                }
+
                 await this.repository.UpsertSiloMetricsAsync(
                     new OrleansSiloMetricsTable
                         {
                             DeploymentId = this.deploymentId,
                             SiloId = this.siloName,
                             GatewayAddress = this.gateway.Address.MapToIPv4().ToString(),
-                            HostName = this.hostName
+                            HostName = this.hostName,
+                            GatewayPort = gateWayPort,
+                            Port = this.siloAddress.Endpoint.Port,
+                            Generation = this.generation
                     }, 
                     metricsData);
             }
             catch (Exception ex)
             {
-                if (this.logger != null && this.logger.IsVerbose) this.logger.Verbose("SqlStatisticsPublisher.ReportMetrics (silo) failed: {0}", ex);
+                if (this.logger != null && this.logger.IsVerbose) this.logger.Verbose("MongoStatisticsPublisher.ReportMetrics (silo) failed: {0}", ex);
                 throw;
             }
         }

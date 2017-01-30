@@ -107,6 +107,7 @@ namespace Orleans.Providers.MongoDB.Statistics.Repository
             siloMetricsTable.SendQueueLength = siloPerformanceMetrics.SendQueueLength;
             siloMetricsTable.SentMessages = siloPerformanceMetrics.SentMessages;
             siloMetricsTable.TotalPhysicalMemory = siloPerformanceMetrics.TotalPhysicalMemory;
+            //siloMetricsTable.Generation = siloPerformanceMetrics.
 
             var collection = this.ReturnOrCreateCollection(OrleansSiloMetricsTableName);
 

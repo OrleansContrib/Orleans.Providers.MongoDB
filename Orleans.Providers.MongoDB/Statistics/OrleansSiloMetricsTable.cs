@@ -10,7 +10,7 @@
         public string SiloId { get; set; }
         public string Address { get; set; }
         public int Port { get; set; }
-        public int Generation { get; set; }
+        public long Generation { get; set; }
         public string HostName { get; set; }
         public string GatewayAddress { get; set; }
         public int GatewayPort { get; set; }
@@ -29,5 +29,10 @@
         public DateTime TimeStamp { get; set; }
         public long AvailablePhysicalMemory { get; set; }
         public long TotalPhysicalMemory { get; set; }
+
+        public OrleansSiloMetricsTable()
+        {
+            this.TimeStamp = DateTime.Now;
+        }
     }
 }

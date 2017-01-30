@@ -97,7 +97,7 @@
     <Compile Include="Statistics\OrleansStatisticsTable.cs" />
     <Compile Include="Statistics\Repository\IMongoStatisticsPublisherRepository.cs" />
     <Compile Include="Statistics\Repository\MongoStatisticsPublisherRepository.cs" />
-    <Compile Include="Statistics\Repository\OrleansSiloMetricsTable.cs" />
+    <Compile Include="Statistics\OrleansSiloMetricsTable.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
