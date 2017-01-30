@@ -54,11 +54,11 @@ namespace UnitTests.Grains
         {
             TimeSpan usePeriod = p ?? period;
 
-            // This is a hack to set the minimum reminder period to 10 sec
-            var ass = Assembly.GetAssembly(typeof(ClientConfiguration));
-            var type = ass.GetType("Orleans.Runtime.Constants");
-            var field = type.GetField("MinReminderPeriod");
-            field.SetValue(null, TimeSpan.FromSeconds(10));
+            //// This is a hack to set the minimum reminder period to 10 sec
+            //var ass = Assembly.GetAssembly(typeof(ClientConfiguration));
+            //var type = ass.GetType("Orleans.Runtime.Constants");
+            //var field = type.GetField("MinReminderPeriod");
+            //field.SetValue(null, TimeSpan.FromSeconds(10));
             
             logger.Info("Starting reminder {0}.", reminderName);
             IGrainReminder r = null;

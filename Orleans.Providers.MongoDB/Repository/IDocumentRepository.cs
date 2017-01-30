@@ -1,17 +1,197 @@
-﻿namespace Orleans.Providers.MongoDB.Repository
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="IDocumentRepository.cs" company="">
+//   
+// </copyright>
+// <summary>
+//   The DocumentRepository interface.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace Orleans.Providers.MongoDB.Repository
 {
+    #region Using
+
+    using System.Collections.Generic;
     using System.Threading.Tasks;
 
     using global::MongoDB.Bson;
     using global::MongoDB.Driver;
 
+    #endregion
+
+    /// <summary>
+    /// The DocumentRepository interface.
+    /// </summary>
     public interface IDocumentRepository
     {
-        string ConnectionString { get; set; }
-        string DatabaseName { get; set; }
-        Task<DeleteResult> DeleteDocumentAsync(string mongoCollectionName, string keyName, string key);
-        Task SaveDocumentAsync(string mongoCollectionName, string keyName, string key, BsonDocument document);      
-        Task<BsonDocument> FindDocumentAsync(string mongoCollectionName, string keyName, string key);
+        #region Properties
 
+        /// <summary>
+        ///     Gets or sets the connection string.
+        /// </summary>
+        string ConnectionString { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the database name.
+        /// </summary>
+        string DatabaseName { get; set; }
+
+        #endregion
+
+        #region Public methods and operators
+
+        /// <summary>
+        /// Add documents.
+        /// </summary>
+        /// <param name="documents">
+        /// The documents.
+        /// </param>
+        /// <param name="mongoCollectionName">
+        /// The mongo collection name.
+        /// </param>
+        /// <param name="isOrdered">
+        /// The is ordered.
+        /// </param>
+        /// <param name="bypassDocumentValidation">
+        /// The bypass document validation.
+        /// </param>
+        void AddDocuments(
+            List<BsonDocument> documents,
+            string mongoCollectionName,
+            bool isOrdered = true,
+            bool bypassDocumentValidation = false);
+
+        /// <summary>
+        /// Add documents async.
+        /// </summary>
+        /// <param name="documents">
+        /// The documents.
+        /// </param>
+        /// <param name="mongoCollectionName">
+        /// The mongo collection name.
+        /// </param>
+        /// <param name="isOrdered">
+        /// The is ordered.
+        /// </param>
+        /// <param name="bypassDocumentValidation">
+        /// The bypass document validation.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        Task AddDocumentsAsync(
+            List<BsonDocument> documents,
+            string mongoCollectionName,
+            bool isOrdered = true,
+            bool bypassDocumentValidation = false);
+
+        /// <summary>
+        /// Bulk write async.
+        /// </summary>
+        /// <param name="documents">
+        /// The documents.
+        /// </param>
+        /// <param name="mongoCollectionName">
+        /// The mongo collection name.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        Task BulkWriteAsync(WriteModel<BsonDocument>[] documents, string mongoCollectionName);
+
+        /// <summary>
+        /// Clear collection.
+        /// </summary>
+        /// <param name="collectionName">
+        /// The collection name.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        Task ClearCollection(string collectionName);
+
+        /// <summary>
+        /// Delete document async.
+        /// </summary>
+        /// <param name="mongoCollectionName">
+        /// The mongo collection name.
+        /// </param>
+        /// <param name="keyName">
+        /// The key name.
+        /// </param>
+        /// <param name="key">
+        /// The key.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        Task<DeleteResult> DeleteDocumentAsync(string mongoCollectionName, string keyName, string key);
+
+        /// <summary>
+        /// Find document async.
+        /// </summary>
+        /// <param name="mongoCollectionName">
+        /// The mongo collection name.
+        /// </param>
+        /// <param name="keyName">
+        /// The key name.
+        /// </param>
+        /// <param name="key">
+        /// The key.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        Task<BsonDocument> FindDocumentAsync<KeyType>(string mongoCollectionName, string keyName, KeyType key);
+
+        /// <summary>
+        /// Return all async.
+        /// </summary>
+        /// <param name="mongoCollectionName">
+        /// The mongo collection name.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        Task<List<BsonDocument>> ReturnAllAsync(string mongoCollectionName);
+
+        /// <summary>
+        /// Save document async.
+        /// </summary>
+        /// <param name="mongoCollectionName">
+        /// The mongo collection name.
+        /// </param>
+        /// <param name="keyName">
+        /// The key name.
+        /// </param>
+        /// <param name="key">
+        /// The key.
+        /// </param>
+        /// <param name="document">
+        /// The document.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        Task SaveDocumentAsync(string mongoCollectionName, string keyName, string key, BsonDocument document);
+
+        /// <summary>
+        /// Upsert documents async.
+        /// </summary>
+        /// <param name="documents">
+        /// The documents.
+        /// </param>
+        /// <param name="lookupFieldName">
+        /// The lookup field name.
+        /// </param>
+        /// <param name="mongoCollectionName">
+        /// The mongo collection name.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        Task UpsertDocumentsAsync(List<BsonDocument> documents, string lookupFieldName, string mongoCollectionName);
+
+        #endregion
     }
 }

@@ -65,7 +65,7 @@ namespace UnitTests.TimerTests
         {
             IReminderTestGrain2 grain = GrainClient.GrainFactory.GetGrain<IReminderTestGrain2>(Guid.NewGuid());
 
-            IGrainReminder r1 = await grain.StartReminder(DR);
+            IGrainReminder r1 = await grain.StartReminder(DR, TimeSpan.FromSeconds(10));
             IGrainReminder r2 = await grain.StartReminder(DR);
             try
             {

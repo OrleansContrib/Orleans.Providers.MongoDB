@@ -88,9 +88,16 @@
     <Compile Include="Reminders\RemindersCollection.cs" />
     <Compile Include="Reminders\Repository\IMongoReminderTableRepository.cs" />
     <Compile Include="Reminders\Repository\MongoReminderTableRepository.cs" />
+    <Compile Include="Repository\ConnectionManager\ConnectionDefinitions.cs" />
     <Compile Include="Repository\DocumentRepository.cs" />
     <Compile Include="Repository\IDocumentRepository.cs" />
+    <Compile Include="Repository\ConnectionManager\MongoConnectionManager.cs" />
     <Compile Include="Statistics\MongoStatisticsPublisher.cs" />
+    <Compile Include="Statistics\OrleansClientMetricsTable.cs" />
+    <Compile Include="Statistics\OrleansStatisticsTable.cs" />
+    <Compile Include="Statistics\Repository\IMongoStatisticsPublisherRepository.cs" />
+    <Compile Include="Statistics\Repository\MongoStatisticsPublisherRepository.cs" />
+    <Compile Include="Statistics\Repository\OrleansSiloMetricsTable.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
