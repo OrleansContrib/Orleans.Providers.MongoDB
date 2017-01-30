@@ -1,5 +1,5 @@
 # Orleans.Providers.MongoDB
-> The MongoStatisticsPublisher is currently being tested and not recommended for production usage. The Membership, Gateway and Reminder providers are however ready for production usage.
+> The MongoStatisticsPublisher is currently being tested and not recommended for production usage. The Membership, Gateway and Reminder providers should be ready for production. Feedback would be appreciated.
 
 A MongoDb implementation of the Orleans Provider model. Currently the Membership(IMembershipTable & IGatewayListProvider) and Reminder(IReminderTable) and MongoStatisticsPublisher providers have been implemented.
 
@@ -22,8 +22,7 @@ Update OrleansConfiguration.xml in the Host application.
 	<StatisticsProviders>
       <Provider Type="Orleans.Providers.MongoDB.Statistics.MongoStatisticsPublisher" Name="MongoStatisticsPublisher" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" />
     </StatisticsProviders>
-
-</Globals>
+  </Globals>
   <Defaults>
     <Networking Address="" Port="11111"/>
     <ProxyingGateway Address="" Port="30000"/>
