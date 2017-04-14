@@ -2,6 +2,7 @@
 {
     using System;
 
+    using global::MongoDB.Bson;
     using global::MongoDB.Bson.Serialization.Attributes;
 
     /// <summary>
@@ -9,8 +10,11 @@
     /// </summary>
     public class OrleansStatisticsTable
     {
+        public string Identity { get; set; }
+
         public string DeploymentId { get; set; }
 
+        [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
 
         public string HostName { get; set; }
@@ -32,6 +36,7 @@
         public OrleansStatisticsTable()
         {
             this.Timestamp = DateTime.Now;
+            this.Id = ObjectId.GenerateNewId().ToString();
         }
     }
 }

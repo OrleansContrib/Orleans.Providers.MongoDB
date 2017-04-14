@@ -148,7 +148,7 @@ namespace Orleans.Providers.MongoDB.Statistics.Repository
                                             DeploymentId = statisticsTable.DeploymentId,
                                             HostName = statisticsTable.HostName,
                                             Name = statisticsTable.Name,
-                                            Id = statisticsTable.Id
+                                            Identity = statisticsTable.Id
                                         };
 
                 newStatisticTable.IsValueDelta = counter.IsValueDelta;

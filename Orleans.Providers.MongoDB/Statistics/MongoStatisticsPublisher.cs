@@ -246,6 +246,7 @@
                     statsCounters.Count,
                     siloOrClientName,
                     id);
+
             var insertTasks = new List<Task>();
             try
             {
@@ -254,11 +255,12 @@
                 //2) Performance, though using a fixed constants likely will not give the optimal performance in every situation.
                 const int maxBatchSizeInclusive = 200;
                 var counterBatches = BatchCounters(statsCounters, maxBatchSizeInclusive);
+
                 foreach (var counterBatch in counterBatches)
                 {
                     //The query template from which to retrieve the set of columns that are being inserted.
 
-                    await this.repository.InsertStatisticsCountersAsync(
+                    insertTasks.Add(this.repository.InsertStatisticsCountersAsync(
                         new OrleansStatisticsTable
                             {
                                 DeploymentId = this.deploymentId,
@@ -266,7 +268,7 @@
                                 Name = siloOrClientName,
                                 Id = id
                         }, 
-                        counterBatch);
+                        counterBatch));
                 }
 
                 await Task.WhenAll(insertTasks);
