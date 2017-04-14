@@ -1,7 +1,7 @@
 # Orleans.Providers.MongoDB
-> The MongoStatisticsPublisher is currently being tested and not recommended for production usage. The Membership, Gateway and Reminder providers should be ready for production. Feedback would be appreciated.
+> The MongoStatisticsPublisher is currently being tested and not recommended for production usage.Feedback would be appreciated.
 
-A MongoDb implementation of the Orleans Provider model. Currently the Membership(IMembershipTable & IGatewayListProvider) and Reminder(IReminderTable) and MongoStatisticsPublisher providers have been implemented.
+A MongoDb implementation of the Orleans Provider. Currently the Membership (IMembershipTable & IGatewayListProvider), Reminder (IReminderTable) and MongoStatisticsPublisher providers have been implemented.
 
 ## Usage
 ###Host Configuration
