@@ -58,14 +58,12 @@ namespace Orleans.Providers.MongoDB.Statistics.Repository
         /// </returns>
         public async Task UpsertReportClientMetricsAsync(OrleansClientMetricsTable metricsTable, IClientPerformanceMetrics clientMetrics)
         {
-            metricsTable.ClientCount = clientMetrics.ConnectedGatewayCount;
-            metricsTable.MemoryUsage = clientMetrics.AvailablePhysicalMemory;
             metricsTable.CpuUsage = clientMetrics.CpuUsage;
             metricsTable.MemoryUsage = clientMetrics.MemoryUsage;
-            metricsTable.RequestQueueLength = clientMetrics.ReceiveQueueLength;
             metricsTable.ReceivedMessages = clientMetrics.ReceivedMessages;
             metricsTable.SendQueueLength = clientMetrics.SendQueueLength;
             metricsTable.SentMessages = clientMetrics.SentMessages;
+            metricsTable.ConnectedGateWayCount = clientMetrics.ConnectedGatewayCount;
 
             var collection = this.ReturnOrCreateCollection(ClientMetricsTableName);
 

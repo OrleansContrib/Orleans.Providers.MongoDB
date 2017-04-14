@@ -15,15 +15,7 @@
 
         public string Address { get; set; }
 
-        public int Port { get; set; }
-
-        public long Generation { get; set; }
-
         public string HostName { get; set; }
-
-        public string GatewayAddress { get; set; }
-
-        public int GatewayPort { get; set; }
 
         public float CpuUsage { get; set; }
 
@@ -37,20 +29,10 @@
 
         public long ReceivedMessages { get; set; }
 
-        public int ActivationCount { get; set; }
-
-        public int RecentlyUsedActivationCount { get; set; }
-
-        public long RequestQueueLength { get; set; }
-
-        public bool IsOverloaded { get; set; }
-
-        public long ClientCount { get; set; }
+        public long ConnectedGateWayCount { get; set; }
 
         [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime DateTime { get; set; }
-
-        public long TotalMemoryUsage { get; set; }
 
         public OrleansClientMetricsTable()
         {

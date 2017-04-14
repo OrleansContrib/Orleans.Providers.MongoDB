@@ -117,7 +117,21 @@
             }
         }
 
-
+        /// <summary>
+        /// The Client init.
+        /// </summary>
+        /// <param name="config">
+        /// The config.
+        /// </param>
+        /// <param name="address">
+        /// The address.
+        /// </param>
+        /// <param name="clientId">
+        /// The client id.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
         async Task IClientMetricsDataPublisher.Init(ClientConfiguration config, IPAddress address, string clientId)
         {
             this.repository = new MongoStatisticsPublisherRepository(config.DataConnectionString, MongoUrl.Create(config.DataConnectionString).DatabaseName);
@@ -136,23 +150,13 @@
                     metricsData);
             try
             {
-                int gateWayPort = 0;
-
-                if (this.gateway != null)
-                {
-                    gateWayPort = this.gateway.Port;
-                }
-
                 await this.repository.UpsertReportClientMetricsAsync(
                         new OrleansClientMetricsTable
                             {
                                 DeploymentId = this.deploymentId,
                                 ClientId = this.clientId,
                                 Address = this.clientAddress.MapToIPv4().ToString(),
-                                HostName = this.hostName,
-                                GatewayPort = gateWayPort,
-                                //Port = this.siloAddress.,
-                                Generation = this.generation
+                                HostName = this.hostName
                         }, 
                             metricsData);
             }
@@ -206,7 +210,8 @@
                             HostName = this.hostName,
                             GatewayPort = gateWayPort,
                             Port = this.siloAddress.Endpoint.Port,
-                            Generation = this.generation
+                            Generation = this.generation,
+                            Address = this.siloAddress.Endpoint.Address.MapToIPv4().ToString()
                     }, 
                     metricsData);
             }
