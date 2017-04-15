@@ -56,10 +56,10 @@ using (var silo = new SiloHost("primary", config))
 ```
 ### Client Configuration
 
-
 ```ps
 Add reference to Orleans.Providers.MongoDB.dll
 ```
+
 ### Update ClientConfiguration.xml in the Client application.
 
 ```xml
