@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Orleans.Providers.MongoDB</id>
-    <version>0.0.5</version>
+    <version>0.0.6</version>
     <authors>Laredoza</authors>
     <owners>Laredoza</owners>
     <projectUrl>https://github.com/OrleansContrib/Orleans.Providers.MongoDB</projectUrl>
