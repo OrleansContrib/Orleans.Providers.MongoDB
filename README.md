@@ -10,7 +10,7 @@ A MongoDb implementation of the Orleans Providers. This includes the Membership 
 ```ps
 Add reference to Orleans.Providers.MongoDB.dll
 ```
-Update OrleansConfiguration.xml in the Host application.
+###Update OrleansConfiguration.xml in the Host application.
 ```xml
 <OrleansConfiguration xmlns="urn:orleans">
   <Globals>
