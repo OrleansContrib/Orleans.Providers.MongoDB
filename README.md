@@ -56,11 +56,10 @@ using (var silo = new SiloHost("primary", config))
 ```
 ### Client Configuration
 
+### Update ClientConfiguration.xml in the Client application.
 ```ps
 Add reference to Orleans.Providers.MongoDB.dll
 ```
-### Update ClientConfiguration.xml in the Client application.
-
 ```xml
 <ClientConfiguration xmlns="urn:orleans">
   <SystemStore SystemStoreType="Custom" CustomGatewayProviderAssemblyName="Orleans.Providers.MongoDB" DataConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" DeploymentId="OrleansTest" />
