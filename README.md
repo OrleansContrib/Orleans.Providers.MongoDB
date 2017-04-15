@@ -8,7 +8,7 @@ A MongoDb implementation of the Orleans Providers. This includes the Membership 
 
 
 ```ps
-Add reference to Orleans.Providers.MongoDB.dll
+install-package Orleans.Providers.MongoDB
 ```
 ### Update OrleansConfiguration.xml in the Host application.
 ```xml
@@ -57,7 +57,7 @@ using (var silo = new SiloHost("primary", config))
 ### Client Configuration
 
 ```ps
-Add reference to Orleans.Providers.MongoDB.dll
+install-package Orleans.Providers.MongoDB
 ```
 ### Update ClientConfiguration.xml in the Client application.
 ```xml
