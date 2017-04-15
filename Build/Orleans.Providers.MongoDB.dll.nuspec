@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Orleans.Providers.MongoDB</id>
+    <version>0.0.1</version>
+    <authors>Laredo Tirnanic</authors>
+    <owners>OrleansContrib</owners>
+    <projectUrl>https://github.com/OrleansContrib/Orleans.Providers.MongoDB</projectUrl>
+	<licenseUrl>https://github.com/dotnet/Orleans#license</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A MongoDb implementation of the Orleans Providers. This includes the Membership (IMembershipTable and IGatewayListProvider), Reminder (IReminderTable) and MongoStatisticsPublisher providers.</description>
+    <releaseNotes>Initial release.</releaseNotes>
+    <copyright>Copyright 2017</copyright>
+    <tags>Orleans Mongo Providers</tags>
+    <dependencies>
+      <dependency id="MongoDB.Driver" version="2.3.0" />
+	  <dependency id="Microsoft.Orleans.OrleansRuntime" version="1.3.0" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\Orleans.Providers.MongoDB\bin\Release\Orleans.Providers.MongoDB.dll" target="lib\net452"/>
+	<file src="..\README.md" target="" />
+  </files>
+</package>

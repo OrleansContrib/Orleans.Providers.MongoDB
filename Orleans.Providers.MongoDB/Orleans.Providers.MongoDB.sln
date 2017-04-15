@@ -22,6 +22,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orleans.Providers.MongoDB.UnitTest", "..\UnitTest\Orleans.Providers.MongoDB.UnitTest.csproj", "{BFDB3AA7-0778-4D84-BF58-537460AD9869}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{F78B46D7-E647-42FB-BE00-DCF5AA6402E9}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{A29BB09A-B983-4BEC-80F0-FE28DE6B6CE9}"
+	ProjectSection(SolutionItems) = preProject
+		..\Build\Build.bat = ..\Build\Build.bat
+		..\Build\Orleans.Providers.MongoDB.dll.nuspec = ..\Build\Orleans.Providers.MongoDB.dll.nuspec
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
