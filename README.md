@@ -1,16 +1,16 @@
 # Orleans.Providers.MongoDB
-> The MongoStatisticsPublisher is currently being tested and not recommended for production usage. The Membership, Gateway and Reminder providers should be ready for production. Feedback would be appreciated.
+> The MongoStatisticsPublisher is currently being tested and not recommended for production usage.Feedback would be appreciated.
 
-A MongoDb implementation of the Orleans Provider model. Currently the Membership(IMembershipTable & IGatewayListProvider) and Reminder(IReminderTable) and MongoStatisticsPublisher providers have been implemented.
+A MongoDb implementation of the Orleans Providers. This includes the Membership (IMembershipTable & IGatewayListProvider), Reminder (IReminderTable) and MongoStatisticsPublisher providers.
 
 ## Usage
-###Host Configuration
+### Host Configuration
 
 
 ```ps
 Add reference to Orleans.Providers.MongoDB.dll
 ```
-Update OrleansConfiguration.xml in the Host application.
+### Update OrleansConfiguration.xml in the Host application.
 ```xml
 <OrleansConfiguration xmlns="urn:orleans">
   <Globals>
@@ -31,7 +31,7 @@ Update OrleansConfiguration.xml in the Host application.
   </Defaults>
 </OrleansConfiguration>
 ```
-Add the following to the Host startup
+### Add the following to the Host startup
 
 ```cs
 var config = ClusterConfiguration.LocalhostPrimarySilo();
@@ -54,13 +54,12 @@ using (var silo = new SiloHost("primary", config))
     var result = silo.StartOrleansSilo();
 }
 ```
-###Client Configuration
-
+### Client Configuration
 
 ```ps
 Add reference to Orleans.Providers.MongoDB.dll
 ```
-Update ClientConfiguration.xml in the Client application.
+### Update ClientConfiguration.xml in the Client application.
 ```xml
 <ClientConfiguration xmlns="urn:orleans">
   <SystemStore SystemStoreType="Custom" CustomGatewayProviderAssemblyName="Orleans.Providers.MongoDB" DataConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" DeploymentId="OrleansTest" />
@@ -69,7 +68,7 @@ Update ClientConfiguration.xml in the Client application.
   </StatisticsProviders>
 </ClientConfiguration>
 ```
-Add the following to the Client startup
+### Add the following to the Client startup
 
 ```cs
 GrainClient.Initialize(ClientConfiguration.LoadFromFile(@".\ClientConfiguration.xml"));
