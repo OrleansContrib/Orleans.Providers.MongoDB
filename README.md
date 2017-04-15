@@ -31,6 +31,8 @@ Update OrleansConfiguration.xml in the Host application.
   </Defaults>
 </OrleansConfiguration>
 ```
+###
+
 Add the following to the Host startup
 
 ```cs
@@ -54,7 +56,9 @@ using (var silo = new SiloHost("primary", config))
     var result = silo.StartOrleansSilo();
 }
 ```
-###Client Configuration
+###
+
+Client Configuration
 
 
 ```ps
