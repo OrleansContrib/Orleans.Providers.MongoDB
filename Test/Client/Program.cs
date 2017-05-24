@@ -39,8 +39,8 @@ internal class Program
 
         // Test State
 
-        var employee = GrainClient.GrainFactory.GetGrain<IEmployeeGrain>(1);
-        employee.SetLevel(100);
+        //var employee = GrainClient.GrainFactory.GetGrain<IEmployeeGrain>(1);
+        //employee.SetLevel(100);
 
         Console.WriteLine(response);
         Console.ReadKey();
