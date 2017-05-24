@@ -50,24 +50,24 @@
       <HintPath>..\..\Orleans.Providers.MongoDB\packages\EnterpriseLibrary.TransientFaultHandling.6.0.1304.0\lib\portable-net45+win+wp8\Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\Orleans.Providers.MongoDB\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\Orleans.Providers.MongoDB\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Orleans, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.Core.1.3.0\lib\net451\Orleans.dll</HintPath>
+    <Reference Include="Orleans, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.Core.1.4.1\lib\net451\Orleans.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="OrleansCodeGenerator, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.OrleansCodeGenerator.1.3.0\lib\net451\OrleansCodeGenerator.dll</HintPath>
+    <Reference Include="OrleansCodeGenerator, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.OrleansCodeGenerator.1.4.1\lib\net451\OrleansCodeGenerator.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="OrleansProviders, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.OrleansProviders.1.3.0\lib\net451\OrleansProviders.dll</HintPath>
+    <Reference Include="OrleansProviders, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.OrleansProviders.1.4.1\lib\net451\OrleansProviders.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="OrleansSQLUtils, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.OrleansSqlUtils.1.3.0\lib\net451\OrleansSQLUtils.dll</HintPath>
+    <Reference Include="OrleansSQLUtils, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Orleans.Providers.MongoDB\packages\Microsoft.Orleans.OrleansSqlUtils.1.4.1\lib\net451\OrleansSQLUtils.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

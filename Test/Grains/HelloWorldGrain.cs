@@ -4,6 +4,7 @@
 
     using Orleans.Providers.MongoDB.Test.GrainInterfaces;
 
+    [StorageProvider(ProviderName = "MongoDBStore")]
     public class HelloWorldGrain : Grain, IHelloWorldGrain
     {
         public Task<string> SayHello(string name)
