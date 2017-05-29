@@ -112,6 +112,10 @@
             existing.Remove("_id");
             existing.Remove("key");
 
+            // NewtonSoft generates a $type & $id which is incompatible with Mongo. Replacing $ with __
+            this.SwapValues(existing, "__type", "$type");
+            this.SwapValues(existing, "__id", "$id");
+
             var strwrtr = new System.IO.StringWriter();
             var writer = new global::MongoDB.Bson.IO.JsonWriter(strwrtr, new global::MongoDB.Bson.IO.JsonWriterSettings());
             global::MongoDB.Bson.Serialization.BsonSerializer.Serialize(writer, existing);
@@ -135,6 +139,11 @@
             var existing = await collection.Find(builder).FirstOrDefaultAsync();
 
             var doc = global::MongoDB.Bson.Serialization.BsonSerializer.Deserialize<BsonDocument>(entityData);
+
+            // NewtonSoft generates a $type & $id which is incompatible with Mongo. Replacing $ with __
+            this.SwapValues(doc, "$type", "__type");
+            this.SwapValues(doc, "$id", "__id");
+
             doc["key"] = key;
 
             if (existing == null)
@@ -145,6 +154,15 @@
             {
                 doc["_id"] = existing["_id"];
                 await collection.ReplaceOneAsync(builder, doc);
+            }
+        }
+
+        private void SwapValues(BsonDocument doc, string oldFieldName, string newFieldName)
+        {
+            if (doc.Contains(oldFieldName))
+            {
+                doc[newFieldName] = doc[oldFieldName];
+                doc.Remove(oldFieldName);
             }
         }
 

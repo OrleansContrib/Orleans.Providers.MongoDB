@@ -19,6 +19,12 @@ namespace Orleans.Providers.MongoDB.Test.Grains
             return base.WriteStateAsync();
         }
 
+        public async Task<int> ReturnLevel()
+        {
+            await base.ReadStateAsync();
+            return this.State.Level;
+        }
+
         #endregion
 
         #region Overrides of Grain

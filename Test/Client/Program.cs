@@ -37,10 +37,13 @@ internal class Program
         var a = reminderGrain.StartReminder("TestReminder", TimeSpan.FromMinutes(10)).Result;
         var b = reminderGrain.RemoveReminder("TestReminder");
 
-        // Test State
+        // Test State 
 
-        //var employee = GrainClient.GrainFactory.GetGrain<IEmployeeGrain>(1);
-        //employee.SetLevel(100);
+        var employee = GrainClient.GrainFactory.GetGrain<IEmployeeGrain>(1);
+        int employeeId = employee.ReturnLevel().Result;
+        employee.SetLevel(100);
+
+        //employee = GrainClient.GrainFactory.GetGrain<IEmployeeGrain>(1);
 
         Console.WriteLine(response);
         Console.ReadKey();
