@@ -49,6 +49,10 @@
             {
                 this.Database = MongoUrl.Create(this.ConnectionString).DatabaseName;
             }
+            else
+            {
+                this.Database = config.Properties["Database"];
+            }
 
             if (string.IsNullOrWhiteSpace(this.ConnectionString)) throw new ArgumentException("ConnectionString property not set");
             if (string.IsNullOrWhiteSpace(this.Database)) throw new ArgumentException("Database property not set");
