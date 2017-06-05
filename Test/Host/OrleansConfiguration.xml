@@ -30,6 +30,6 @@
     <ProxyingGateway Address="" Port="30000"/>
     <!--SqlServer Providers-->
     <!--<Statistics ProviderType="MySQLStatsProvider" WriteLogStatisticsToTable="true"/>-->
-    <Statistics ProviderType="MongoStatisticsPublisher" WriteLogStatisticsToTable="true"/>
+    <Statistics ProviderType="MongoStatisticsPublisher" WriteLogStatisticsToTable="false"/>
   </Defaults>
 </OrleansConfiguration>
