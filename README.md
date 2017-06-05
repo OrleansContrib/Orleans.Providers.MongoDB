@@ -1,7 +1,7 @@
 # Orleans.Providers.MongoDB
-> The MongoStatisticsPublisher is currently being tested and not recommended for production usage.Feedback would be appreciated.
+> The MongoStatisticsPublisher and MongoDBStorage providers are currently being tested and not recommended for production usage. Feedback would be appreciated.
 
-A MongoDb implementation of the Orleans Providers. This includes the Membership (IMembershipTable & IGatewayListProvider), Reminder (IReminderTable) and MongoStatisticsPublisher providers.
+A MongoDb implementation of the Orleans Providers. This includes the Membership (IMembershipTable & IGatewayListProvider), Reminder (IReminderTable), MongoStatisticsPublisher and IStorageProvider providers
 
 ## Usage
 ### Host Configuration
@@ -18,6 +18,11 @@ install-package Orleans.Providers.MongoDB
     There is currently a known issue with the "Custom" membership provider OrleansConfiguration.xml configuration file that will fail to parse correctly. For this reason you have to provide a placeholder SystemStore in the xml and then configure the provider in code before starting the Silo.
     -->
     <SystemStore SystemStoreType="None" DataConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" DeploymentId="OrleansTest" />
+    
+    <StorageProviders>
+        <Provider Type="Orleans.Providers.MongoDB.StorageProviders.MongoDBStorage" Name="MongoDBStore" Database="" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" />
+    </StorageProviders>
+    
 	<StatisticsProviders>
       <Provider Type="Orleans.Providers.MongoDB.Statistics.MongoStatisticsPublisher" Name="MongoStatisticsPublisher" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" />
     </StatisticsProviders>
@@ -77,3 +82,5 @@ initialized = GrainClient.IsInitialized;
 ## Todo
 
 - Test MongoStatisticsPublisher
+- Test MongoDBStorage
+- Add indexes for MongoDBStorage generated collections 
