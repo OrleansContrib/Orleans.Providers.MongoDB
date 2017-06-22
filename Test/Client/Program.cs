@@ -41,7 +41,17 @@ internal class Program
 
         var employee = GrainClient.GrainFactory.GetGrain<IEmployeeGrain>(1);
         int employeeId = employee.ReturnLevel().Result;
-        employee.SetLevel(100);
+
+        if (employeeId == 100)
+        {
+            employee.SetLevel(50);
+        }
+        else
+        {
+            employee.SetLevel(100);
+        }
+
+        employeeId = employee.ReturnLevel().Result;
 
         //employee = GrainClient.GrainFactory.GetGrain<IEmployeeGrain>(1);
 

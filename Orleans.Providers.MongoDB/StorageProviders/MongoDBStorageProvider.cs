@@ -5,6 +5,10 @@
 
     using global::MongoDB.Bson;
     using global::MongoDB.Driver;
+    using Newtonsoft.Json;
+    using System.IO;
+    using System.Text;
+    using Orleans.Providers.MongoDB.StorageProviders.Serializing;
 
     /// <summary>
     /// A MongoDB storage provider.
@@ -116,15 +120,12 @@
             existing.Remove("_id");
             existing.Remove("key");
 
-            // NewtonSoft generates a $type & $id which is incompatible with Mongo. Replacing $ with __
-            this.SwapValues(existing, "__type", "$type");
-            this.SwapValues(existing, "__id", "$id");
-
             var strwrtr = new System.IO.StringWriter();
             var writer = new global::MongoDB.Bson.IO.JsonWriter(strwrtr, new global::MongoDB.Bson.IO.JsonWriterSettings());
             global::MongoDB.Bson.Serialization.BsonSerializer.Serialize(writer, existing);
 
-            return strwrtr.ToString();
+            // NewtonSoft generates a $type & $id which is incompatible with Mongo. Replacing $ with __
+            return this.ReverseInvalidValues(strwrtr.ToString());
         }
 
         /// <summary>
@@ -142,11 +143,9 @@
 
             var existing = await collection.Find(builder).FirstOrDefaultAsync();
 
+            // NewtonSoft generates a $type & $id which is incompatible with Mongo. Replacing __ with $
+            entityData = this.ReverseInvalidValues(entityData);
             var doc = global::MongoDB.Bson.Serialization.BsonSerializer.Deserialize<BsonDocument>(entityData);
-
-            // NewtonSoft generates a $type & $id which is incompatible with Mongo. Replacing $ with __
-            this.SwapValues(doc, "$type", "__type");
-            this.SwapValues(doc, "$id", "__id");
 
             doc["key"] = key;
 
@@ -161,13 +160,133 @@
             }
         }
 
-        private void SwapValues(BsonDocument doc, string oldFieldName, string newFieldName)
+        /// <summary>
+        /// NewtonSoft generates a $type & $id which is incompatible with Mongo. Replacing $ with __
+        /// </summary>
+        /// <param name="entityData"></param>
+        /// <returns></returns>
+        private string ReverseInvalidValues(string entityData)
         {
-            if (doc.Contains(oldFieldName))
+            StringBuilder sb = new StringBuilder();
+            CustomJsonWriter writer = new CustomJsonWriter(new StringWriter(sb));
+            JsonTextReader reader = new JsonTextReader(new StringReader(entityData));
+
+            int n = 0;
+
+            while (reader.Read())
             {
-                doc[newFieldName] = doc[oldFieldName];
-                doc.Remove(oldFieldName);
+                if (reader.Value != null)
+                {
+                    Console.WriteLine("Token: {0}, Value: {1}", reader.TokenType, reader.Value);
+
+                    switch (reader.TokenType)
+                    {
+                        case JsonToken.PropertyName:
+
+                            if (reader.Value.ToString() == "$type")
+                            {
+                                writer.WritePropertyName("__type");
+                            }
+                            else if (reader.Value.ToString() == "__type")
+                            {
+                                writer.WritePropertyName("$type");
+                            }
+                            else if (reader.Value.ToString() == "$id")
+                            {
+                                writer.WritePropertyName("__id");
+                            }
+                            else if (reader.Value.ToString() == "__id")
+                            {
+                                writer.WritePropertyName("$id");
+                            }
+                            else if (reader.Value.ToString() == "$type")
+                            {
+                                writer.WritePropertyName("__type");
+                            }
+                            else if (reader.Value.ToString() == "__type")
+                            {
+                                writer.WritePropertyName("$type");
+                            }
+                            else if (reader.Value.ToString() == "$values")
+                            {
+                                writer.WritePropertyName("__values");
+                            }
+                            else if (reader.Value.ToString() == "__values")
+                            {
+                                writer.WritePropertyName("$values");
+                            }
+                            else
+                            {
+                                writer.WritePropertyName(reader.Value.ToString());
+                            }
+
+                            break;
+                        case JsonToken.None:
+                            break;
+                        case JsonToken.StartConstructor:
+                            writer.WriteStartConstructor(reader.Value.ToString());
+                            break;
+                        case JsonToken.Comment:
+                            writer.WriteComment(reader.Value.ToString());
+                            break;
+                        case JsonToken.Raw:
+                            writer.WriteRaw(reader.Value.ToString());
+                            break;
+                        case JsonToken.Integer:
+                        case JsonToken.Float:
+                        case JsonToken.String:
+                        case JsonToken.Boolean:
+                        case JsonToken.Date:
+                        case JsonToken.Bytes:
+                            writer.WriteValue(reader.Value);
+                            break;
+                        case JsonToken.Null:
+                            writer.WriteNull();
+                            break;
+                        case JsonToken.Undefined:
+                            writer.WriteUndefined();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Token: {0}", reader.TokenType);
+
+                    switch (reader.TokenType)
+                    {
+                        case JsonToken.None:
+                            break;
+                        case JsonToken.StartObject:
+                            writer.WriteStartObject();
+                            break;
+                        case JsonToken.StartArray:
+                            writer.WriteStartArray();
+                            break;
+                        case JsonToken.Null:
+                            writer.WriteNull();
+                            break;
+                        case JsonToken.Undefined:
+                            writer.WriteUndefined();
+                            break;
+                        case JsonToken.EndObject:
+                            writer.WriteEndObject();
+                            break;
+                        case JsonToken.EndArray:
+                            writer.WriteEndArray();
+                            break;
+                        case JsonToken.EndConstructor:
+                            writer.WriteEndConstructor();
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
             }
+
+            return sb.ToString();
         }
 
         /// <summary>
