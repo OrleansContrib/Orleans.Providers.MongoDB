@@ -16,7 +16,7 @@ namespace Orleans.Providers.MongoDB.Test.Grains
 
         public EmployeeState()
         {
-            //this.Address = new EmployeeAddress();
+            this.Address = new EmployeeAddress();
             this.FavouriteColours = new string[] { "Red", "Blue", "Green" };
         }
     }
