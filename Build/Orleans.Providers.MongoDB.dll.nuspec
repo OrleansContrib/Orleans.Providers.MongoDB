@@ -2,14 +2,14 @@
 <package >
   <metadata>
     <id>Orleans.Providers.MongoDB</id>
-    <version>0.0.7</version>
+    <version>0.0.8</version>
     <authors>laredoza</authors>
     <owners>laredoza</owners>
     <projectUrl>https://github.com/OrleansContrib/Orleans.Providers.MongoDB</projectUrl>
 	<licenseUrl>https://github.com/dotnet/Orleans#license</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A MongoDb implementation of the Orleans Providers. This includes the Membership (IMembershipTable and IGatewayListProvider), Reminder (IReminderTable), MongoStatisticsPublisher and IStorageProvider providers.</description>
-    <releaseNotes>Added MongoDBStorage so that it can be tested. It is not recommended for production usage. Feedback would be appreciated. </releaseNotes>
+    <releaseNotes>MongoDBStorage now saves more complex data types. It is not recommended for production usage. Feedback would be appreciated. </releaseNotes>
     <copyright>Copyright 2017</copyright>
     <tags>Orleans OrleansProviders MongoDB</tags>
     <dependencies>
