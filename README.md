@@ -70,6 +70,8 @@ install-package Orleans.Providers.MongoDB
   <StatisticsProviders>
     <Provider Type="Orleans.Providers.MongoDB.Statistics.MongoStatisticsPublisher" Name="MongoStatisticsPublisher" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" />
   </StatisticsProviders>
+  
+   <Statistics ProviderType="MongoStatisticsPublisher" WriteLogStatisticsToTable="false"/>
 </ClientConfiguration>
 ```
 ### Add the following to the Client startup
@@ -83,4 +85,4 @@ initialized = GrainClient.IsInitialized;
 
 - Test MongoStatisticsPublisher
 - Test MongoDBStorage
-- Add indexes for MongoDBStorage generated collections 
+- Add indexes for MongoDBStorage generated collections
