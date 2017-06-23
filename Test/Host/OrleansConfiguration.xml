@@ -29,7 +29,6 @@
     <Networking Address="" Port="11111"/>
     <ProxyingGateway Address="" Port="30000"/>
     <!--SqlServer Providers-->
-    <!--<Statistics ProviderType="MySQLStatsProvider" WriteLogStatisticsToTable="true"/>-->
-    <Statistics ProviderType="MongoStatisticsPublisher" WriteLogStatisticsToTable="false"/>
+    <Statistics ProviderType="MongoStatisticsPublisher" MetricsTableWriteInterval="10s" PerfCounterWriteInterval="5s" LogWriteInterval="5s" WriteLogStatisticsToTable="true" />
   </Defaults>
 </OrleansConfiguration>

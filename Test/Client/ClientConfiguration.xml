@@ -1,4 +1,5 @@
 ﻿<ClientConfiguration xmlns="urn:orleans">
+
   <!-- SqlServer 
   <SystemStore SystemStoreType ="SqlServer"
              DeploymentId="OrleansTest"
@@ -13,11 +14,12 @@
              -->
 
   <SystemStore SystemStoreType="Custom" CustomGatewayProviderAssemblyName="Orleans.Providers.MongoDB" DataConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" DeploymentId="OrleansTest" DataConnectionStringName="Test" />
-  
+
   <StatisticsProviders>
     <!--<Provider Type="Orleans.Providers.SqlServer.SqlStatisticsPublisher" Name="MySQLStatsProvider" ConnectionString="Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Orleans;Integrated Security=True;Pooling=False;Max Pool Size=200;Asynchronous Processing=True;MultipleActiveResultSets=True" />-->
     <Provider Type="Orleans.Providers.MongoDB.Statistics.MongoStatisticsPublisher" Name="MongoStatisticsPublisher" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" />
   </StatisticsProviders>
   <!--<GatewayProvider ProviderType="Custom"/>-->
 
+  <Statistics ProviderType="MongoStatisticsPublisher" MetricsTableWriteInterval="10s" PerfCounterWriteInterval="5s" LogWriteInterval="5s" WriteLogStatisticsToTable="false" />
 </ClientConfiguration>
