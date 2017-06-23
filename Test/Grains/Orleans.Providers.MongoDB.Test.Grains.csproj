@@ -73,7 +73,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EmployeeAddress.cs" />
+    <Compile Include="EmployeeAddressSecret.cs" />
     <Compile Include="EmployeeState.cs" />
+    <Compile Include="EmployeeStatus.cs" />
     <Compile Include="HelloWorldGrain.cs" />
     <Compile Include="EmployeeGrain.cs" />
     <Compile Include="NewsReminderGrain.cs" />
