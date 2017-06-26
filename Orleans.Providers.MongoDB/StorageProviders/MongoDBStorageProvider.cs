@@ -137,7 +137,7 @@
         /// <returns>Completion promise for this operation.</returns>
         public async Task Write(string collectionName, string key, string entityData)
         {
-            var collection = this.GetOrCreateCollection(collectionName);
+            var collection = await this.GetOrCreateCollection(collectionName);
 
             var builder = Builders<BsonDocument>.Filter.Eq("key", key);
 
@@ -305,14 +305,30 @@
         /// </summary>
         /// <param name="name">The name of the collection.</param>
         /// <returns></returns>
-        private IMongoCollection<BsonDocument> GetOrCreateCollection(string name)
+        private async Task<IMongoCollection<BsonDocument>> GetOrCreateCollection(string name)
         {
+            bool exists = await this.CollectionExistsAsync(name);
             var collection = this._database.GetCollection<BsonDocument>(name);
-            if (collection != null)
+
+            if (exists)
+            {
                 return collection;
-            this._database.CreateCollection(name);
-            collection = this._database.GetCollection<BsonDocument>(name);
+            }
+            else
+            {
+                await collection.Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending("key"), new CreateIndexOptions());
+            }
+
             return collection;
+        }
+
+        public async Task<bool> CollectionExistsAsync(string collectionName)
+        {
+            var filter = new BsonDocument("name", collectionName);
+            //filter by collection name
+            var collections = await this._database.ListCollectionsAsync(new ListCollectionsOptions { Filter = filter });
+            //check for existence
+            return await collections.AnyAsync();
         }
 
         /// <summary>
