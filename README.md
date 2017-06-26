@@ -85,4 +85,3 @@ initialized = GrainClient.IsInitialized;
 
 - Test MongoStatisticsPublisher
 - Test MongoDBStorage
-- Add indexes for MongoDBStorage generated collections
