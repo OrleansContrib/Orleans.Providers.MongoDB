@@ -1,5 +1,5 @@
 # Orleans.Providers.MongoDB
-> The MongoStatisticsPublisher and MongoDBStorage providers are currently being tested and not recommended for production usage. Feedback would be appreciated.
+> Feedback would be appreciated.
 
 A MongoDb implementation of the Orleans Providers. This includes the Membership (IMembershipTable & IGatewayListProvider), Reminder (IReminderTable), MongoStatisticsPublisher and IStorageProvider providers
 
@@ -83,5 +83,4 @@ initialized = GrainClient.IsInitialized;
 
 ## Todo
 
-- Test MongoStatisticsPublisher
-- Test MongoDBStorage
+- .Net Core compatibility 
