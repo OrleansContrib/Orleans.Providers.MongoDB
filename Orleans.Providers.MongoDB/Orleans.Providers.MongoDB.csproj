@@ -120,6 +120,7 @@
     <Compile Include="Statistics\OrleansSiloMetricsTable.cs" />
     <Compile Include="StorageProviders\BaseJSONStorageProvider.cs" />
     <Compile Include="StorageProviders\FileStorageProvider.cs" />
+    <Compile Include="StorageProviders\GrainStateMongoDataManager.cs" />
     <Compile Include="StorageProviders\IJSONStateDataManager.cs" />
     <Compile Include="StorageProviders\MongoDBStorageProvider.cs" />
     <Compile Include="StorageProviders\MSJsonReader.cs" />

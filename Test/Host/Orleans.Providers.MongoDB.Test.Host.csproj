@@ -131,6 +131,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomStorageProvider\MongoDBStorageWithOrleansPrefixProvider.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="OrleansHostWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

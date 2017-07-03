@@ -6,10 +6,12 @@
     <SystemStore SystemStoreType="None" DataConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" DeploymentId="OrleansTest" DataConnectionStringName="Test" />
     
     <StorageProviders>
-        <Provider Type="Orleans.Providers.MongoDB.StorageProviders.MongoDBStorage" Name="MongoDBStore" Database="" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" />
+      <!--Standard MongoProvider-->
+      <Provider Type="Orleans.Providers.MongoDB.StorageProviders.MongoDBStorage" Name="MongoDBStore" Database="" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" />
+      <!--Custom StorageProvider that adds OrleansStorage Prefix to each collection-->
+      <!--<Provider Type="Orleans.Providers.MongoDB.Test.Host.CustomStorageProvider.MongoDBStorageWithOrleansPrefix" Name="MongoDBStore" Database="" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" />-->
     </StorageProviders>
     
-    <Provider Type="Orleans.Providers.MongoDB.StorageProviders.MongoDBStorage" Name="MongoDBStore" Database="" ConnectionString="mongodb://YOURHOSTNAME:27017/db-name" />
     <!-- SqlServer Providers
     
     <SystemStore SystemStoreType ="SqlServer"
