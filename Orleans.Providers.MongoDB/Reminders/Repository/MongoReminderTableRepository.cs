@@ -11,6 +11,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
 
     using Orleans.Providers.MongoDB.Repository;
     using Orleans.Runtime;
+    using System.Reflection;
 
     public class MongoReminderTableRepository : DocumentRepository, IMongoReminderTableRepository
     {
@@ -18,11 +19,12 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
         private const string ServiceId = "ServiceId";
         private const string GrainId = "GrainId";
         private const string ReminderName = "ReminderName";
-        
-        public MongoReminderTableRepository(string connectionsString, string databaseName)
+        private IGrainReferenceConverter grainReferenceConverter;
+
+        public MongoReminderTableRepository(string connectionsString, string databaseName, IGrainReferenceConverter grainReferenceConverter)
             : base(connectionsString, databaseName)
         {
-
+            this.grainReferenceConverter = grainReferenceConverter;
         }
 
         public Task<ReminderTableData> ReadRangeRowsKey1Async(string serviceId, uint beginHash, uint endHash)
@@ -60,7 +62,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
                     .Where(
                         r =>
                         r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString()).ToList();
-            
+
             return await this.ProcessRemindersList(reminders);
         }
 
@@ -96,13 +98,13 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
                 if (!string.IsNullOrEmpty(grainId))
                 {
                     return new ReminderEntry
-                               {
-                                   GrainRef = GrainReference.FromKeyString(grainId),
-                                   ReminderName = reminder.ReminderName,
-                                   StartAt = reminder.StartTime,
-                                   Period = TimeSpan.FromMilliseconds(reminder.Period),
-                                   ETag = reminder.Version.ToString()
-                               };
+                    {
+                        GrainRef = this.grainReferenceConverter.GetGrainFromKeyString(grainId),
+                        ReminderName = reminder.ReminderName,
+                        StartAt = reminder.StartTime,
+                        Period = TimeSpan.FromMilliseconds(reminder.Period),
+                        ETag = reminder.Version.ToString()
+                    };
                 }
             }
 
@@ -189,15 +191,15 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
                 await
                     collection.InsertOneAsync(
                         new RemindersCollection
-                            {
-                                ServiceId = serviceId,
-                                GrainId = grainRef.ToKeyString(),
-                                ReminderName = reminderName,
-                                StartTime = startTime,
-                                Period = period.TotalMilliseconds,
-                                GrainHash = grainRef.GetUniformHashCode(),
-                                Version = 0
-                            });
+                        {
+                            ServiceId = serviceId,
+                            GrainId = grainRef.ToKeyString(),
+                            ReminderName = reminderName,
+                            StartTime = startTime,
+                            Period = period.TotalMilliseconds,
+                            GrainHash = grainRef.GetUniformHashCode(),
+                            Version = 0
+                        });
 
                 return "0";
             }

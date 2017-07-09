@@ -11,6 +11,12 @@
 
     public class MongoReminderTable : IReminderTable
     {
+        private IGrainReferenceConverter grainReferenceConverter;
+
+        public MongoReminderTable(IGrainReferenceConverter grainReferenceConverter)
+        {
+            this.grainReferenceConverter = grainReferenceConverter;
+        }
 
         private IMongoReminderTableRepository repository;
         private string serviceId;
@@ -29,7 +35,7 @@
                 connectionString = config.DataConnectionString;
             }
 
-            this.repository = new MongoReminderTableRepository(connectionString, MongoUrl.Create(config.DataConnectionString).DatabaseName);
+            this.repository = new MongoReminderTableRepository(connectionString, MongoUrl.Create(config.DataConnectionString).DatabaseName, this.grainReferenceConverter);
             await this.repository.InitTables();
         }
 

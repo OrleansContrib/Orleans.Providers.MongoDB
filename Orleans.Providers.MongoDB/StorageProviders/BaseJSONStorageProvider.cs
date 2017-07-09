@@ -4,14 +4,14 @@ namespace Orleans.Providers.MongoDB.StorageProviders
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-
     using Newtonsoft.Json;
-
     using Orleans;
     using Orleans.Providers;
     using Orleans.Runtime;
     using Orleans.Serialization;
     using Orleans.Storage;
+    using Microsoft.Extensions.DependencyInjection;
+
 
     /// <summary>
     /// Base class for JSON-based grain storage providers.
@@ -56,7 +56,9 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         public virtual Task Init(string name, IProviderRuntime providerRuntime, IProviderConfiguration config)
         {
             this.Log = providerRuntime.GetLogger(this.GetType().FullName);
-            this.serializerSettings = OrleansJsonSerializer.GetDefaultSerializerSettings();
+
+            var serializationManager = providerRuntime.ServiceProvider.GetRequiredService<SerializationManager>();
+            this.serializerSettings = OrleansJsonSerializer.UpdateSerializerSettings(OrleansJsonSerializer.GetDefaultSerializerSettings(serializationManager, providerRuntime.GrainFactory), config);
             return TaskDone.Done;
         }
 

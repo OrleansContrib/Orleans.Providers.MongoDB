@@ -209,7 +209,7 @@ namespace UnitTests.Grains
 
         public async Task EraseReminderTable(string connectionString)
         {
-            IMongoReminderTableRepository repository = new MongoReminderTableRepository(connectionString, MongoUrl.Create(connectionString).DatabaseName);
+            IMongoReminderTableRepository repository = new MongoReminderTableRepository(connectionString, MongoUrl.Create(connectionString).DatabaseName, null);
 
             ClusterConfiguration config = new ClusterConfiguration();
             config.LoadFromFile("ClientConfiguration.xml");
