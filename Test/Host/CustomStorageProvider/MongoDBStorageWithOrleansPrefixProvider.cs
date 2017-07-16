@@ -9,9 +9,9 @@ namespace Orleans.Providers.MongoDB.Test.Host.CustomStorageProvider
 {
     public class MongoDBStorageWithOrleansPrefix : MongoDBStorage
     {
-        public override string ReturnGrainName(string grainType)
+        public override string ReturnGrainName(string grainType, IGrainState grainState)
         {
-            return string.Concat("OrleansStorage", base.ReturnGrainName(grainType));
+            return string.Concat("OrleansStorage", base.ReturnGrainName(grainType, grainState));
         }
     }
 }
