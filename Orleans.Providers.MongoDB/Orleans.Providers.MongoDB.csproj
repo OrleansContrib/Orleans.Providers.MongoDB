@@ -180,6 +180,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Membership\MembershipHelper.cs" />
     <Compile Include="Membership\Repository\GatewayProviderRepository.cs" />
     <Compile Include="Membership\Repository\IGatewayProviderRepository.cs" />
     <Compile Include="Membership\Repository\IMongoMembershipRepository.cs" />

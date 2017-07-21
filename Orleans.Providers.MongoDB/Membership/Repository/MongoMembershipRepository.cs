@@ -1,18 +1,15 @@
-﻿namespace Orleans.Providers.MongoDB.Membership.Repository
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using Orleans.Providers.MongoDB.Repository;
+using Orleans.Runtime;
+
+namespace Orleans.Providers.MongoDB.Membership.Repository
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
-    using System.Net;
-    using System.Threading.Tasks;
-
-    using global::MongoDB.Bson;
-    using global::MongoDB.Driver;
-
-    using Orleans.Providers.MongoDB.Repository;
-    using Orleans.Runtime;
-
     /// <summary>
     /// The mongo membership provider repository.
     /// </summary>
@@ -21,24 +18,19 @@
         /// <summary>
         /// Gets the membership collection name.
         /// </summary>
-        public static string MembershipCollectionName
-        {
-            get
-            {
-                return "OrleansMembership";
-            }
-        }
+        public static string MembershipCollectionName => "OrleansMembership";
 
         /// <summary>
         /// The membership version collection name.
         /// </summary>
-        private static readonly string MembershipVersionCollectionName = "OrleansMembershipVersion";
+        private const string MembershipVersionCollectionName = "OrleansMembershipVersion";
 
         /// <summary>
         /// The membership version key name.
         /// </summary>
-        private static readonly string MembershipVersionKeyName = "DeploymentId";
-        private static readonly string MembershipKeyName = "DeploymentId";
+        private const string MembershipVersionKeyName = "DeploymentId";
+
+        private const string MembershipKeyName = "DeploymentId";
 
         public MongoMembershipRepository(string connectionsString, string databaseName)
             : base(connectionsString, databaseName)
@@ -56,25 +48,25 @@
         /// </returns>
         public async Task InitMembershipVersionCollectionAsync(string deploymentId)
         {
-            if (!await base.CollectionExistsAsync(MembershipCollectionName))
+            if (!await CollectionExistsAsync(MembershipCollectionName))
             {
-                await base.ReturnOrCreateCollection(MembershipVersionCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(m => m[MembershipVersionKeyName]));
-                await base.ReturnOrCreateCollection(MembershipCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(m => m[MembershipKeyName]));
+                await ReturnOrCreateCollection(MembershipVersionCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(m => m[MembershipVersionKeyName]));
+                await ReturnOrCreateCollection(MembershipCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(m => m[MembershipKeyName]));
             }
 
             BsonDocument membershipVersionDocument =
-                await this.FindDocumentAsync(MembershipVersionCollectionName, MembershipVersionKeyName, deploymentId);
+                await FindDocumentAsync(MembershipVersionCollectionName, MembershipVersionKeyName, deploymentId);
             if (membershipVersionDocument == null)
             {
                 membershipVersionDocument = new BsonDocument
-                                                {
-                                                    ["DeploymentId"] = deploymentId,
-                                                    ["Timestamp"] = DateTime.UtcNow,
-                                                    ["Version"] = 0
-                                                };
+                {
+                    ["DeploymentId"] = deploymentId,
+                    ["Timestamp"] = DateTime.UtcNow,
+                    ["Version"] = 0
+                };
 
                 await
-                    this.SaveDocumentAsync(
+                    SaveDocumentAsync(
                         MembershipVersionCollectionName,
                         MembershipVersionKeyName,
                         deploymentId,
@@ -110,91 +102,63 @@
         {
             string address = ReturnAddress(entry.SiloAddress.Endpoint.Address);
 
-            var collection = await ReturnCollection();
+            var collection = ReturnMembershipCollection();
 
-            var membershipDocument =
-                collection.AsQueryable()
-                    .FirstOrDefault(
-                        m =>
-                        m.DeploymentId == deploymentId && m.Address == address
-                        && m.Port == entry.SiloAddress.Endpoint.Port && m.Generation == entry.SiloAddress.Generation);
+            var membershipDocumentCursor = await collection.FindAsync(m =>
+                m.DeploymentId == deploymentId && m.Address == address
+                && m.Port == entry.SiloAddress.Endpoint.Port && m.Generation == entry.SiloAddress.Generation);
 
-            if (membershipDocument == null)
+            var membershipDocument = await membershipDocumentCursor.ToListAsync();
+
+            if (membershipDocument.Count != 0) return false;
+            if (!await UpdateVersion(deploymentId, Convert.ToInt32(tableVersion.VersionEtag),
+                tableVersion.Version)) return false;
+
+            MembershipCollection document = new MembershipCollection
             {
-                // Todo: Handle as transaction
+                DeploymentId = deploymentId,
+                Address = address,
+                Port = entry.SiloAddress.Endpoint.Port,
+                Generation = entry.SiloAddress.Generation,
+                HostName = entry.HostName,
+                Status = (int)entry.Status,
+                ProxyPort = entry.ProxyPort,
+                StartTime = entry.StartTime,
+                IAmAliveTime = entry.IAmAliveTime
+            };
 
-                if (await UpdateVersion(deploymentId, Convert.ToInt32(tableVersion.VersionEtag), tableVersion.Version))
-                {
-                    MembershipCollection document = new MembershipCollection
-                                                   {
-                                                       DeploymentId = deploymentId,
-                                                       Address = address,
-                                                       Port = entry.SiloAddress.Endpoint.Port,
-                                                       Generation = entry.SiloAddress.Generation,
-                                                       HostName = entry.HostName,
-                                                       Status = (int)entry.Status,
-                                                       ProxyPort = entry.ProxyPort,
-                                                       StartTime = entry.StartTime,
-                                                       IAmAliveTime = entry.IAmAliveTime
-                                                   };
+            if (entry.SuspectTimes == null || entry.SuspectTimes.Count == 0)
+            {
+                document.SuspectTimes = string.Empty;
+            }
+            else
+            {
+                document.SuspectTimes = MembershipHelper.ReturnStringFromSuspectTimes(entry);
+            }
 
-                    if (entry.SuspectTimes == null || entry.SuspectTimes.Count == 0)
-                    {
-                        document.SuspectTimes = string.Empty;
-                    }
-                    else
-                    {
-                        document.SuspectTimes = ReturnStringFromSuspectTimes(entry);
-                    }
+            var cursorfoundMemberships = await collection.FindAsync(r => r.DeploymentId == document.DeploymentId
+                                                                         && r.Address == document.Address
+                                                                         && r.Port == document.Port
+                                                                         && r.Generation == document.Generation
+                                                                         && r.HostName == document.HostName
+                                                                         && r.Status == document.Status
+                                                                         && r.ProxyPort == document.ProxyPort
+                                                                         && r.StartTime == document.StartTime
+                                                                         && r.IAmAliveTime == document.IAmAliveTime);
 
-                    if (!collection.AsQueryable().Any(
-                        r => r.DeploymentId == document.DeploymentId 
-                        && r.Address == document.Address
-                        && r.Port == document.Port
-                        && r.Generation == document.Generation
-                        && r.HostName == document.HostName
-                        && r.Status == document.Status
-                        && r.ProxyPort == document.ProxyPort
-                        && r.StartTime == document.StartTime
-                        && r.IAmAliveTime == document.IAmAliveTime))
-                    {
-                        await collection.InsertOneAsync(document);
-                    }
-                    else
-                    {
-                        return false;
-                    }
+            var foundMemberships = await cursorfoundMemberships.ToListAsync();
 
-                    return true;
-                }
-
+            if (foundMemberships.Count == 0)
+            {
+                await collection.InsertOneAsync(document);
+            }
+            else
+            {
                 return false;
             }
 
-            return false;
+            return true;
         }
-
-        /// <summary>
-        /// Increments a membership version number
-        /// </summary>
-        /// <param name="deploymentId">
-        /// The deployment id.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
-        //private async Task<bool> UpdateVersion(string deploymentId)
-        //{
-        //    var versionDocument =
-        //        await this.FindDocumentAsync(MembershipVersionCollectionName, MembershipVersionKeyName, deploymentId);
-
-        //    if (versionDocument != null)
-        //    {
-        //        return await UpdateVersion(deploymentId, Convert.ToString(versionDocument["Version"].AsInt32));
-        //    }
-
-        //    return false;
-        //}
 
         /// <summary>
         /// Update the membership version.
@@ -238,17 +202,17 @@
         /// </exception>
         public async Task<MembershipTableData> ReturnAllRows(string deploymentId)
         {
-            if (string.IsNullOrEmpty(this.ConnectionString))
+            if (string.IsNullOrEmpty(ConnectionString))
             {
                 throw new ArgumentException("ConnectionString may not be empty");
             }
 
-            List<MembershipCollection> membershipList =
-                Database.GetCollection<MembershipCollection>(MembershipCollectionName)
-                    .AsQueryable()
-                    .Where(m => m.DeploymentId == deploymentId).ToList();
+            var membershipListCursor = await Database.GetCollection<MembershipCollection>(MembershipCollectionName)
+                .FindAsync(m => m.DeploymentId == deploymentId);
 
-            return await this.ReturnMembershipTableData(membershipList, deploymentId);
+            List<MembershipCollection> membershipList = await membershipListCursor.ToListAsync();
+
+            return await ReturnMembershipTableData(membershipList, deploymentId);
         }
 
         /// <summary>
@@ -265,31 +229,16 @@
         /// </returns>
         public async Task<MembershipTableData> ReturnRow(SiloAddress key, string deploymentId)
         {
-            List<MembershipCollection> membershipList =
-                Database.GetCollection<MembershipCollection>(MembershipCollectionName)
-                    .AsQueryable()
-                    .Where(
-                        m =>
-                        m.DeploymentId == deploymentId && m.Address == ReturnAddress(key.Endpoint.Address)
-                        && m.Port == key.Endpoint.Port && m.Generation == key.Generation)
-                    .ToList();
+            var membershipListCursor = await Database.GetCollection<MembershipCollection>(MembershipCollectionName)
+                .FindAsync(m =>
+                    m.DeploymentId == deploymentId && m.Address == ReturnAddress(key.Endpoint.Address)
+                    && m.Port == key.Endpoint.Port && m.Generation == key.Generation);
 
-            return await this.ReturnMembershipTableData(membershipList, deploymentId);
+            List<MembershipCollection> membershipList = await membershipListCursor.ToListAsync();
+
+            return await ReturnMembershipTableData(membershipList, deploymentId);
         }
 
-        /// <summary>
-        /// Returns address.
-        /// </summary>
-        /// <param name="address">
-        /// The address.
-        /// </param>
-        /// <returns>
-        /// The <see cref="string"/>.
-        /// </returns>
-        static string ReturnAddress(IPAddress address)
-        {
-            return address.MapToIPv4().ToString();
-        }
 
         /// <summary>
         /// Update i am alive time.
@@ -311,140 +260,14 @@
             SiloAddress siloAddress,
             DateTime iAmAliveTime)
         {
-            var collection = await ReturnCollection();
+            var collection = ReturnMembershipCollection();
 
             var update = new UpdateDefinitionBuilder<MembershipCollection>().Set(x => x.IAmAliveTime, iAmAliveTime);
-            var result =
-                await
-                collection.UpdateOneAsync(
-                    m =>
-                    m.DeploymentId == deploymentId && m.Address == ReturnAddress(siloAddress.Endpoint.Address)
-                    && m.Port == siloAddress.Endpoint.Port && m.Generation == siloAddress.Generation,
-                    update);
-
-            var success = result.ModifiedCount == 1;
-        }
-
-        /// <summary>
-        /// Parses the MembershipData to a MembershipEntry
-        /// </summary>
-        /// <param name="membershipData">
-        /// The membership data.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
-        internal async Task<Tuple<MembershipEntry, string>> Parse(MembershipCollection membershipData)
-        {
-            // TODO: This is a bit of hack way to check in the current version if there's membership data or not, but if there's a start time, there's member.            
-            DateTime? startTime = membershipData.StartTime;
-            MembershipEntry entry = null;
-            if (startTime.HasValue)
-            {
-                entry = new MembershipEntry
-                            {
-                                SiloAddress = ReturnSiloAddress(membershipData),
-
-                                // SiloName = TryGetSiloName(record),
-                                HostName = membershipData.HostName,
-                                Status = (SiloStatus)membershipData.Status,
-                                ProxyPort = membershipData.ProxyPort,
-                                StartTime = startTime.Value,
-                                IAmAliveTime = membershipData.IAmAliveTime,
-                                SiloName = membershipData.HostName
-                            };
-
-                string suspectingSilos = membershipData.SuspectTimes;
-                if (!string.IsNullOrWhiteSpace(suspectingSilos))
-                {
-                    entry.SuspectTimes = new List<Tuple<SiloAddress, DateTime>>();
-                    entry.SuspectTimes.AddRange(
-                        suspectingSilos.Split('|').Select(
-                            s =>
-                                {
-                                    var split = s.Split(',');
-                                    return new Tuple<SiloAddress, DateTime>(
-                                        SiloAddress.FromParsableString(split[0].Trim()),
-                                        LogFormatter.ParseDate(split[1].Trim()));
-                                }));
-                }
-            }
-
-            BsonDocument membershipVersionDocument =
-                await
-                this.FindDocumentAsync(
-                    MembershipVersionCollectionName,
-                    MembershipVersionKeyName,
-                    membershipData.DeploymentId);
-
-            return Tuple.Create(entry, membershipVersionDocument["Version"].AsInt32.ToString());
-        }
-
-        /// <summary>
-        /// Returns a silo address.
-        /// </summary>
-        /// <param name="membershipData">
-        /// The membership data.
-        /// </param>
-        /// <param name="useProxyPort">
-        /// The use proxy port.
-        /// </param>
-        /// <returns>
-        /// The <see cref="SiloAddress"/>.
-        /// </returns>
-        public static SiloAddress ReturnSiloAddress(MembershipCollection membershipData, bool useProxyPort = false)
-        {
-            // Todo: Move this method to it's own class so it can be shared a bit more elogantly
-            int port = membershipData.Port;
-
-            if (useProxyPort)
-            {
-                port = membershipData.ProxyPort;
-            }
-
-            int generation = membershipData.Generation;
-            string address = membershipData.Address;
-            var siloAddress = SiloAddress.New(new IPEndPoint(IPAddress.Parse(address), port), generation);
-            return siloAddress;
-        }
-
-        /// <summary>
-        /// Returns a MembershipTableData from a list of MembershipTable's
-        /// </summary>
-        /// <param name="membershipList">
-        /// The membership list to be converted.
-        /// </param>
-        /// <param name="deploymentId">
-        /// The deployment id.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
-        private async Task<MembershipTableData> ReturnMembershipTableData(
-            List<MembershipCollection> membershipList,
-            string deploymentId)
-        {
-            var membershipVersion = await this.FindDocumentAsync(MembershipVersionCollectionName, MembershipVersionKeyName, deploymentId);
-            if (!membershipVersion.Contains("Version"))
-            {
-                membershipVersion["Version"] = 1;
-            }
-
-            var tableVersionEtag = membershipVersion["Version"].AsInt32;
-
-            var membershipEntries = new List<Tuple<MembershipEntry, string>>();
-
-            if (membershipList.Count > 0)
-            {
-                foreach (var membership in membershipList)
-                {
-                    membershipEntries.Add(await this.Parse(membership));
-                }
-            }
-
-            return new MembershipTableData(
-                membershipEntries,
-                new TableVersion(tableVersionEtag, tableVersionEtag.ToString()));
+            await collection.UpdateOneAsync(
+                m =>
+                m.DeploymentId == deploymentId && m.Address == ReturnAddress(siloAddress.Endpoint.Address)
+                && m.Port == siloAddress.Endpoint.Port && m.Generation == siloAddress.Generation,
+                update);
         }
 
         /// <summary>
@@ -468,18 +291,18 @@
             string etag)
         {
             bool verionUpdateResult = await UpdateVersion(deploymentId, Convert.ToInt32(etag), Convert.ToInt32(etag) + 1);
-            var collection = await ReturnCollection();
+            var collection = ReturnMembershipCollection();
 
-            string suspecttimes = ReturnStringFromSuspectTimes(membershipEntry);
+            string suspecttimes = MembershipHelper.ReturnStringFromSuspectTimes(membershipEntry);
 
             var update = new UpdateDefinitionBuilder<MembershipCollection>()
-                .Set(x => x.Status, (int)membershipEntry.Status)            
+                .Set(x => x.Status, (int)membershipEntry.Status)
                 .Set(x => x.SuspectTimes, suspecttimes)
                 .Set(x => x.IAmAliveTime, membershipEntry.IAmAliveTime);
 
             var result = await collection.UpdateOneAsync(
                m => m.DeploymentId == deploymentId && m.Address == ReturnAddress(membershipEntry.SiloAddress.Endpoint.Address)
-               && m.Port == membershipEntry.SiloAddress.Endpoint.Port && m.Generation == membershipEntry.SiloAddress.Generation, 
+               && m.Port == membershipEntry.SiloAddress.Endpoint.Port && m.Generation == membershipEntry.SiloAddress.Generation,
                update);
 
             bool returnResult = verionUpdateResult || result.ModifiedCount > 0;
@@ -493,36 +316,76 @@
             //    returnResult = result.MatchedCount > 0;
             //}
 
-            return  returnResult;
+            return returnResult;
         }
 
         /// <summary>
-        /// Returns string from suspect times.
+        /// Returns address.
         /// </summary>
-        /// <param name="membershipEntry">
-        /// The membership entry.
+        /// <param name="address">
+        /// The address.
         /// </param>
         /// <returns>
         /// The <see cref="string"/>.
         /// </returns>
-        private static string ReturnStringFromSuspectTimes(MembershipEntry membershipEntry)
+        static string ReturnAddress(IPAddress address)
         {
-            if (membershipEntry.SuspectTimes != null)
-            {
-                string suspectingSilos = string.Empty;
-                foreach (var suspectTime in membershipEntry.SuspectTimes)
-                {
-                    suspectingSilos += string.Format(
-                        "{0}@{1},{2} |",
-                        suspectTime.Item1.Endpoint,
-                        suspectTime.Item1.Generation,
-                        LogFormatter.PrintDate(suspectTime.Item2.ToUniversalTime()));
-                }
+            return address.MapToIPv4().ToString();
+        }
 
-                return suspectingSilos.TrimEnd('|').TrimEnd(' ');
+        /// <summary>
+        /// Parses the MembershipData to a MembershipEntry
+        /// </summary>
+        /// <param name="membershipData">
+        /// The membership data.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        internal async Task<Tuple<MembershipEntry, string>> Parse(MembershipCollection membershipData)
+        {
+            // TODO: This is a bit of hack way to check in the current version if there's membership data or not, but if there's a start time, there's member.            
+            DateTime? startTime = membershipData.StartTime;
+            MembershipEntry entry = null;
+            if (startTime.HasValue)
+            {
+                entry = new MembershipEntry
+                {
+                    SiloAddress = MembershipHelper.ReturnSiloAddress(membershipData),
+
+                    // SiloName = TryGetSiloName(record),
+                    HostName = membershipData.HostName,
+                    Status = (SiloStatus)membershipData.Status,
+                    ProxyPort = membershipData.ProxyPort,
+                    StartTime = startTime.Value,
+                    IAmAliveTime = membershipData.IAmAliveTime,
+                    SiloName = membershipData.HostName
+                };
+
+                string suspectingSilos = membershipData.SuspectTimes;
+                if (!string.IsNullOrWhiteSpace(suspectingSilos))
+                {
+                    entry.SuspectTimes = new List<Tuple<SiloAddress, DateTime>>();
+                    entry.SuspectTimes.AddRange(
+                        suspectingSilos.Split('|').Select(
+                            s =>
+                            {
+                                var split = s.Split(',');
+                                return new Tuple<SiloAddress, DateTime>(
+                                    SiloAddress.FromParsableString(split[0].Trim()),
+                                    LogFormatter.ParseDate(split[1].Trim()));
+                            }));
+                }
             }
 
-            return string.Empty;
+            BsonDocument membershipVersionDocument =
+                await
+                    FindDocumentAsync(
+                        MembershipVersionCollectionName,
+                        MembershipVersionKeyName,
+                        membershipData.DeploymentId);
+
+            return Tuple.Create(entry, membershipVersionDocument["Version"].AsInt32.ToString());
         }
 
         /// <summary>
@@ -553,11 +416,11 @@
         /// </returns>
         private static async Task DeleteMembershipAsync(string deploymentId)
         {
-            var collection = await ReturnCollection();
+            var collection = ReturnMembershipCollection();
             await collection.DeleteManyAsync(m => m.DeploymentId == deploymentId);
         }
 
-        private async static Task<IMongoCollection<MembershipCollection>> ReturnCollection()
+        private static IMongoCollection<MembershipCollection> ReturnMembershipCollection()
         {
             var collection = Database.GetCollection<MembershipCollection>(MembershipCollectionName);
             return collection;
@@ -574,9 +437,48 @@
         /// </returns>
         private async Task DeleteVersionAsync(string deploymentId)
         {
-            var versionCollection = this.ReturnOrCreateCollection(MembershipVersionCollectionName);
+            var versionCollection = ReturnOrCreateCollection(MembershipVersionCollectionName);
             var builder = Builders<BsonDocument>.Filter.Eq(MembershipVersionKeyName, deploymentId);
             await versionCollection.DeleteOneAsync(builder);
+        }
+
+        /// <summary>
+        /// Returns a MembershipTableData from a list of MembershipTable's
+        /// </summary>
+        /// <param name="membershipList">
+        /// The membership list to be converted.
+        /// </param>
+        /// <param name="deploymentId">
+        /// The deployment id.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        private async Task<MembershipTableData> ReturnMembershipTableData(
+            List<MembershipCollection> membershipList,
+            string deploymentId)
+        {
+            var membershipVersion = await FindDocumentAsync(MembershipVersionCollectionName, MembershipVersionKeyName, deploymentId);
+            if (!membershipVersion.Contains("Version"))
+            {
+                membershipVersion["Version"] = 1;
+            }
+
+            var tableVersionEtag = membershipVersion["Version"].AsInt32;
+
+            var membershipEntries = new List<Tuple<MembershipEntry, string>>();
+
+            if (membershipList.Count > 0)
+            {
+                foreach (var membership in membershipList)
+                {
+                    membershipEntries.Add(await Parse(membership));
+                }
+            }
+
+            return new MembershipTableData(
+                membershipEntries,
+                new TableVersion(tableVersionEtag, tableVersionEtag.ToString()));
         }
     }
 }

@@ -1,15 +1,12 @@
-﻿namespace Orleans.Providers.MongoDB.Membership.Repository
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using MongoDB.Driver;
+using Orleans.Providers.MongoDB.Repository;
+using Orleans.Runtime;
+
+namespace Orleans.Providers.MongoDB.Membership.Repository
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-
-    using global::MongoDB.Driver;
-    using global::MongoDB.Driver.Linq;
-
-    using Orleans.Providers.MongoDB.Repository;
-    using Orleans.Runtime;
-
     public class GatewayProviderRepository : DocumentRepository, IGatewayProviderRepository
     {
         /// <summary>
@@ -21,15 +18,15 @@
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        public Task<List<Uri>> ReturnActiveGatewaysAsync(string deploymentId)
+        public async Task<List<Uri>> ReturnActiveGatewaysAsync(string deploymentId)
         {
             var collection = Database.GetCollection<MembershipCollection>(MongoMembershipRepository.MembershipCollectionName);
 
-            // Todo: This should be async 
-            List<MembershipCollection> gateways =
-                collection.AsQueryable()
-                    .Where(m => m.DeploymentId == deploymentId && m.Status == (int)SiloStatus.Active && m.ProxyPort > 0)
-                    .ToList();
+            IAsyncCursor<MembershipCollection> gatewaysCursor =
+                await collection.FindAsync(m => m.DeploymentId == deploymentId && m.Status == (int)SiloStatus.Active &&
+                                                m.ProxyPort > 0);
+
+            List<MembershipCollection> gateways = await gatewaysCursor.ToListAsync();
 
             List<Uri> results = new List<Uri>();
 
@@ -38,7 +35,7 @@
                 results.Add(ReturnGatewayUri(gateway));
             }
 
-            return Task.FromResult(results);
+            return results;
         }
 
         /// <summary>
@@ -52,7 +49,7 @@
         /// </returns>
         internal static Uri ReturnGatewayUri(MembershipCollection record)
         {
-            return MongoMembershipRepository.ReturnSiloAddress(record, true).ToGatewayUri();
+            return MembershipHelper.ReturnSiloAddress(record, true).ToGatewayUri();
         }
 
         /// <summary>

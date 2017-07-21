@@ -16,7 +16,6 @@ namespace Orleans.Providers.MongoDB.Membership
     public class MongoMembershipTable : IMembershipTable, IGatewayListProvider
     {
         private string deploymentId;
-        private TimeSpan maxStaleness;
         private Logger logger;
         private IMongoMembershipRepository membershipRepository;
 
@@ -52,15 +51,14 @@ namespace Orleans.Providers.MongoDB.Membership
 
         public async Task DeleteMembershipTableEntries(string deploymentId)
         {
-            if (logger.IsVerbose3)
-            {
-                logger.Verbose3(
-                    string.Format(
-                        "MongoMembershipTable.DeleteMembershipTableEntries called with deploymentId {0}.",
-                        deploymentId));
-            }
             try
             {
+                if (logger.IsVerbose3)
+                {
+                    logger.Verbose3(
+                        $"MongoMembershipTable.DeleteMembershipTableEntries called with deploymentId {deploymentId}.");
+                }
+
                 await membershipRepository.DeleteMembershipTableEntriesAsync(deploymentId);
             }
             catch (Exception ex)
@@ -86,13 +84,13 @@ namespace Orleans.Providers.MongoDB.Membership
         /// </returns>
         public async Task<MembershipTableData> ReadRow(SiloAddress key)
         {
-            if (logger.IsVerbose3)
-            {
-                logger.Verbose3("MongoMembershipTable.ReadRow called.");
-            }
-
             try
             {
+                if (logger.IsVerbose3)
+                {
+                    logger.Verbose3("MongoMembershipTable.ReadRow called.");
+                }
+
                 return await membershipRepository.ReturnRow(key, deploymentId);
             }
             catch (Exception ex)
@@ -114,13 +112,13 @@ namespace Orleans.Providers.MongoDB.Membership
         /// </returns>
         public async Task<MembershipTableData> ReadAll()
         {
-            if (logger.IsVerbose3)
-            {
-                logger.Verbose3("MongoMembershipTable.ReadAll called.");
-            }
-
             try
             {
+                if (logger.IsVerbose3)
+                {
+                    logger.Verbose3("MongoMembershipTable.ReadAll called.");
+                }
+
                 return await membershipRepository.ReturnAllRows(deploymentId);
             }
             catch (Exception ex)
@@ -287,7 +285,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             if (logger.IsVerbose3)
             {
-                logger.Verbose3(string.Format("MongoMembershipTable.UpdateIAmAlive called with entry {0}.", entry));
+                logger.Verbose3($"MongoMembershipTable.UpdateIAmAlive called with entry {entry}.");
             }
 
             if (entry == null)
@@ -356,13 +354,13 @@ namespace Orleans.Providers.MongoDB.Membership
         /// </returns>
         public async Task<IList<Uri>> GetGateways()
         {
-            if (logger.IsVerbose3)
-            {
-                logger.Verbose3("MongoMembershipTable.GetGateways called.");
-            }
-
             try
             {
+                if (logger.IsVerbose3)
+                {
+                    logger.Verbose3("MongoMembershipTable.GetGateways called.");
+                }
+
                 return await gatewayRepository.ReturnActiveGatewaysAsync(deploymentId);
             }
             catch (Exception ex)
@@ -376,13 +374,7 @@ namespace Orleans.Providers.MongoDB.Membership
             }
         }
 
-        public bool IsUpdatable
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public bool IsUpdatable => true;
 
         public TimeSpan MaxStaleness { get; private set; }
 
