@@ -116,6 +116,7 @@
             return (await collections.ToListAsync()).Any();
         }
 
+
         /// <summary>
         /// Delete document async.
         /// </summary>
@@ -466,15 +467,9 @@
                 throw new ArgumentException("MongoCollectionName may not be empty");
             }
 
+            // A collection is created if one isn't found
             var collection = Database.GetCollection<BsonDocument>(mongoCollectionName);
-            if (collection != null)
-            {
-                return collection;
-            }
 
-            // Todo: This doesn't actually work. A collection is always returned, so this code never runs
-            Database.CreateCollection(mongoCollectionName);
-            collection = Database.GetCollection<BsonDocument>(mongoCollectionName);
             return collection;
         }
 

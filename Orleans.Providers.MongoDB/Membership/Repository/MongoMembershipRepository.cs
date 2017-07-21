@@ -56,6 +56,12 @@
         /// </returns>
         public async Task InitMembershipVersionCollectionAsync(string deploymentId)
         {
+            if (!await base.CollectionExistsAsync(MembershipCollectionName))
+            {
+                await base.ReturnOrCreateCollection(MembershipVersionCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(m => m[MembershipVersionKeyName]));
+                await base.ReturnOrCreateCollection(MembershipCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(m => m[MembershipKeyName]));
+            }
+
             BsonDocument membershipVersionDocument =
                 await this.FindDocumentAsync(MembershipVersionCollectionName, MembershipVersionKeyName, deploymentId);
             if (membershipVersionDocument == null)
@@ -74,14 +80,6 @@
                         deploymentId,
                         membershipVersionDocument);
 
-                if (!await base.CollectionExistsAsync(MembershipCollectionName))
-                {
-                    await base.ReturnOrCreateCollection(MembershipVersionCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(m => m[MembershipVersionKeyName]));
-                    await base.ReturnOrCreateCollection(MembershipCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(m => m[MembershipKeyName]));
-                }
-
-                //Database.CreateCollection(MembershipCollectionName);
-                //collection = Database.GetCollection<MembershipTable>(MembershipCollectionName);
 
                 //// Todo: This might be overkill
                 //await collection.Indexes.CreateOneAsync(Builders<MembershipTable>.IndexKeys.Ascending(m => m.DeploymentId));
