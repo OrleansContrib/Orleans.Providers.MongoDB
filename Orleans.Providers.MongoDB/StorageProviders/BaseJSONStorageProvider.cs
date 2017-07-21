@@ -129,7 +129,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         {
             if (this.DataManager == null) throw new ArgumentException("DataManager property not initialized");
 
-            var grainTypeName = grainType.Split('.').Last();
+            var grainTypeName = this.ReturnGrainName(grainType, grainReference);
 
             this.DataManager.Delete(grainTypeName, grainReference.ToKeyString());
             return TaskDone.Done;
