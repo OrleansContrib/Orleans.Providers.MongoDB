@@ -1,4 +1,6 @@
-﻿namespace Orleans.Providers.MongoDB.StorageProviders
+﻿using Orleans.Runtime;
+
+namespace Orleans.Providers.MongoDB.StorageProviders
 {
     using System;
     using System.Threading.Tasks;

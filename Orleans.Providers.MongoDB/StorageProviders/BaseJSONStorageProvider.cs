@@ -86,7 +86,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         {
             if (this.DataManager == null) throw new ArgumentException("DataManager property not initialized");
 
-            var grainTypeName = this.ReturnGrainName(grainType, grainState);
+            var grainTypeName = this.ReturnGrainName(grainType, grainReference);
 
             var entityData = await this.DataManager.Read(grainTypeName, grainReference.ToKeyString());
             if (entityData != null)
@@ -96,7 +96,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         }
 
 
-        public virtual string ReturnGrainName(string grainType, IGrainState grainState)
+        public virtual string ReturnGrainName(string grainType, GrainReference grainReference)
         {
             return grainType.Split('.').Last();
         }
@@ -112,7 +112,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         {
             if (this.DataManager == null) throw new ArgumentException("DataManager property not initialized");
 
-            var grainTypeName = this.ReturnGrainName(grainType, grainState);
+            var grainTypeName = this.ReturnGrainName(grainType, grainReference);
 
             var entityData = this.ConvertToStorageFormat(grainState);
             return this.DataManager.Write(grainTypeName, grainReference.ToKeyString(), entityData);
