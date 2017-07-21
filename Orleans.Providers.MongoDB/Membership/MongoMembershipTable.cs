@@ -1,16 +1,14 @@
-﻿namespace Orleans.Providers.MongoDB.Membership
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using MongoDB.Driver;
+using Orleans.Messaging;
+using Orleans.Providers.MongoDB.Membership.Repository;
+using Orleans.Runtime;
+using Orleans.Runtime.Configuration;
+
+namespace Orleans.Providers.MongoDB.Membership
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-
-    using global::MongoDB.Driver;
-
-    using Orleans.Messaging;
-    using Orleans.Providers.MongoDB.Membership.Repository;
-    using Orleans.Runtime;
-    using Orleans.Runtime.Configuration;
-
     /// <summary>
     /// The mongo membership provider. It is used to manage cluster members as well as provide gateway
     /// servers
@@ -44,7 +42,7 @@
             // so we always have a first table version row, before this silo starts working.
             if (tryInitTableVersion)
             {
-                var wasCreated = await this.InitTableAsync();
+                var wasCreated = await InitTableAsync();
                 if (wasCreated)
                 {
                     logger.Info("Created new table version row.");
@@ -54,22 +52,22 @@
 
         public async Task DeleteMembershipTableEntries(string deploymentId)
         {
-            if (this.logger.IsVerbose3)
+            if (logger.IsVerbose3)
             {
-                this.logger.Verbose3(
+                logger.Verbose3(
                     string.Format(
                         "MongoMembershipTable.DeleteMembershipTableEntries called with deploymentId {0}.",
                         deploymentId));
             }
             try
             {
-                await this.membershipRepository.DeleteMembershipTableEntriesAsync(deploymentId);
+                await membershipRepository.DeleteMembershipTableEntriesAsync(deploymentId);
             }
             catch (Exception ex)
             {
-                if (this.logger.IsVerbose)
+                if (logger.IsVerbose)
                 {
-                    this.logger.Verbose("MongoMembershipTable.DeleteMembershipTableEntries failed: {0}", ex);
+                    logger.Verbose("MongoMembershipTable.DeleteMembershipTableEntries failed: {0}", ex);
                 }
 
                 throw;
@@ -88,18 +86,18 @@
         /// </returns>
         public async Task<MembershipTableData> ReadRow(SiloAddress key)
         {
-            if (this.logger.IsVerbose3)
+            if (logger.IsVerbose3)
             {
                 logger.Verbose3("MongoMembershipTable.ReadRow called.");
             }
 
             try
             {
-                return await this.membershipRepository.ReturnRow(key, this.deploymentId);
+                return await membershipRepository.ReturnRow(key, deploymentId);
             }
             catch (Exception ex)
             {
-                if (this.logger.IsVerbose)
+                if (logger.IsVerbose)
                 {
                     logger.Verbose("MongoMembershipTable.ReadRow failed: {0}", ex);
                 }
@@ -116,20 +114,20 @@
         /// </returns>
         public async Task<MembershipTableData> ReadAll()
         {
-            if (this.logger.IsVerbose3)
+            if (logger.IsVerbose3)
             {
-                this.logger.Verbose3("MongoMembershipTable.ReadAll called.");
+                logger.Verbose3("MongoMembershipTable.ReadAll called.");
             }
 
             try
             {
-                return await membershipRepository.ReturnAllRows(this.deploymentId);
+                return await membershipRepository.ReturnAllRows(deploymentId);
             }
             catch (Exception ex)
             {
-                if (this.logger.IsVerbose)
+                if (logger.IsVerbose)
                 {
-                    this.logger.Verbose("MongoMembershipTable.ReadAll failed: {0}", ex);
+                    logger.Verbose("MongoMembershipTable.ReadAll failed: {0}", ex);
                 }
 
                 throw;
@@ -152,9 +150,9 @@
         /// </exception>
         public async Task<bool> InsertRow(MembershipEntry entry, TableVersion tableVersion)
         {
-            if (this.logger.IsVerbose3)
+            if (logger.IsVerbose3)
             {
-                this.logger.Verbose3(
+                logger.Verbose3(
                     string.Format(
                         "MongoMembershipTable.InsertRow called with entry {0} and tableVersion {1}.",
                         entry,
@@ -168,9 +166,9 @@
             // Likewise, no update can be done without membership entry.
             if (entry == null)
             {
-                if (this.logger.IsVerbose)
+                if (logger.IsVerbose)
                 {
-                    this.logger.Verbose(
+                    logger.Verbose(
                         "MongoMembershipTable.InsertRow aborted due to null check. MembershipEntry is null.");
                 }
 
@@ -179,9 +177,9 @@
 
             if (tableVersion == null)
             {
-                if (this.logger.IsVerbose)
+                if (logger.IsVerbose)
                 {
-                    this.logger.Verbose(
+                    logger.Verbose(
                         "MongoMembershipTable.InsertRow aborted due to null check. TableVersion is null ");
                 }
 
@@ -190,13 +188,13 @@
 
             try
             {
-                return await this.membershipRepository.InsertMembershipRow(this.deploymentId, entry, tableVersion);
+                return await membershipRepository.InsertMembershipRow(deploymentId, entry, tableVersion);
             }
             catch (Exception ex)
             {
-                if (this.logger.IsVerbose)
+                if (logger.IsVerbose)
                 {
-                    this.logger.Verbose("MongoMembershipTable.InsertRow failed: {0}", ex);
+                    logger.Verbose("MongoMembershipTable.InsertRow failed: {0}", ex);
                 }
 
                 throw;
@@ -222,9 +220,9 @@
         /// </exception>
         public async Task<bool> UpdateRow(MembershipEntry entry, string etag, TableVersion tableVersion)
         {
-            if (this.logger.IsVerbose3)
+            if (logger.IsVerbose3)
             {
-                this.logger.Verbose3(
+                logger.Verbose3(
                     string.Format(
                         "MongoMembershipTable.UpdateRow called with entry {0}, etag {1} and tableVersion {2}.",
                         entry,
@@ -239,9 +237,9 @@
             // Likewise, no update can be done without membership entry or an etag.
             if (entry == null)
             {
-                if (this.logger.IsVerbose)
+                if (logger.IsVerbose)
                 {
-                    this.logger.Verbose(
+                    logger.Verbose(
                         "MongoMembershipTable.UpdateRow aborted due to null check. MembershipEntry is null.");
                 }
 
@@ -250,9 +248,9 @@
 
             if (tableVersion == null)
             {
-                if (this.logger.IsVerbose)
+                if (logger.IsVerbose)
                 {
-                    this.logger.Verbose(
+                    logger.Verbose(
                         "MongoMembershipTable.UpdateRow aborted due to null check. TableVersion is null ");
                 }
 
@@ -261,13 +259,13 @@
 
             try
             {
-                return await this.membershipRepository.UpdateMembershipRowAsync(this.deploymentId, entry, tableVersion.VersionEtag);
+                return await membershipRepository.UpdateMembershipRowAsync(deploymentId, entry, tableVersion.VersionEtag);
             }
             catch (Exception ex)
             {
-                if (this.logger.IsVerbose)
+                if (logger.IsVerbose)
                 {
-                    this.logger.Verbose("MongoMembershipTable.UpdateRow failed: {0}", ex);
+                    logger.Verbose("MongoMembershipTable.UpdateRow failed: {0}", ex);
                 }
 
                 throw;
@@ -287,16 +285,16 @@
         /// </exception>
         public async Task UpdateIAmAlive(MembershipEntry entry)
         {
-            if (this.logger.IsVerbose3)
+            if (logger.IsVerbose3)
             {
-                this.logger.Verbose3(string.Format("MongoMembershipTable.UpdateIAmAlive called with entry {0}.", entry));
+                logger.Verbose3(string.Format("MongoMembershipTable.UpdateIAmAlive called with entry {0}.", entry));
             }
 
             if (entry == null)
             {
-                if (this.logger.IsVerbose)
+                if (logger.IsVerbose)
                 {
-                    this.logger.Verbose(
+                    logger.Verbose(
                         "MongoMembershipTable.UpdateIAmAlive aborted due to null check. MembershipEntry is null.");
                 }
 
@@ -305,16 +303,16 @@
 
             try
             {
-                await this.membershipRepository.UpdateIAmAliveTimeAsyncTask( 
-                        this.deploymentId,
+                await membershipRepository.UpdateIAmAliveTimeAsyncTask( 
+                        deploymentId,
                         entry.SiloAddress,
                         entry.IAmAliveTime);
             }
             catch (Exception ex)
             {
-                if (this.logger.IsVerbose)
+                if (logger.IsVerbose)
                 {
-                    this.logger.Verbose("MongoMembershipTable.UpdateIAmAlive failed: {0}", ex);
+                    logger.Verbose("MongoMembershipTable.UpdateIAmAlive failed: {0}", ex);
                 }
 
                 throw;
@@ -336,16 +334,16 @@
         /// </returns>
         public Task InitializeGatewayListProvider(ClientConfiguration clientConfiguration, Logger traceLogger)
         {
-            this.logger = traceLogger;
-            if (this.logger.IsVerbose3)
+            logger = traceLogger;
+            if (logger.IsVerbose3)
             {
-                this.logger.Verbose3("MongoMembershipTable.InitializeGatewayListProvider called.");
+                logger.Verbose3("MongoMembershipTable.InitializeGatewayListProvider called.");
             }
 
-            this.deploymentId = clientConfiguration.DeploymentId;
-            this.MaxStaleness = clientConfiguration.GatewayListRefreshPeriod;
+            deploymentId = clientConfiguration.DeploymentId;
+            MaxStaleness = clientConfiguration.GatewayListRefreshPeriod;
 
-            this.gatewayRepository = new GatewayProviderRepository(clientConfiguration.DataConnectionString, MongoUrl.Create(clientConfiguration.DataConnectionString).DatabaseName);
+            gatewayRepository = new GatewayProviderRepository(clientConfiguration.DataConnectionString, MongoUrl.Create(clientConfiguration.DataConnectionString).DatabaseName);
 
             return TaskDone.Done;
         }
@@ -358,20 +356,20 @@
         /// </returns>
         public async Task<IList<Uri>> GetGateways()
         {
-            if (this.logger.IsVerbose3)
+            if (logger.IsVerbose3)
             {
-                this.logger.Verbose3("MongoMembershipTable.GetGateways called.");
+                logger.Verbose3("MongoMembershipTable.GetGateways called.");
             }
 
             try
             {
-                return await this.gatewayRepository.ReturnActiveGatewaysAsync(this.deploymentId);
+                return await gatewayRepository.ReturnActiveGatewaysAsync(deploymentId);
             }
             catch (Exception ex)
             {
-                if (this.logger.IsVerbose)
+                if (logger.IsVerbose)
                 {
-                    this.logger.Verbose("MongoMembershipTable.Gateways failed {0}", ex);
+                    logger.Verbose("MongoMembershipTable.Gateways failed {0}", ex);
                 }
 
                 throw;
@@ -398,14 +396,14 @@
         {
             try
             {
-                await this.membershipRepository.InitMembershipVersionCollectionAsync(this.deploymentId);
+                await membershipRepository.InitMembershipVersionCollectionAsync(deploymentId);
                 return true;
             }
             catch (Exception ex)
             {
-                if (this.logger.IsVerbose2)
+                if (logger.IsVerbose2)
                 {
-                    this.logger.Verbose2("Insert silo membership version failed: {0}", ex.ToString());
+                    logger.Verbose2("Insert silo membership version failed: {0}", ex.ToString());
                 }
 
                 throw;

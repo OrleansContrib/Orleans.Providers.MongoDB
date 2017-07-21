@@ -1,17 +1,9 @@
-﻿using Orleans.Runtime;
+﻿using System;
+using System.Threading.Tasks;
+using MongoDB.Driver;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
 {
-    using System;
-    using System.Threading.Tasks;
-
-    using global::MongoDB.Bson;
-    using global::MongoDB.Driver;
-    using Newtonsoft.Json;
-    using System.IO;
-    using System.Text;
-    using Orleans.Providers.MongoDB.StorageProviders.Serializing;
-
     /// <summary>
     /// A MongoDB storage provider.
     /// </summary>
@@ -48,21 +40,21 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// <returns>Completion promise for this operation.</returns>
         public override Task Init(string name, IProviderRuntime providerRuntime, IProviderConfiguration config)
         {
-            this.Name = name;
-            this.ConnectionString = config.Properties["ConnectionString"];
+            Name = name;
+            ConnectionString = config.Properties["ConnectionString"];
 
             if (!config.Properties.ContainsKey("Database") || string.IsNullOrEmpty(config.Properties["Database"]))
             {
-                this.Database = MongoUrl.Create(this.ConnectionString).DatabaseName;
+                Database = MongoUrl.Create(ConnectionString).DatabaseName;
             }
             else
             {
-                this.Database = config.Properties["Database"];
+                Database = config.Properties["Database"];
             }
 
-            if (string.IsNullOrWhiteSpace(this.ConnectionString)) throw new ArgumentException("ConnectionString property not set");
-            if (string.IsNullOrWhiteSpace(this.Database)) throw new ArgumentException("Database property not set");
-            this.DataManager = this.ReturnDataManager(this.Database, this.ConnectionString);
+            if (string.IsNullOrWhiteSpace(ConnectionString)) throw new ArgumentException("ConnectionString property not set");
+            if (string.IsNullOrWhiteSpace(Database)) throw new ArgumentException("Database property not set");
+            DataManager = ReturnDataManager(Database, ConnectionString);
             return base.Init(name, providerRuntime, config);
         }
 

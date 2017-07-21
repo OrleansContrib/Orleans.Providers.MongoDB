@@ -1,17 +1,15 @@
-﻿namespace Orleans.Providers.MongoDB.Statistics
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+using MongoDB.Driver;
+using Orleans.Providers.MongoDB.Statistics.Repository;
+using Orleans.Runtime;
+using Orleans.Runtime.Configuration;
+
+namespace Orleans.Providers.MongoDB.Statistics
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net;
-    using System.Threading.Tasks;
-
-    using global::MongoDB.Driver;
-
-    using Orleans.Providers.MongoDB.Statistics.Repository;
-    using Orleans.Runtime;
-    using Orleans.Runtime.Configuration;
-
     /// <summary>
     /// Plugin for publishing silos and client statistics to a Mongo database.
     /// </summary>
@@ -56,10 +54,23 @@
         /// <returns></returns>
         public async Task Init(string name, IProviderRuntime providerRuntime, IProviderConfiguration config)
         {
-            this.Name = name;
-            this.logger = providerRuntime.GetLogger("MongoStatisticsPublisher");
+            Name = name;
+            logger = providerRuntime.GetLogger("MongoStatisticsPublisher");
 
-            this.repository = new MongoStatisticsPublisherRepository(config.Properties["ConnectionString"], MongoUrl.Create(config.Properties["ConnectionString"]).DatabaseName);
+            string connectionString = config.Properties["ConnectionString"];
+            string database = string.Empty;
+
+            if (!config.Properties.ContainsKey("Database") || string.IsNullOrEmpty(config.Properties["Database"]))
+            {
+                database = MongoUrl.Create(connectionString).DatabaseName;
+            }
+            else
+            {
+                database = config.Properties["Database"];
+            }
+
+
+            repository = new MongoStatisticsPublisherRepository(connectionString, database);
         }
 
         /// <summary>
@@ -80,12 +91,12 @@
         /// <param name="address">IP address</param>
         public void AddConfiguration(string deployment, string hostName, string client, IPAddress address)
         {
-            this.deploymentId = deployment;
-            this.isSilo = false;
+            deploymentId = deployment;
+            isSilo = false;
             this.hostName = hostName;
-            this.clientId = client;
-            this.clientAddress = address;
-            this.generation = SiloAddress.AllocateNewGeneration();
+            clientId = client;
+            clientAddress = address;
+            generation = SiloAddress.AllocateNewGeneration();
         }
 
         /// <summary>
@@ -105,15 +116,15 @@
             IPEndPoint gatewayAddress,
             string hostName)
         {
-            this.deploymentId = deployment;
-            this.isSilo = silo;
-            this.siloName = siloId;
-            this.siloAddress = address;
-            this.gateway = gatewayAddress;
+            deploymentId = deployment;
+            isSilo = silo;
+            siloName = siloId;
+            siloAddress = address;
+            gateway = gatewayAddress;
             this.hostName = hostName;
-            if (!this.isSilo)
+            if (!isSilo)
             {
-                this.generation = SiloAddress.AllocateNewGeneration();
+                generation = SiloAddress.AllocateNewGeneration();
             }
         }
 
@@ -134,7 +145,7 @@
         /// </returns>
         async Task IClientMetricsDataPublisher.Init(ClientConfiguration config, IPAddress address, string clientId)
         {
-            this.repository = new MongoStatisticsPublisherRepository(config.DataConnectionString, MongoUrl.Create(config.DataConnectionString).DatabaseName);
+            repository = new MongoStatisticsPublisherRepository(config.DataConnectionString, MongoUrl.Create(config.DataConnectionString).DatabaseName);
         }
 
         /// <summary>
@@ -144,27 +155,27 @@
         /// <returns>Task for database operation</returns>
         public async Task ReportMetrics(IClientPerformanceMetrics metricsData)
         {
-            if (this.logger != null && this.logger.IsVerbose3)
-                this.logger.Verbose3(
+            if (logger != null && logger.IsVerbose3)
+                logger.Verbose3(
                     "MongoStatisticsPublisher.ReportMetrics (client) called with data: {0}.",
                     metricsData);
             try
             {
-                await this.repository.UpsertReportClientMetricsAsync(
+                await repository.UpsertReportClientMetricsAsync(
                         new OrleansClientMetricsTable
                             {
-                                DeploymentId = this.deploymentId,
-                                ClientId = this.clientId,
-                                Address = this.clientAddress.MapToIPv4().ToString(),
-                                HostName = this.hostName
+                                DeploymentId = deploymentId,
+                                ClientId = clientId,
+                                Address = clientAddress.MapToIPv4().ToString(),
+                                HostName = hostName
                         }, 
                             metricsData);
             }
             catch (Exception ex)
             {
-                if (this.logger != null && this.logger.IsVerbose)
+                if (logger != null && logger.IsVerbose)
                 {
-                    this.logger.Verbose("MongoStatisticsPublisher.ReportMetrics (client) failed: {0}", ex);
+                    logger.Verbose("MongoStatisticsPublisher.ReportMetrics (client) failed: {0}", ex);
                 }
 
                 throw;
@@ -191,33 +202,33 @@
         /// <returns>Task for database operation</returns>
         public async Task ReportMetrics(ISiloPerformanceMetrics metricsData)
         {
-            if (this.logger != null && this.logger.IsVerbose3) this.logger.Verbose3("MongoStatisticsPublisher.ReportMetrics (silo) called with data: {0}.", metricsData);
+            if (logger != null && logger.IsVerbose3) logger.Verbose3("MongoStatisticsPublisher.ReportMetrics (silo) called with data: {0}.", metricsData);
             try
             {
                 int gateWayPort = 0;
 
-                if (this.gateway != null)
+                if (gateway != null)
                 {
-                    gateWayPort = this.gateway.Port;
+                    gateWayPort = gateway.Port;
                 }
 
-                await this.repository.UpsertSiloMetricsAsync(
+                await repository.UpsertSiloMetricsAsync(
                     new OrleansSiloMetricsTable
                         {
-                            DeploymentId = this.deploymentId,
-                            SiloId = this.siloName,
-                            GatewayAddress = this.gateway.Address.MapToIPv4().ToString(),
-                            HostName = this.hostName,
+                            DeploymentId = deploymentId,
+                            SiloId = siloName,
+                            GatewayAddress = gateway.Address.MapToIPv4().ToString(),
+                            HostName = hostName,
                             GatewayPort = gateWayPort,
-                            Port = this.siloAddress.Endpoint.Port,
-                            Generation = this.generation,
-                            Address = this.siloAddress.Endpoint.Address.MapToIPv4().ToString()
+                            Port = siloAddress.Endpoint.Port,
+                            Generation = generation,
+                            Address = siloAddress.Endpoint.Address.MapToIPv4().ToString()
                     }, 
                     metricsData);
             }
             catch (Exception ex)
             {
-                if (this.logger != null && this.logger.IsVerbose) this.logger.Verbose("MongoStatisticsPublisher.ReportMetrics (silo) failed: {0}", ex);
+                if (logger != null && logger.IsVerbose) logger.Verbose("MongoStatisticsPublisher.ReportMetrics (silo) failed: {0}", ex);
                 throw;
             }
         }
@@ -241,12 +252,12 @@
         /// <returns>Task for database opearation</returns>
         public async Task ReportStats(List<ICounter> statsCounters)
         {
-            var siloOrClientName = (this.isSilo) ? this.siloName : this.clientId;
-            var id = (this.isSilo)
-                         ? this.siloAddress.ToLongString()
-                         : string.Format("{0}:{1}", siloOrClientName, this.generation);
-            if (this.logger != null && this.logger.IsVerbose3)
-                this.logger.Verbose3(
+            var siloOrClientName = (isSilo) ? siloName : clientId;
+            var id = (isSilo)
+                         ? siloAddress.ToLongString()
+                         : string.Format("{0}:{1}", siloOrClientName, generation);
+            if (logger != null && logger.IsVerbose3)
+                logger.Verbose3(
                     "ReportStats called with {0} counters, name: {1}, id: {2}",
                     statsCounters.Count,
                     siloOrClientName,
@@ -265,11 +276,11 @@
                 {
                     //The query template from which to retrieve the set of columns that are being inserted.
 
-                    insertTasks.Add(this.repository.InsertStatisticsCountersAsync(
+                    insertTasks.Add(repository.InsertStatisticsCountersAsync(
                         new OrleansStatisticsTable
                             {
-                                DeploymentId = this.deploymentId,
-                                HostName = this.hostName,
+                                DeploymentId = deploymentId,
+                                HostName = hostName,
                                 Name = siloOrClientName,
                                 Id = id
                         }, 
@@ -280,16 +291,16 @@
             }
             catch (Exception ex)
             {
-                if (this.logger != null && this.logger.IsVerbose) this.logger.Verbose("ReportStats faulted: {0}", ex.ToString());
+                if (logger != null && logger.IsVerbose) logger.Verbose("ReportStats faulted: {0}", ex.ToString());
                 foreach (var faultedTask in insertTasks.Where(t => t.IsFaulted))
                 {
-                    if (this.logger != null && this.logger.IsVerbose) this.logger.Verbose("Faulted task exception: {0}", faultedTask.ToString());
+                    if (logger != null && logger.IsVerbose) logger.Verbose("Faulted task exception: {0}", faultedTask.ToString());
                 }
 
                 throw;
             }
 
-            if (this.logger != null && this.logger.IsVerbose) this.logger.Verbose("ReportStats SUCCESS");
+            if (logger != null && logger.IsVerbose) logger.Verbose("ReportStats SUCCESS");
         }
 
 
