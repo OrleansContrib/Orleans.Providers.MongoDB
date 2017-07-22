@@ -1,25 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using Orleans.Providers.MongoDB.Repository;
+using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Reminders.Repository
 {
-    using global::MongoDB.Bson;
-    using global::MongoDB.Driver;
-
-    using Orleans.Providers.MongoDB.Repository;
-    using Orleans.Runtime;
-    using System.Reflection;
-
     public class MongoReminderTableRepository : DocumentRepository, IMongoReminderTableRepository
     {
         private const string RemindersCollectionName = "OrleansReminder";
         private const string ServiceId = "ServiceId";
         private const string GrainId = "GrainId";
         private const string ReminderName = "ReminderName";
-        private IGrainReferenceConverter grainReferenceConverter;
+        private readonly IGrainReferenceConverter grainReferenceConverter;
 
         public MongoReminderTableRepository(string connectionsString, string databaseName, IGrainReferenceConverter grainReferenceConverter)
             : base(connectionsString, databaseName)
@@ -27,88 +23,49 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
             this.grainReferenceConverter = grainReferenceConverter;
         }
 
-        public Task<ReminderTableData> ReadRangeRowsKey1Async(string serviceId, uint beginHash, uint endHash)
+        public async Task<ReminderTableData> ReadRangeRowsKey1Async(string serviceId, uint beginHash, uint endHash)
         {
             var collection = ReturnOrCreateRemindersCollection();
+            var remindersCursor =
+                await collection.FindAsync(r => r.ServiceId == serviceId && r.GrainHash > beginHash &&
+                                                r.GrainHash <= endHash);
 
-            var reminders =
-                collection.AsQueryable()
-                    .Where(r => r.ServiceId == serviceId && r.GrainHash > beginHash && r.GrainHash <= endHash)
-                    .ToList();
+            var reminders = await remindersCursor.ToListAsync();
 
-            return this.ProcessRemindersList(reminders);
+            return await RemindersHelper.ProcessRemindersList(reminders, grainReferenceConverter);
         }
 
-        public Task<ReminderEntry> ReadReminderRowAsync(string serviceId, GrainReference grainRef, string reminderName)
+        public async Task<ReminderEntry> ReadReminderRowAsync(string serviceId, GrainReference grainRef, string reminderName)
         {
             var collection = ReturnOrCreateRemindersCollection();
+            var reminderCursor = await collection.FindAsync(r =>
+                r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString()
+                && r.ReminderName == reminderName);
 
-            var reminder =
-                collection.AsQueryable()
-                    .FirstOrDefault(
-                        r =>
-                        r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString()
-                        && r.ReminderName == reminderName);
+            var reminder = await reminderCursor.ToListAsync();
 
-            return Task.FromResult(Parse(reminder));
+            return RemindersHelper.Parse(reminder.FirstOrDefault(), grainReferenceConverter);
         }
 
         public async Task<ReminderTableData> ReadReminderRowsAsync(string serviceId, GrainReference grainRef)
         {
             var collection = ReturnOrCreateRemindersCollection();
+            var remindersCursor = await collection.FindAsync(r =>
+                r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString());
 
-            var reminders =
-                collection.AsQueryable()
-                    .Where(
-                        r =>
-                        r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString()).ToList();
-
-            return await this.ProcessRemindersList(reminders);
+            var reminders = await remindersCursor.ToListAsync();
+            return await RemindersHelper.ProcessRemindersList(reminders, grainReferenceConverter);
         }
 
-        public Task<ReminderTableData> ReadRangeRowsKey2Async(string serviceId, uint beginHash, uint endHash)
+        public async Task<ReminderTableData> ReadRangeRowsKey2Async(string serviceId, uint beginHash, uint endHash)
         {
             var collection = ReturnOrCreateRemindersCollection();
+            var remindersCursor =
+                await collection.FindAsync(r => r.ServiceId == serviceId &&
+                                                (r.GrainHash > beginHash || r.GrainHash <= endHash));
 
-            var reminders =
-                collection.AsQueryable()
-                    .Where(r => r.ServiceId == serviceId && (r.GrainHash > beginHash || r.GrainHash <= endHash))
-                    .ToList();
-
-            return this.ProcessRemindersList(reminders);
-        }
-
-        private Task<ReminderTableData> ProcessRemindersList(List<RemindersCollection> reminders)
-        {
-            List<ReminderEntry> reminderEntryList = new List<ReminderEntry>();
-            foreach (var reminder in reminders)
-            {
-                reminderEntryList.Add(this.Parse(reminder));
-            }
-
-            return Task.FromResult(new ReminderTableData(reminderEntryList));
-        }
-
-        private ReminderEntry Parse(RemindersCollection reminder)
-        {
-            if (reminder != null)
-            {
-                string grainId = reminder.GrainId;
-
-                if (!string.IsNullOrEmpty(grainId))
-                {
-                    return new ReminderEntry
-                    {
-                        GrainRef = this.grainReferenceConverter.GetGrainFromKeyString(grainId),
-                        ReminderName = reminder.ReminderName,
-                        StartAt = reminder.StartTime,
-                        Period = TimeSpan.FromMilliseconds(reminder.Period),
-                        ETag = reminder.Version.ToString()
-                    };
-                }
-            }
-
-            return null;
+            var reminders = await remindersCursor.ToListAsync();
+            return await RemindersHelper.ProcessRemindersList(reminders, grainReferenceConverter);
         }
 
         private IMongoCollection<RemindersCollection> ReturnOrCreateRemindersCollection()
@@ -144,28 +101,25 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
         public async Task<ReminderTableData> ReadReminderRowAsync(string serviceId, GrainReference grainRef)
         {
             var collection = ReturnOrCreateRemindersCollection();
+            var remindersCursor = await collection.FindAsync(r =>
+                r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString());
 
-            var reminders = collection.AsQueryable()
-                    .Where(
-                        r =>
-                        r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString()).ToList();
-
-            return await this.ProcessRemindersList(reminders);
+            var reminders = await remindersCursor.ToListAsync();
+            return await RemindersHelper.ProcessRemindersList(reminders, grainReferenceConverter);
         }
 
         public async Task RemoveReminderRowsAsync(string serviceId)
         {
             var collection = ReturnOrCreateRemindersCollection();
-
             await collection.DeleteManyAsync(r => r.ServiceId == serviceId);
         }
 
         public async Task InitTables()
         {
-            if (!await base.CollectionExistsAsync(RemindersCollectionName))
+            if (!await CollectionExistsAsync(RemindersCollectionName))
             {
                 // Create Index
-                await base.ReturnOrCreateCollection(RemindersCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(ServiceId).Ascending(GrainId).Ascending(ReminderName), new CreateIndexOptions { Unique = true });
+                await ReturnOrCreateCollection(RemindersCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(ServiceId).Ascending(GrainId).Ascending(ReminderName), new CreateIndexOptions { Unique = true });
             }
         }
 
@@ -177,13 +131,12 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
             TimeSpan period)
         {
             var collection = ReturnOrCreateRemindersCollection();
+            var remindersCursor = await collection.FindAsync(r =>
+                r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString()
+                && r.ReminderName == reminderName);
 
-            var reminder =
-                collection.AsQueryable()
-                    .FirstOrDefault(
-                        r =>
-                        r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString()
-                        && r.ReminderName == reminderName);
+            var reminders = await remindersCursor.ToListAsync();
+            var reminder = reminders.FirstOrDefault();
 
             if (reminder == null)
             {
@@ -203,25 +156,17 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
 
                 return "0";
             }
-            else
-            {
-                reminder.Version++;
+            reminder.Version++;
 
-                // Update
-                var update = new UpdateDefinitionBuilder<RemindersCollection>()
+            // Update
+            var update = new UpdateDefinitionBuilder<RemindersCollection>()
                 .Set(x => x.StartTime, startTime)
                 .Set(x => x.Period, period.TotalMilliseconds)
                 .Set(x => x.GrainHash, grainRef.GetUniformHashCode())
                 .Set(x => x.Version, reminder.Version);
 
-                //reminder.StartTime = startTime;
-                //reminder.Period = Convert.ToInt64(period.TotalMilliseconds);
-                //reminder.GrainHash = grainRef.GetUniformHashCode();
-                //reminder.Version++;
-
-                var result = await collection.UpdateOneAsync(r => r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString() && r.ReminderName == reminderName, update);
-                return reminder.Version.ToString();
-            }
+            await collection.UpdateOneAsync(r => r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString() && r.ReminderName == reminderName, update);
+            return reminder.Version.ToString();
         }
     }
 }

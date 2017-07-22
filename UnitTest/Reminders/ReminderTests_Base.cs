@@ -169,6 +169,7 @@ namespace UnitTests.TimerTests
             }
 
             this.StartAdditionalSilos(1);
+            Thread.Sleep(period.Multiply(5));
 
             //Block until all tasks complete.
             await Task.WhenAll(tasks).WithTimeout(ENDWAIT);

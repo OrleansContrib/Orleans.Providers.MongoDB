@@ -22,7 +22,6 @@
             {
                 //var config = ClusterConfiguration.LocalhostPrimarySilo();
                 this.LoadFromFile(@".\OrleansConfiguration.xml");
-
                 // Init Mongo Membership
                 this.Globals.LivenessType = GlobalConfiguration.LivenessProviderType.Custom;
                 this.Globals.MembershipTableAssembly = "Orleans.Providers.MongoDB";
@@ -45,9 +44,10 @@
             hosts.Add("Primary");
 
             this.Deploy(hosts);
-
+            GrainClient.Initialize(ClientConfiguration.LoadFromFile(@".\ClientConfiguration.xml"));
             var controlProxy = GrainClient.GrainFactory.GetGrain<IReminderTestGrain2>(Guid.NewGuid());
             controlProxy.EraseReminderTable(this.ClusterConfiguration.Globals.DataConnectionString).WaitWithThrow(TestConstants.InitTimeout);
+
         }
 
         [TestMethod]

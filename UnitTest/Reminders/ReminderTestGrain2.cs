@@ -41,6 +41,7 @@ namespace UnitTests.Grains
             period = GetDefaultPeriod(logger);
             logger.Info("OnActivateAsync.");
             filePrefix = "g" + this.IdentityString + "_";
+            WrongReminderGrain.ExtendTimeOutPeriod();
             return GetMissingReminders();
         }
 
@@ -62,6 +63,7 @@ namespace UnitTests.Grains
             
             logger.Info("Starting reminder {0}.", reminderName);
             IGrainReminder r = null;
+
             if (validate)
                 r = await RegisterOrUpdateReminder(reminderName, usePeriod - TimeSpan.FromSeconds(2), usePeriod);
             else
@@ -251,7 +253,7 @@ namespace UnitTests.Grains
             filePrefix = "gc" + this.IdentityString + "_";
 
             //*grn / 549BB267 / 4b7d05e0f95eff7cea95b210de1f338903000000549bb267 - 0xC1FA7939
-
+            WrongReminderGrain.ExtendTimeOutPeriod();
             await GetMissingReminders();
         }
 
@@ -407,16 +409,20 @@ namespace UnitTests.Grains
 
         public async Task<bool> StartReminder(string reminderName)
         {
+            logger.Info("Starting reminder {0}.", reminderName);
+            ExtendTimeOutPeriod();
+            IGrainReminder r = await RegisterOrUpdateReminder(reminderName, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(3));
+            logger.Info("Started reminder {0}. It shouldn't have succeeded!", r);
+            return true;
+        }
+
+        public static void ExtendTimeOutPeriod()
+        {
             var ass = Assembly.GetAssembly(typeof(ClientConfiguration));
             var type = ass.GetType("Orleans.Runtime.Constants");
             var field = type.GetField("MinReminderPeriod");
             field.SetValue(null, TimeSpan.FromSeconds(10));
             var a = field.GetValue(null);
-
-            logger.Info("Starting reminder {0}.", reminderName);
-            IGrainReminder r = await RegisterOrUpdateReminder(reminderName, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(3));
-            logger.Info("Started reminder {0}. It shouldn't have succeeded!", r);
-            return true;
         }
     }
     #endregion

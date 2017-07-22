@@ -190,6 +190,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reminders\MongoReminderTable.cs" />
     <Compile Include="Reminders\RemindersCollection.cs" />
+    <Compile Include="Reminders\RemindersHelper.cs" />
     <Compile Include="Reminders\Repository\IMongoReminderTableRepository.cs" />
     <Compile Include="Reminders\Repository\MongoReminderTableRepository.cs" />
     <Compile Include="Repository\ConnectionManager\ConnectionDefinitions.cs" />

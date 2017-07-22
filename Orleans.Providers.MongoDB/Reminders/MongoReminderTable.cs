@@ -41,16 +41,16 @@
 
         public async Task<ReminderTableData> ReadRows(GrainReference key)
         {
-            if (this.logger.IsVerbose3)
-            {
-                this.logger.Verbose3(
-                    string.Format(
-                        "ReminderTable.ReadRows called with serviceId {0}.",
-                        this.serviceId));
-            }
-
             try
             {
+                if (this.logger.IsVerbose3)
+                {
+                    this.logger.Verbose3(
+                        string.Format(
+                            "ReminderTable.ReadRows called with serviceId {0}.",
+                            this.serviceId));
+                }
+
                 return await this.repository.ReadReminderRowAsync(this.serviceId, key);
             }
             catch (Exception ex)
@@ -75,9 +75,7 @@
             if (this.logger.IsVerbose3)
             {
                 this.logger.Verbose3(
-                    string.Format(
-                        "ReminderTable.ReadRows called with serviceId {0}.",
-                        this.serviceId));
+                    $"ReminderTable.ReadRows called with serviceId {this.serviceId}.");
             }
 
             try
@@ -107,9 +105,7 @@
             if (this.logger.IsVerbose3)
             {
                 this.logger.Verbose3(
-                    string.Format(
-                        "ReminderTable.ReadRow called with serviceId {0}.",
-                        this.serviceId));
+                    $"ReminderTable.ReadRow called with serviceId {this.serviceId}.");
             }
 
             try
@@ -132,9 +128,7 @@
             if (this.logger.IsVerbose3)
             {
                 this.logger.Verbose3(
-                    string.Format(
-                        "ReminderTable.UpsertRow called with serviceId {0}.",
-                        this.serviceId));
+                    $"ReminderTable.UpsertRow called with serviceId {this.serviceId}.");
             }
 
             try
@@ -166,9 +160,7 @@
             if (this.logger.IsVerbose3)
             {
                 this.logger.Verbose3(
-                    string.Format(
-                        "ReminderTable.RemoveRow called with serviceId {0}.",
-                        this.serviceId));
+                    $"ReminderTable.RemoveRow called with serviceId {this.serviceId}.");
             }
 
             try
@@ -191,9 +183,7 @@
             if (this.logger.IsVerbose3)
             {
                 this.logger.Verbose3(
-                    string.Format(
-                        "ReminderTable.TestOnlyClearTable called with serviceId {0}.",
-                        this.serviceId));
+                    $"ReminderTable.TestOnlyClearTable called with serviceId {this.serviceId}.");
             }
 
             try
