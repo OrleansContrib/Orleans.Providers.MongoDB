@@ -117,8 +117,6 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             CustomJsonWriter writer = new CustomJsonWriter(new StringWriter(sb));
             JsonTextReader reader = new JsonTextReader(new StringReader(entityData));
 
-            int n = 0;
-
             while (reader.Read())
             {
                 if (reader.Value != null)

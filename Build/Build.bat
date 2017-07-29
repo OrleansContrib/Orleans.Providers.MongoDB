@@ -11,6 +11,8 @@ IF NOT EXIST %MSBUILDDIR%msbuild.exe goto MissingMSBuildExe
 "%MSBUILDDIR%msbuild.exe" /version
 
 REM "%MSBUILDDIR%msbuild.exe" ..\Orleans.Providers.MongoDB\Orleans.Providers.MongoDB.sln /t:Build /p:Configuration=Release /p:TargetFramework=v4.0
+"%programfiles(x86)%\MSBuild\14.0\Bin\msbuild.exe" ..\Orleans.Providers.MongoDB\Orleans.Providers.MongoDB.sln /t:Build /p:Configuration=Release /p:TargetFramework=v4.0
+
 REM "..\Orleans.Providers.MongoDB\.nuget\nuget.exe" spec "..\Orleans.Providers.MongoDB\bin\Release\Orleans.Providers.MongoDB.dll"
 "..\Orleans.Providers.MongoDB\.nuget\nuget.exe" pack Orleans.Providers.MongoDB.dll.nuspec
 

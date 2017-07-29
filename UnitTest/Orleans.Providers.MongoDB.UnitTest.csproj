@@ -220,6 +220,7 @@
     <Compile Include="Reminders\ReminderTestGrain2.cs" />
     <Compile Include="Reminders\ReminderTests_Base.cs" />
     <Compile Include="Reminders\Utils.cs" />
+    <Compile Include="Storage\StorageTableTestsBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -244,6 +245,7 @@
     <Analyzer Include="..\Orleans.Providers.MongoDB\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />
     <Analyzer Include="..\Orleans.Providers.MongoDB\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

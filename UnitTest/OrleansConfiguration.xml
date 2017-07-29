@@ -4,17 +4,14 @@
     There is currently a known issue with the "Custom" membership provider OrleansConfiguration.xml configuration file that will fail to parse correctly. For this reason you have to provide a placeholder SystemStore in the xml and then configure the provider in code before starting the Silo.
     -->
     <SystemStore SystemStoreType="None" DataConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" DeploymentId="OrleansTest" />
-    <!-- SqlServer Providers
-    
-    <SystemStore SystemStoreType ="SqlServer"
-               DeploymentId="OrleansTest"
-               DataConnectionString="Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Orleans;Integrated Security=True;Pooling=False;Max Pool Size=200;Asynchronous Processing=True;MultipleActiveResultSets=True" AdoInvariant="System.Data.SqlClient" />
-    <StatisticsProviders>
-      <Provider Type="Orleans.Providers.SqlServer.SqlStatisticsPublisher" Name="MySQLStatsProvider" ConnectionString="Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Orleans;Integrated Security=True;Pooling=False;Max Pool Size=200;Asynchronous Processing=True;MultipleActiveResultSets=True" />
-    </StatisticsProviders>
-    -->
-    <!--<SeedNode Address="localhost" Port="11111" />-->
-  
+
+    <StorageProviders>
+      <!--Standard MongoProvider-->
+      <Provider Type="Orleans.Providers.MongoDB.StorageProviders.MongoDBStorage" Name="MongoDBStore" Database="" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" />
+      <!--Custom StorageProvider that adds OrleansStorage Prefix to each collection-->
+      <!--<Provider Type="Orleans.Providers.MongoDB.Test.Host.CustomStorageProvider.MongoDBStorageWithOrleansPrefix" Name="MongoDBStore" Database="" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" />-->
+    </StorageProviders>
+
   </Globals>
   <Defaults>
     <Networking Address="" Port="11111"/>
