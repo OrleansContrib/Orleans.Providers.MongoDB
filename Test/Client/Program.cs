@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading;
-
 using Orleans;
 using Orleans.Providers.MongoDB.Test.GrainInterfaces;
 using Orleans.Runtime.Configuration;
@@ -12,7 +11,6 @@ internal class Program
         // initialize the grain client, with some retry logic
         var initialized = false;
         while (!initialized)
-        {
             try
             {
                 // Todo: This configuration should not be called from the config file
@@ -24,7 +22,6 @@ internal class Program
                 Console.WriteLine(ex.ToString());
                 Thread.Sleep(TimeSpan.FromSeconds(1));
             }
-        }
 
         // get a reference to the grain from the grain factory
         var helloWorldGrain = GrainClient.GrainFactory.GetGrain<IHelloWorldGrain>(1);
@@ -40,16 +37,12 @@ internal class Program
         // Test State 
 
         var employee = GrainClient.GrainFactory.GetGrain<IEmployeeGrain>(1);
-        int employeeId = employee.ReturnLevel().Result;
+        var employeeId = employee.ReturnLevel().Result;
 
         if (employeeId == 100)
-        {
             employee.SetLevel(50);
-        }
         else
-        {
             employee.SetLevel(100);
-        }
 
         employeeId = employee.ReturnLevel().Result;
 

@@ -1,16 +1,15 @@
-﻿namespace Orleans.Providers.MongoDB.Membership
+﻿using System;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace Orleans.Providers.MongoDB.Membership
 {
     #region Using
-
-    using System;
-
-    using global::MongoDB.Bson;
-    using global::MongoDB.Bson.Serialization.Attributes;
 
     #endregion
 
     /// <summary>
-    /// The membership table.
+    ///     The membership table.
     /// </summary>
     public class MembershipCollection
     {
@@ -38,6 +37,5 @@
         public int Status { get; set; }
 
         public string SuspectTimes { get; set; }
-
     }
 }

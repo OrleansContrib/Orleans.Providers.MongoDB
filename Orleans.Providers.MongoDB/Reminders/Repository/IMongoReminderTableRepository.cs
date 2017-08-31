@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Orleans.Providers.MongoDB.Repository;
+using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Reminders.Repository
 {
-    using Orleans.Providers.MongoDB.Repository;
-    using Orleans.Runtime;
-
     public interface IMongoReminderTableRepository : IDocumentRepository
     {
         Task<ReminderTableData> ReadRangeRowsKey1Async(string serviceId, uint beginHash, uint endHash);

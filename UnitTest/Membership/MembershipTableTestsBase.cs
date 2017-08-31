@@ -2,47 +2,44 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Orleans;
 using Orleans.Messaging;
+using Orleans.Providers.MongoDB.UnitTest.Membership;
+using Orleans.Providers.MongoDB.UnitTest.Reminders;
 using Orleans.Runtime;
 using Orleans.Runtime.Configuration;
+using Orleans.TestingHost.Utils;
+using Utils = Orleans.Providers.MongoDB.UnitTest.Reminders.Utils;
 
 namespace UnitTests.MembershipTests
 {
-    using System.Diagnostics;
-    using System.Reflection;
-
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-    using Orleans.Providers.MongoDB.UnitTest.Membership;
-    using Orleans.Providers.MongoDB.UnitTest.Reminders;
-    using Orleans.TestingHost;
-    using Orleans.TestingHost.Utils;
-
     public abstract class MembershipTableTestsBase : IDisposable
     {
-        private static readonly string hostName = Dns.GetHostName();
-        private readonly Logger logger;
-        private readonly IMembershipTable membershipTable;
-        private readonly IGatewayListProvider gatewayListProvider;
-        private readonly string deploymentId;
-
-        protected const string testDatabaseName = "OrleansMembershipTest";//for relational storage
+        protected const string testDatabaseName = "OrleansMembershipTest"; //for relational storage
 
         private const bool IsTrue = true;
+        private static readonly string hostName = Dns.GetHostName();
+
+        private static int generation;
+        private readonly string deploymentId;
+        private readonly IGatewayListProvider gatewayListProvider;
+        private readonly Logger logger;
+        private readonly IMembershipTable membershipTable;
 
         protected MembershipTableTestsBase(ClusterConfiguration clusterConfiguration)
         {
-            ConstructorInfo loggerGlobalConfiguration = typeof(Logger).GetConstructors
-           (BindingFlags.Instance | BindingFlags.NonPublic)[0];
+            var loggerGlobalConfiguration = typeof(Logger).GetConstructors
+                (BindingFlags.Instance | BindingFlags.NonPublic)[0];
 
             //logger = (TraceLogger)loggerGlobalConfiguration.Invoke(new object[] { GetType().Name, TraceLogger.LoggerType.Application });
 
             //logger = (TraceLogger)loggerGlobalConfiguration.Invoke(new object[] {});
 
-            this.logger = new NoOpTestLogger();
+            logger = new NoOpTestLogger();
 
             //LogManager.Initialize(new NodeConfiguration());
             //logger = LogManager.GetLogger(GetType().Name, TraceLogger.LoggerType.Application);
@@ -53,10 +50,10 @@ namespace UnitTests.MembershipTests
             //BindingFlags.NonPublic | BindingFlags.Instance);
             //        dynMethod.Invoke(this, new object[] { methodParams });
 
-            ConstructorInfo ctorGlobalConfiguration = typeof(GlobalConfiguration).GetConstructors
-            (BindingFlags.Instance | BindingFlags.NonPublic)[0];
+            var ctorGlobalConfiguration = typeof(GlobalConfiguration).GetConstructors
+                (BindingFlags.Instance | BindingFlags.NonPublic)[0];
 
-            GlobalConfiguration globalConfiguration = (GlobalConfiguration)ctorGlobalConfiguration.Invoke(new object[] {});
+            var globalConfiguration = (GlobalConfiguration) ctorGlobalConfiguration.Invoke(new object[] { });
             globalConfiguration.DeploymentId = globalConfiguration.DeploymentId;
             //globalConfiguration.AdoInvariant = GetAdoInvariant();
             globalConfiguration.DataConnectionString = clusterConfiguration.Globals.DataConnectionString;
@@ -67,9 +64,10 @@ namespace UnitTests.MembershipTests
             globalConfiguration.MembershipTableAssembly = clusterConfiguration.Globals.MembershipTableAssembly;
             globalConfiguration.ReminderServiceType = clusterConfiguration.Globals.ReminderServiceType;
             globalConfiguration.DeploymentId = clusterConfiguration.Globals.DeploymentId;
-            
+
             membershipTable = CreateMembershipTable(logger);
-            membershipTable.InitializeMembershipTable(globalConfiguration, IsTrue, logger).WithTimeout(TimeSpan.FromMinutes(1)).Wait();
+            membershipTable.InitializeMembershipTable(globalConfiguration, IsTrue, logger)
+                .WithTimeout(TimeSpan.FromMinutes(1)).Wait();
 
             var clientConfiguration = new ClientConfiguration
             {
@@ -79,15 +77,14 @@ namespace UnitTests.MembershipTests
             };
 
             gatewayListProvider = CreateGatewayListProvider(logger);
-            gatewayListProvider.InitializeGatewayListProvider(clientConfiguration, logger).WithTimeout(TimeSpan.FromMinutes(1)).Wait();
+            gatewayListProvider.InitializeGatewayListProvider(clientConfiguration, logger)
+                .WithTimeout(TimeSpan.FromMinutes(1)).Wait();
         }
 
         public void Dispose()
         {
             if (membershipTable != null && SiloInstanceTableTestConstants.DeleteEntriesAfterTest)
-            {
                 membershipTable.DeleteMembershipTableEntries(deploymentId).Wait();
-            }
         }
 
         protected abstract IGatewayListProvider CreateGatewayListProvider(Logger logger);
@@ -146,9 +143,9 @@ namespace UnitTests.MembershipTests
             Assert.IsNotNull(data);
             Assert.AreEqual(0, data.Members.Count);
 
-            TableVersion nextTableVersion = data.Version.Next();
+            var nextTableVersion = data.Version.Next();
 
-            bool ok = await membershipTable.InsertRow(membershipEntry, nextTableVersion);
+            var ok = await membershipTable.InsertRow(membershipEntry, nextTableVersion);
             Assert.IsTrue(ok, "InsertRow failed");
 
             data = await membershipTable.ReadAll();
@@ -161,16 +158,16 @@ namespace UnitTests.MembershipTests
 
         protected async Task MembershipTable_ReadRow_Insert_Read(bool extendedProtocol = IsTrue)
         {
-            MembershipTableData data = await membershipTable.ReadAll();
+            var data = await membershipTable.ReadAll();
 
             logger.Info("Membership.ReadAll returned VableVersion={0} Data={1}", data.Version, data);
 
             Assert.AreEqual(0, data.Members.Count);
 
-            TableVersion newTableVersion = data.Version.Next();
+            var newTableVersion = data.Version.Next();
 
-            MembershipEntry newEntry = CreateMembershipEntryForTest();
-            bool ok = await membershipTable.InsertRow(newEntry, newTableVersion);
+            var newEntry = CreateMembershipEntryForTest();
+            var ok = await membershipTable.InsertRow(newEntry, newTableVersion);
 
             Assert.IsTrue(ok, "InsertRow failed");
 
@@ -188,7 +185,7 @@ namespace UnitTests.MembershipTests
             if (extendedProtocol)
                 Assert.AreEqual(1, data.Version.Version);
 
-            TableVersion nextTableVersion = data.Version.Next();
+            var nextTableVersion = data.Version.Next();
 
             ok = await membershipTable.InsertRow(newEntry, nextTableVersion);
             Assert.IsFalse(ok, "InsertRow should have failed - duplicate entry");
@@ -211,7 +208,7 @@ namespace UnitTests.MembershipTests
                 Assert.AreEqual(newTableVersion.Version, data.Version.Version);
             }
             var membershipEntry = data.Members[0].Item1;
-            string eTag = data.Members[0].Item2;
+            var eTag = data.Members[0].Item2;
             logger.Info("Membership.ReadRow returned MembershipEntry ETag={0} Entry={1}", eTag, membershipEntry);
 
             Assert.IsNotNull(eTag);
@@ -220,15 +217,15 @@ namespace UnitTests.MembershipTests
 
         protected async Task MembershipTable_ReadAll_Insert_ReadAll(bool extendedProtocol = IsTrue)
         {
-            MembershipTableData data = await membershipTable.ReadAll();
+            var data = await membershipTable.ReadAll();
             logger.Info("Membership.ReadAll returned VableVersion={0} Data={1}", data.Version, data);
 
             Assert.AreEqual(0, data.Members.Count);
 
-            TableVersion newTableVersion = data.Version.Next();
+            var newTableVersion = data.Version.Next();
 
-            MembershipEntry newEntry = CreateMembershipEntryForTest();
-            bool ok = await membershipTable.InsertRow(newEntry, newTableVersion);
+            var newEntry = CreateMembershipEntryForTest();
+            var ok = await membershipTable.InsertRow(newEntry, newTableVersion);
 
             Assert.IsTrue(ok, "InsertRow failed");
 
@@ -245,7 +242,7 @@ namespace UnitTests.MembershipTests
             }
 
             var membershipEntry = data.Members[0].Item1;
-            string eTag = data.Members[0].Item2;
+            var eTag = data.Members[0].Item2;
             logger.Info("Membership.ReadAll returned MembershipEntry ETag={0} Entry={1}", eTag, membershipEntry);
 
             Assert.IsNotNull(eTag);
@@ -260,21 +257,23 @@ namespace UnitTests.MembershipTests
             Assert.AreEqual(0, tableData.Version.Version);
             Assert.AreEqual(0, tableData.Members.Count);
 
-            for (int i = 1; i < 10; i++)
+            for (var i = 1; i < 10; i++)
             {
                 var siloEntry = CreateMembershipEntryForTest();
 
                 siloEntry.SuspectTimes =
                     new List<Tuple<SiloAddress, DateTime>>
                     {
-                        new Tuple<SiloAddress, DateTime>(CreateSiloAddressForTest(), GetUtcNowWithSecondsResolution().AddSeconds(1)),
-                        new Tuple<SiloAddress, DateTime>(CreateSiloAddressForTest(), GetUtcNowWithSecondsResolution().AddSeconds(2))
+                        new Tuple<SiloAddress, DateTime>(CreateSiloAddressForTest(),
+                            GetUtcNowWithSecondsResolution().AddSeconds(1)),
+                        new Tuple<SiloAddress, DateTime>(CreateSiloAddressForTest(),
+                            GetUtcNowWithSecondsResolution().AddSeconds(2))
                     };
 
-                TableVersion tableVersion = tableData.Version.Next();
+                var tableVersion = tableData.Version.Next();
 
                 logger.Info("Calling InsertRow with Entry = {0} TableVersion = {1}", siloEntry, tableVersion);
-                bool ok = await membershipTable.InsertRow(siloEntry, tableVersion);
+                var ok = await membershipTable.InsertRow(siloEntry, tableVersion);
 
                 Assert.IsTrue(ok, "InsertRow failed");
 
@@ -287,7 +286,7 @@ namespace UnitTests.MembershipTests
                 if (extendedProtocol)
                 {
                     logger.Info("Calling UpdateRow with Entry = {0} correct eTag = {1} old version={2}", siloEntry,
-                                etagBefore, tableVersion != null ? tableVersion.ToString() : "null");
+                        etagBefore, tableVersion != null ? tableVersion.ToString() : "null");
                     ok = await membershipTable.UpdateRow(siloEntry, etagBefore, tableVersion);
                     Assert.IsFalse(ok, $"row update should have failed - Table Data = {tableData}");
                     tableData = await membershipTable.ReadAll();
@@ -318,7 +317,7 @@ namespace UnitTests.MembershipTests
                 if (extendedProtocol)
                 {
                     logger.Info("Calling UpdateRow with Entry = {0} correct eTag = {1} old version={2}", siloEntry,
-                                etagAfter, tableVersion != null ? tableVersion.ToString() : "null");
+                        etagAfter, tableVersion != null ? tableVersion.ToString() : "null");
 
                     ok = await membershipTable.UpdateRow(siloEntry, etagAfter, tableVersion);
 
@@ -345,10 +344,10 @@ namespace UnitTests.MembershipTests
             if (!full)
                 return ToString();
 
-            List<SiloAddress> suspecters = entry.SuspectTimes == null
+            var suspecters = entry.SuspectTimes == null
                 ? null
                 : entry.SuspectTimes.Select(tuple => tuple.Item1).ToList();
-            List<DateTime> timestamps = entry.SuspectTimes == null
+            var timestamps = entry.SuspectTimes == null
                 ? null
                 : entry.SuspectTimes.Select(tuple => tuple.Item2).ToList();
             return string.Format("[SiloAddress={0} SiloName={1} Status={2} HostName={3} ProxyPort={4} " +
@@ -369,7 +368,7 @@ namespace UnitTests.MembershipTests
                 timestamps == null
                     ? ""
                     : "SuspectTimes = " + Utils.EnumerableToString(timestamps, LogFormatter.PrintDate)
-                );
+            );
         }
 
         protected async Task MembershipTable_UpdateRowInParallel(bool extendedProtocol = IsTrue)
@@ -378,9 +377,10 @@ namespace UnitTests.MembershipTests
 
             var data = CreateMembershipEntryForTest();
 
-            TableVersion newTableVer = tableData.Version.Next();
+            var newTableVer = tableData.Version.Next();
 
-            var insertions = Task.WhenAll(Enumerable.Range(1, 20).Select(i => membershipTable.InsertRow(data, newTableVer)));
+            var insertions =
+                Task.WhenAll(Enumerable.Range(1, 20).Select(i => membershipTable.InsertRow(data, newTableVer)));
 
             Assert.IsTrue((await insertions).Single(x => x), "InsertRow failed");
 
@@ -392,7 +392,7 @@ namespace UnitTests.MembershipTests
                     var updatedTableData = await membershipTable.ReadAll();
                     var updatedRow = updatedTableData.Get(data.SiloAddress);
 
-                    TableVersion tableVersion = updatedTableData.Version.Next();
+                    var tableVersion = updatedTableData.Version.Next();
 
                     await Task.Delay(10);
                     done = await membershipTable.UpdateRow(updatedRow.Item1, updatedRow.Item2, tableVersion);
@@ -409,11 +409,10 @@ namespace UnitTests.MembershipTests
             Assert.AreEqual(1, tableData.Members.Count);
         }
 
-        private static int generation;
         // Utility methods
         private static MembershipEntry CreateMembershipEntryForTest()
         {
-            SiloAddress siloAddress = CreateSiloAddressForTest();
+            var siloAddress = CreateSiloAddressForTest();
 
 
             var membershipEntry = new MembershipEntry

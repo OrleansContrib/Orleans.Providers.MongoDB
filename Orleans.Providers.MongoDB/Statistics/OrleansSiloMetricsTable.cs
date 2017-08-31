@@ -1,11 +1,15 @@
-﻿namespace Orleans.Providers.MongoDB.Statistics.Repository
+﻿using System;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace Orleans.Providers.MongoDB.Statistics.Repository
 {
-    using System;
-
-    using global::MongoDB.Bson.Serialization.Attributes;
-
     public class OrleansSiloMetricsTable
     {
+        public OrleansSiloMetricsTable()
+        {
+            TimeStamp = DateTime.Now;
+        }
+
         public string DeploymentId { get; set; }
         public string SiloId { get; set; }
         public string Address { get; set; }
@@ -25,14 +29,11 @@
         public long RequestQueueLength { get; set; }
         public bool IsOverloaded { get; set; }
         public long ClientCount { get; set; }
+
         [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime TimeStamp { get; set; }
+
         public long AvailablePhysicalMemory { get; set; }
         public long TotalPhysicalMemory { get; set; }
-
-        public OrleansSiloMetricsTable()
-        {
-            this.TimeStamp = DateTime.Now;
-        }
     }
 }

@@ -1,10 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Text;
-using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Orleans.Providers.MongoDB.StorageProviders.Serializing
 {
@@ -32,11 +28,8 @@ namespace Orleans.Providers.MongoDB.StorageProviders.Serializing
         {
             var hasToken = base.Read();
             if (hasToken && TokenType == JsonToken.PropertyName && Value != null && Value.Equals("__type"))
-            {
                 SetToken(JsonToken.PropertyName, "$type");
-            }
             return hasToken;
         }
     }
-
 }

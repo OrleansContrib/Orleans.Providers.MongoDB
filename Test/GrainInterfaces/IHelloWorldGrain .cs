@@ -1,7 +1,7 @@
-﻿namespace Orleans.Providers.MongoDB.Test.GrainInterfaces
-{
-    using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
+namespace Orleans.Providers.MongoDB.Test.GrainInterfaces
+{
     public interface IHelloWorldGrain : IGrainWithIntegerKey
     {
         #region Public methods and operators

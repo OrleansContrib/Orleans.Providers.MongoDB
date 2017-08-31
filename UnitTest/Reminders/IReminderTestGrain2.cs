@@ -1,12 +1,10 @@
-﻿namespace Orleans.Providers.MongoDB.UnitTest.Reminders
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Orleans.Runtime;
+
+namespace Orleans.Providers.MongoDB.UnitTest.Reminders
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-
-    using Orleans;
-    using Orleans.Runtime;
-
     public interface IReminderTestGrain2 : IGrainWithGuidKey
     {
         Task<IGrainReminder> StartReminder(string reminderName, TimeSpan? period = null, bool validate = false);
@@ -33,10 +31,9 @@
     }
 
     public interface IReminderGrainWrong : IGrainWithIntegerKey
-    // since it doesnt implement IRemindable, we should get an error at run time
-    // we need a way to let the user know at compile time if s/he doesn't implement IRemindable yet tries to register a reminder
+        // since it doesnt implement IRemindable, we should get an error at run time
+        // we need a way to let the user know at compile time if s/he doesn't implement IRemindable yet tries to register a reminder
     {
         Task<bool> StartReminder(string reminderName);
     }
 }
-

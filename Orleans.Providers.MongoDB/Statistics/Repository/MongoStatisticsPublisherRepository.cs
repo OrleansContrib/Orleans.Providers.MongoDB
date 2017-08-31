@@ -1,29 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using Orleans.Providers.MongoDB.Repository;
+using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Statistics.Repository
 {
-    using global::MongoDB.Bson;
-    using global::MongoDB.Driver;
-
-    using Orleans.Providers.MongoDB.Repository;
-    using Orleans.Runtime;
-
-    using InsertManyOptions = global::MongoDB.Driver.InsertManyOptions;
-
     /// <summary>
-    /// The mongo statistics publisher repository.
-    /// These functions are used to publish silo & client statistics
+    ///     The mongo statistics publisher repository.
+    ///     These functions are used to publish silo & client statistics
     /// </summary>
     public class MongoStatisticsPublisherRepository : DocumentRepository, IMongoStatisticsPublisherRepository
     {
         /// <summary>
-        /// The client metrics table.
+        ///     The client metrics table.
         /// </summary>
         private static readonly string ClientMetricsTableName = "OrleansClientMetricsTable";
+
         private static readonly string OrleansSiloMetricsTableName = "OrleansSiloMetricsTable";
         private static readonly string OrleansStatisticsTableName = "OrleansStatisticsTable";
         private static readonly string DeploymentIdName = "DeploymentId";
@@ -31,13 +25,13 @@ namespace Orleans.Providers.MongoDB.Statistics.Repository
         private static readonly string SiloIdName = "SiloId";
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DocumentRepository"/> class.
+        ///     Initializes a new instance of the <see cref="DocumentRepository" /> class.
         /// </summary>
         /// <param name="connectionsString">
-        /// The connections string.
+        ///     The connections string.
         /// </param>
         /// <param name="databaseName">
-        /// The database name.
+        ///     The database name.
         /// </param>
         public MongoStatisticsPublisherRepository(string connectionsString, string databaseName)
             : base(connectionsString, databaseName)
@@ -45,18 +39,19 @@ namespace Orleans.Providers.MongoDB.Statistics.Repository
         }
 
         /// <summary>
-        /// Upsert report client metrics.
+        ///     Upsert report client metrics.
         /// </summary>
         /// <param name="metricsTable">
-        /// The metrics table.
+        ///     The metrics table.
         /// </param>
         /// <param name="clientMetrics">
-        /// The client metrics.
+        ///     The client metrics.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
-        public async Task UpsertReportClientMetricsAsync(OrleansClientMetricsTable metricsTable, IClientPerformanceMetrics clientMetrics)
+        public async Task UpsertReportClientMetricsAsync(OrleansClientMetricsTable metricsTable,
+            IClientPerformanceMetrics clientMetrics)
         {
             metricsTable.CpuUsage = clientMetrics.CpuUsage;
             metricsTable.MemoryUsage = clientMetrics.MemoryUsage;
@@ -65,32 +60,33 @@ namespace Orleans.Providers.MongoDB.Statistics.Repository
             metricsTable.SentMessages = clientMetrics.SentMessages;
             metricsTable.ConnectedGateWayCount = clientMetrics.ConnectedGatewayCount;
 
-            var collection = this.ReturnOrCreateCollection(ClientMetricsTableName);
+            var collection = ReturnOrCreateCollection(ClientMetricsTableName);
 
             FilterDefinition<BsonDocument> filter = null;
-            BsonDocument document = metricsTable.ToBsonDocument();
-            filter = Builders<BsonDocument>.Filter.Eq(DeploymentIdName, metricsTable.DeploymentId) & Builders<BsonDocument>.Filter.Eq(ClientIdName, metricsTable.ClientId);
+            var document = metricsTable.ToBsonDocument();
+            filter = Builders<BsonDocument>.Filter.Eq(DeploymentIdName, metricsTable.DeploymentId) &
+                     Builders<BsonDocument>.Filter.Eq(ClientIdName, metricsTable.ClientId);
 
             await collection.ReplaceOneAsync(
-                 filter,
-                 document,
-                 new UpdateOptions { BypassDocumentValidation = true, IsUpsert = true });
-
+                filter,
+                document,
+                new UpdateOptions {BypassDocumentValidation = true, IsUpsert = true});
         }
 
         /// <summary>
-        /// Upsert silo metrics.
+        ///     Upsert silo metrics.
         /// </summary>
         /// <param name="siloMetricsTable">
-        /// The silo metrics table.
+        ///     The silo metrics table.
         /// </param>
         /// <param name="siloPerformanceMetrics">
-        /// The silo performance metrics.
+        ///     The silo performance metrics.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
-        public async Task UpsertSiloMetricsAsync(OrleansSiloMetricsTable siloMetricsTable, ISiloPerformanceMetrics siloPerformanceMetrics)
+        public async Task UpsertSiloMetricsAsync(OrleansSiloMetricsTable siloMetricsTable,
+            ISiloPerformanceMetrics siloPerformanceMetrics)
         {
             siloMetricsTable.ActivationCount = siloPerformanceMetrics.ActivationCount;
             siloMetricsTable.ClientCount = siloPerformanceMetrics.ClientCount;
@@ -107,47 +103,48 @@ namespace Orleans.Providers.MongoDB.Statistics.Repository
             siloMetricsTable.TotalPhysicalMemory = siloPerformanceMetrics.TotalPhysicalMemory;
             //siloMetricsTable.Generation = siloPerformanceMetrics.
 
-            var collection = this.ReturnOrCreateCollection(OrleansSiloMetricsTableName);
+            var collection = ReturnOrCreateCollection(OrleansSiloMetricsTableName);
 
             FilterDefinition<BsonDocument> filter = null;
-            BsonDocument document = siloMetricsTable.ToBsonDocument();
-            filter = Builders<BsonDocument>.Filter.Eq(DeploymentIdName, siloMetricsTable.DeploymentId) & Builders<BsonDocument>.Filter.Eq(SiloIdName, siloMetricsTable.SiloId);
+            var document = siloMetricsTable.ToBsonDocument();
+            filter = Builders<BsonDocument>.Filter.Eq(DeploymentIdName, siloMetricsTable.DeploymentId) &
+                     Builders<BsonDocument>.Filter.Eq(SiloIdName, siloMetricsTable.SiloId);
 
             await collection.ReplaceOneAsync(
-                 filter,
-                 document,
-                 new UpdateOptions { BypassDocumentValidation = true, IsUpsert = true });
+                filter,
+                document,
+                new UpdateOptions {BypassDocumentValidation = true, IsUpsert = true});
         }
 
         /// <summary>
-        /// Insert statistics counters.
+        ///     Insert statistics counters.
         /// </summary>
         /// <param name="statisticsTable">
-        /// The statistics table.
+        ///     The statistics table.
         /// </param>
         /// <param name="counterBatch">
-        /// The counter batch.
+        ///     The counter batch.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         public async Task InsertStatisticsCountersAsync(
             OrleansStatisticsTable statisticsTable,
             List<ICounter> counterBatch)
         {
-            List<BsonDocument> documents = new List<BsonDocument>();
+            var documents = new List<BsonDocument>();
 
             OrleansStatisticsTable newStatisticTable = null;
 
-            foreach (ICounter counter in counterBatch)
+            foreach (var counter in counterBatch)
             {
                 newStatisticTable = new OrleansStatisticsTable
-                                        {
-                                            DeploymentId = statisticsTable.DeploymentId,
-                                            HostName = statisticsTable.HostName,
-                                            Name = statisticsTable.Name,
-                                            Identity = statisticsTable.Id
-                                        };
+                {
+                    DeploymentId = statisticsTable.DeploymentId,
+                    HostName = statisticsTable.HostName,
+                    Name = statisticsTable.Name,
+                    Identity = statisticsTable.Id
+                };
 
                 newStatisticTable.IsValueDelta = counter.IsValueDelta;
                 newStatisticTable.StatValue = counter.GetValueString();
@@ -156,9 +153,8 @@ namespace Orleans.Providers.MongoDB.Statistics.Repository
                 documents.Add(newStatisticTable.ToBsonDocument());
             }
 
-            var collection = this.ReturnOrCreateCollection(OrleansStatisticsTableName);
-            await collection.InsertManyAsync(documents, new InsertManyOptions { BypassDocumentValidation = true });
+            var collection = ReturnOrCreateCollection(OrleansStatisticsTableName);
+            await collection.InsertManyAsync(documents, new InsertManyOptions {BypassDocumentValidation = true});
         }
-
     }
 }
