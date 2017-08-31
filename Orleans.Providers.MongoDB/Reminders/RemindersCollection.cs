@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Orleans.Providers.MongoDB.Reminders
 {
-    using global::MongoDB.Bson;
-    using global::MongoDB.Bson.Serialization.Attributes;
-
     public class RemindersCollection
     {
         [BsonRepresentation(BsonType.ObjectId)]
@@ -28,6 +23,5 @@ namespace Orleans.Providers.MongoDB.Reminders
 
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime StartTime { get; set; }
-
     }
 }

@@ -1,43 +1,47 @@
-﻿using MongoDB.Bson;
+﻿using System;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
+using MongoDB.Bson;
+using MongoDB.Bson.IO;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using Orleans.Providers.MongoDB.StorageProviders.Serializing;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using JsonToken = Newtonsoft.Json.JsonToken;
+using JsonWriter = MongoDB.Bson.IO.JsonWriter;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
 {
     /// <summary>
-    /// Interfaces with a MongoDB database driver.
+    ///     Interfaces with a MongoDB database driver.
     /// </summary>
     public class GrainStateMongoDataManager : IJSONStateDataManager
     {
+        private readonly IMongoDatabase _database;
+
         /// <summary>
-        /// Constructor
+        ///     Constructor
         /// </summary>
         /// <param name="connectionString">A database name.</param>
         /// <param name="databaseName">A MongoDB database connection string.</param>
         public GrainStateMongoDataManager(string databaseName, string connectionString)
         {
-            MongoClient client = new MongoClient(connectionString);
-            this._database = client.GetDatabase(databaseName);
+            var client = new MongoClient(connectionString);
+            _database = client.GetDatabase(databaseName);
         }
 
         /// <summary>
-        /// Deletes a file representing a grain state object.
+        ///     Deletes a file representing a grain state object.
         /// </summary>
         /// <param name="collectionName">The type of the grain state object.</param>
         /// <param name="key">The grain id string.</param>
         /// <returns>Completion promise for this operation.</returns>
         public Task Delete(string collectionName, string key)
         {
-            var collection = this.GetCollection(collectionName);
+            var collection = GetCollection(collectionName);
             if (collection == null)
-                return TaskDone.Done;
+                return Task.CompletedTask;
 
             var builder = Builders<BsonDocument>.Filter.Eq("key", key);
 
@@ -45,14 +49,14 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         }
 
         /// <summary>
-        /// Reads a file representing a grain state object.
+        ///     Reads a file representing a grain state object.
         /// </summary>
         /// <param name="collectionName">The type of the grain state object.</param>
         /// <param name="key">The grain id string.</param>
         /// <returns>Completion promise for this operation.</returns>
         public async Task<string> Read(string collectionName, string key)
         {
-            var collection = this.GetCollection(collectionName);
+            var collection = GetCollection(collectionName);
             if (collection == null)
                 return null;
 
@@ -66,16 +70,16 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             existing.Remove("_id");
             existing.Remove("key");
 
-            var strwrtr = new System.IO.StringWriter();
-            var writer = new global::MongoDB.Bson.IO.JsonWriter(strwrtr, new global::MongoDB.Bson.IO.JsonWriterSettings());
-            global::MongoDB.Bson.Serialization.BsonSerializer.Serialize(writer, existing);
+            var strwrtr = new StringWriter();
+            var writer = new JsonWriter(strwrtr, new JsonWriterSettings());
+            BsonSerializer.Serialize(writer, existing);
 
             // NewtonSoft generates a $type & $id which is incompatible with Mongo. Replacing $ with __
-            return this.ReverseInvalidValues(strwrtr.ToString());
+            return ReverseInvalidValues(strwrtr.ToString());
         }
 
         /// <summary>
-        /// Writes a file representing a grain state object.
+        ///     Writes a file representing a grain state object.
         /// </summary>
         /// <param name="collectionName">The type of the grain state object.</param>
         /// <param name="key">The grain id string.</param>
@@ -83,15 +87,15 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// <returns>Completion promise for this operation.</returns>
         public async Task Write(string collectionName, string key, string entityData)
         {
-            var collection = await this.GetOrCreateCollection(collectionName);
+            var collection = await GetOrCreateCollection(collectionName);
 
             var builder = Builders<BsonDocument>.Filter.Eq("key", key);
 
             var existing = await collection.Find(builder).FirstOrDefaultAsync();
 
             // NewtonSoft generates a $type & $id which is incompatible with Mongo. Replacing __ with $
-            entityData = this.ReverseInvalidValues(entityData);
-            var doc = global::MongoDB.Bson.Serialization.BsonSerializer.Deserialize<BsonDocument>(entityData);
+            entityData = ReverseInvalidValues(entityData);
+            var doc = BsonSerializer.Deserialize<BsonDocument>(entityData);
 
             doc["key"] = key;
 
@@ -107,18 +111,24 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         }
 
         /// <summary>
-        /// NewtonSoft generates a $type & $id which is incompatible with Mongo. Replacing $ with __
+        ///     Clean up.
+        /// </summary>
+        public void Dispose()
+        {
+        }
+
+        /// <summary>
+        ///     NewtonSoft generates a $type & $id which is incompatible with Mongo. Replacing $ with __
         /// </summary>
         /// <param name="entityData"></param>
         /// <returns></returns>
         private string ReverseInvalidValues(string entityData)
         {
-            StringBuilder sb = new StringBuilder();
-            CustomJsonWriter writer = new CustomJsonWriter(new StringWriter(sb));
-            JsonTextReader reader = new JsonTextReader(new StringReader(entityData));
+            var sb = new StringBuilder();
+            var writer = new CustomJsonWriter(new StringWriter(sb));
+            var reader = new JsonTextReader(new StringReader(entityData));
 
             while (reader.Read())
-            {
                 if (reader.Value != null)
                 {
                     Console.WriteLine("Token: {0}, Value: {1}", reader.TokenType, reader.Value);
@@ -128,41 +138,23 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                         case JsonToken.PropertyName:
 
                             if (reader.Value.ToString() == "$type")
-                            {
                                 writer.WritePropertyName("__type");
-                            }
                             else if (reader.Value.ToString() == "__type")
-                            {
                                 writer.WritePropertyName("$type");
-                            }
                             else if (reader.Value.ToString() == "$id")
-                            {
                                 writer.WritePropertyName("__id");
-                            }
                             else if (reader.Value.ToString() == "__id")
-                            {
                                 writer.WritePropertyName("$id");
-                            }
                             else if (reader.Value.ToString() == "$type")
-                            {
                                 writer.WritePropertyName("__type");
-                            }
                             else if (reader.Value.ToString() == "__type")
-                            {
                                 writer.WritePropertyName("$type");
-                            }
                             else if (reader.Value.ToString() == "$values")
-                            {
                                 writer.WritePropertyName("__values");
-                            }
                             else if (reader.Value.ToString() == "__values")
-                            {
                                 writer.WritePropertyName("$values");
-                            }
                             else
-                            {
                                 writer.WritePropertyName(reader.Value.ToString());
-                            }
 
                             break;
                         case JsonToken.None:
@@ -226,42 +218,36 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                         default:
                             break;
                     }
-
                 }
-            }
 
             return sb.ToString();
         }
 
         /// <summary>
-        /// Gets a collection from the MongoDB database.
+        ///     Gets a collection from the MongoDB database.
         /// </summary>
         /// <param name="name">The name of the collection.</param>
         /// <returns></returns>
         private IMongoCollection<BsonDocument> GetCollection(string name)
         {
-            return this._database.GetCollection<BsonDocument>(name);
+            return _database.GetCollection<BsonDocument>(name);
         }
 
         /// <summary>
-        /// Gets a collection from the MongoDB database and creates it if it
-        /// does not already exist.
+        ///     Gets a collection from the MongoDB database and creates it if it
+        ///     does not already exist.
         /// </summary>
         /// <param name="name">The name of the collection.</param>
         /// <returns></returns>
         private async Task<IMongoCollection<BsonDocument>> GetOrCreateCollection(string name)
         {
-            bool exists = await this.CollectionExistsAsync(name);
-            var collection = this._database.GetCollection<BsonDocument>(name);
+            var exists = await CollectionExistsAsync(name);
+            var collection = _database.GetCollection<BsonDocument>(name);
 
             if (exists)
-            {
                 return collection;
-            }
-            else
-            {
-                await collection.Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending("key"), new CreateIndexOptions());
-            }
+            await collection.Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending("key"),
+                new CreateIndexOptions());
 
             return collection;
         }
@@ -270,19 +256,9 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         {
             var filter = new BsonDocument("name", collectionName);
             //filter by collection name
-            var collections = await this._database.ListCollectionsAsync(new ListCollectionsOptions { Filter = filter });
+            var collections = await _database.ListCollectionsAsync(new ListCollectionsOptions {Filter = filter});
             //check for existence
             return await collections.AnyAsync();
         }
-
-        /// <summary>
-        /// Clean up.
-        /// </summary>
-        public void Dispose()
-        {
-        }
-
-        private readonly IMongoDatabase _database;
-
     }
 }

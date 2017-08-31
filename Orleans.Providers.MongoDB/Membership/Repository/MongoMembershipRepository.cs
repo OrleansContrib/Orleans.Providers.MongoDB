@@ -11,22 +11,17 @@ using Orleans.Runtime;
 namespace Orleans.Providers.MongoDB.Membership.Repository
 {
     /// <summary>
-    /// The mongo membership provider repository.
+    ///     The mongo membership provider repository.
     /// </summary>
     public class MongoMembershipRepository : DocumentRepository, IMongoMembershipRepository
     {
         /// <summary>
-        /// Gets the membership collection name.
-        /// </summary>
-        public static string MembershipCollectionName => "OrleansMembership";
-
-        /// <summary>
-        /// The membership version collection name.
+        ///     The membership version collection name.
         /// </summary>
         private const string MembershipVersionCollectionName = "OrleansMembershipVersion";
 
         /// <summary>
-        /// The membership version key name.
+        ///     The membership version key name.
         /// </summary>
         private const string MembershipVersionKeyName = "DeploymentId";
 
@@ -38,23 +33,30 @@ namespace Orleans.Providers.MongoDB.Membership.Repository
         }
 
         /// <summary>
-        /// Init membership version collection.
+        ///     Gets the membership collection name.
+        /// </summary>
+        public static string MembershipCollectionName => "OrleansMembership";
+
+        /// <summary>
+        ///     Init membership version collection.
         /// </summary>
         /// <param name="deploymentId">
-        /// The deployment id.
+        ///     The deployment id.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         public async Task InitMembershipVersionCollectionAsync(string deploymentId)
         {
             if (!await CollectionExistsAsync(MembershipCollectionName))
             {
-                await ReturnOrCreateCollection(MembershipVersionCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(m => m[MembershipVersionKeyName]));
-                await ReturnOrCreateCollection(MembershipCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(m => m[MembershipKeyName]));
+                await ReturnOrCreateCollection(MembershipVersionCollectionName).Indexes
+                    .CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(m => m[MembershipVersionKeyName]));
+                await ReturnOrCreateCollection(MembershipCollectionName).Indexes
+                    .CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(m => m[MembershipKeyName]));
             }
 
-            BsonDocument membershipVersionDocument =
+            var membershipVersionDocument =
                 await FindDocumentAsync(MembershipVersionCollectionName, MembershipVersionKeyName, deploymentId);
             if (membershipVersionDocument == null)
             {
@@ -79,19 +81,19 @@ namespace Orleans.Providers.MongoDB.Membership.Repository
         }
 
         /// <summary>
-        /// Insert a membership as well as update the version
+        ///     Insert a membership as well as update the version
         /// </summary>
         /// <param name="deploymentId">
-        /// The deployment id.
+        ///     The deployment id.
         /// </param>
         /// <param name="entry">
-        /// The entry.
+        ///     The entry.
         /// </param>
         /// <param name="tableVersion">
-        /// The table version.
+        ///     The table version.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         /// <exception cref="Exception">
         /// </exception>
@@ -100,7 +102,7 @@ namespace Orleans.Providers.MongoDB.Membership.Repository
             MembershipEntry entry,
             TableVersion tableVersion)
         {
-            string address = ReturnAddress(entry.SiloAddress.Endpoint.Address);
+            var address = ReturnAddress(entry.SiloAddress.Endpoint.Address);
 
             var collection = ReturnMembershipCollection();
 
@@ -114,27 +116,23 @@ namespace Orleans.Providers.MongoDB.Membership.Repository
             if (!await UpdateVersion(deploymentId, Convert.ToInt32(tableVersion.VersionEtag),
                 tableVersion.Version)) return false;
 
-            MembershipCollection document = new MembershipCollection
+            var document = new MembershipCollection
             {
                 DeploymentId = deploymentId,
                 Address = address,
                 Port = entry.SiloAddress.Endpoint.Port,
                 Generation = entry.SiloAddress.Generation,
                 HostName = entry.HostName,
-                Status = (int)entry.Status,
+                Status = (int) entry.Status,
                 ProxyPort = entry.ProxyPort,
                 StartTime = entry.StartTime,
                 IAmAliveTime = entry.IAmAliveTime
             };
 
             if (entry.SuspectTimes == null || entry.SuspectTimes.Count == 0)
-            {
                 document.SuspectTimes = string.Empty;
-            }
             else
-            {
                 document.SuspectTimes = MembershipHelper.ReturnStringFromSuspectTimes(entry);
-            }
 
             var cursorfoundMemberships = await collection.FindAsync(r => r.DeploymentId == document.DeploymentId
                                                                          && r.Address == document.Address
@@ -149,83 +147,48 @@ namespace Orleans.Providers.MongoDB.Membership.Repository
             var foundMemberships = await cursorfoundMemberships.ToListAsync();
 
             if (foundMemberships.Count == 0)
-            {
                 await collection.InsertOneAsync(document);
-            }
             else
-            {
                 return false;
-            }
 
             return true;
         }
 
         /// <summary>
-        /// Update the membership version.
+        ///     Return all the deployment members
         /// </summary>
         /// <param name="deploymentId">
-        /// The deployment id.
-        /// </param>
-        /// <param name="version">
-        /// The version.
+        ///     The deployment id.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
-        private static async Task<bool> UpdateVersion(string deploymentId, int perviousVersion, int newVersion)
-        {
-            var collection = Database.GetCollection<BsonDocument>(MembershipVersionCollectionName);
-
-            var builder = Builders<BsonDocument>.Filter;
-            var filter = builder.Eq("DeploymentId", deploymentId) & builder.Eq("Version", perviousVersion);
-
-            var result =
-                await
-                collection.UpdateOneAsync(
-                    filter,
-                    Builders<BsonDocument>.Update.Set("Version", newVersion)
-                    .Set("Timestamp", DateTime.Now.ToUniversalTime()));
-
-            return result.ModifiedCount > 0;
-        }
-
-        /// <summary>
-        /// Return all the deployment members
-        /// </summary>
-        /// <param name="deploymentId">
-        /// The deployment id.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         /// <exception cref="ArgumentException">
         /// </exception>
         public async Task<MembershipTableData> ReturnAllRows(string deploymentId)
         {
             if (string.IsNullOrEmpty(ConnectionString))
-            {
                 throw new ArgumentException("ConnectionString may not be empty");
-            }
 
             var membershipListCursor = await Database.GetCollection<MembershipCollection>(MembershipCollectionName)
                 .FindAsync(m => m.DeploymentId == deploymentId);
 
-            List<MembershipCollection> membershipList = await membershipListCursor.ToListAsync();
+            var membershipList = await membershipListCursor.ToListAsync();
 
             return await ReturnMembershipTableData(membershipList, deploymentId);
         }
 
         /// <summary>
-        /// Returns a membership for a deployment.
+        ///     Returns a membership for a deployment.
         /// </summary>
         /// <param name="key">
-        /// The key.
+        ///     The key.
         /// </param>
         /// <param name="deploymentId">
-        /// The deployment id.
+        ///     The deployment id.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         public async Task<MembershipTableData> ReturnRow(SiloAddress key, string deploymentId)
         {
@@ -234,26 +197,26 @@ namespace Orleans.Providers.MongoDB.Membership.Repository
                     m.DeploymentId == deploymentId && m.Address == ReturnAddress(key.Endpoint.Address)
                     && m.Port == key.Endpoint.Port && m.Generation == key.Generation);
 
-            List<MembershipCollection> membershipList = await membershipListCursor.ToListAsync();
+            var membershipList = await membershipListCursor.ToListAsync();
 
             return await ReturnMembershipTableData(membershipList, deploymentId);
         }
 
 
         /// <summary>
-        /// Update i am alive time.
+        ///     Update i am alive time.
         /// </summary>
         /// <param name="deploymentId">
-        /// The deployment id.
+        ///     The deployment id.
         /// </param>
         /// <param name="siloAddress">
-        /// The silo address.
+        ///     The silo address.
         /// </param>
         /// <param name="iAmAliveTime">
-        /// The i am alive time.
+        ///     The i am alive time.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         public async Task UpdateIAmAliveTimeAsyncTask(
             string deploymentId,
@@ -265,47 +228,50 @@ namespace Orleans.Providers.MongoDB.Membership.Repository
             var update = new UpdateDefinitionBuilder<MembershipCollection>().Set(x => x.IAmAliveTime, iAmAliveTime);
             await collection.UpdateOneAsync(
                 m =>
-                m.DeploymentId == deploymentId && m.Address == ReturnAddress(siloAddress.Endpoint.Address)
-                && m.Port == siloAddress.Endpoint.Port && m.Generation == siloAddress.Generation,
+                    m.DeploymentId == deploymentId && m.Address == ReturnAddress(siloAddress.Endpoint.Address)
+                    && m.Port == siloAddress.Endpoint.Port && m.Generation == siloAddress.Generation,
                 update);
         }
 
         /// <summary>
-        /// Updates membership row.
+        ///     Updates membership row.
         /// </summary>
         /// <param name="deploymentId">
-        /// The deployment id.
+        ///     The deployment id.
         /// </param>
         /// <param name="membershipEntry">
-        /// The membership entry.
+        ///     The membership entry.
         /// </param>
         /// <param name="etag">
-        /// The etag.
+        ///     The etag.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         public async Task<bool> UpdateMembershipRowAsync(
             string deploymentId,
             MembershipEntry membershipEntry,
             string etag)
         {
-            bool verionUpdateResult = await UpdateVersion(deploymentId, Convert.ToInt32(etag), Convert.ToInt32(etag) + 1);
+            var verionUpdateResult =
+                await UpdateVersion(deploymentId, Convert.ToInt32(etag), Convert.ToInt32(etag) + 1);
             var collection = ReturnMembershipCollection();
 
-            string suspecttimes = MembershipHelper.ReturnStringFromSuspectTimes(membershipEntry);
+            var suspecttimes = MembershipHelper.ReturnStringFromSuspectTimes(membershipEntry);
 
             var update = new UpdateDefinitionBuilder<MembershipCollection>()
-                .Set(x => x.Status, (int)membershipEntry.Status)
+                .Set(x => x.Status, (int) membershipEntry.Status)
                 .Set(x => x.SuspectTimes, suspecttimes)
                 .Set(x => x.IAmAliveTime, membershipEntry.IAmAliveTime);
 
             var result = await collection.UpdateOneAsync(
-               m => m.DeploymentId == deploymentId && m.Address == ReturnAddress(membershipEntry.SiloAddress.Endpoint.Address)
-               && m.Port == membershipEntry.SiloAddress.Endpoint.Port && m.Generation == membershipEntry.SiloAddress.Generation,
-               update);
+                m => m.DeploymentId == deploymentId &&
+                     m.Address == ReturnAddress(membershipEntry.SiloAddress.Endpoint.Address)
+                     && m.Port == membershipEntry.SiloAddress.Endpoint.Port &&
+                     m.Generation == membershipEntry.SiloAddress.Generation,
+                update);
 
-            bool returnResult = verionUpdateResult || result.ModifiedCount > 0;
+            var returnResult = verionUpdateResult || result.ModifiedCount > 0;
 
             //if (!returnResult)
             //{
@@ -320,27 +286,73 @@ namespace Orleans.Providers.MongoDB.Membership.Repository
         }
 
         /// <summary>
-        /// Returns address.
+        ///     Deletes all memberships for a deployment as well as it version entry.
         /// </summary>
-        /// <param name="address">
-        /// The address.
+        /// <param name="deploymentId">
+        ///     The deployment id.
         /// </param>
         /// <returns>
-        /// The <see cref="string"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
-        static string ReturnAddress(IPAddress address)
+        public async Task DeleteMembershipTableEntriesAsync(string deploymentId)
+        {
+            var version = DeleteVersionAsync(deploymentId);
+            var membership = DeleteMembershipAsync(deploymentId);
+
+            await Task.WhenAll(version, membership);
+        }
+
+        /// <summary>
+        ///     Update the membership version.
+        /// </summary>
+        /// <param name="deploymentId">
+        ///     The deployment id.
+        /// </param>
+        /// <param name="version">
+        ///     The version.
+        /// </param>
+        /// <returns>
+        ///     The <see cref="Task" />.
+        /// </returns>
+        private static async Task<bool> UpdateVersion(string deploymentId, int perviousVersion, int newVersion)
+        {
+            var collection = Database.GetCollection<BsonDocument>(MembershipVersionCollectionName);
+
+            var builder = Builders<BsonDocument>.Filter;
+            var filter = builder.Eq("DeploymentId", deploymentId) & builder.Eq("Version", perviousVersion);
+
+            var result =
+                await
+                    collection.UpdateOneAsync(
+                        filter,
+                        Builders<BsonDocument>.Update.Set("Version", newVersion)
+                            .Set("Timestamp", DateTime.Now.ToUniversalTime()));
+
+            return result.ModifiedCount > 0;
+        }
+
+        /// <summary>
+        ///     Returns address.
+        /// </summary>
+        /// <param name="address">
+        ///     The address.
+        /// </param>
+        /// <returns>
+        ///     The <see cref="string" />.
+        /// </returns>
+        private static string ReturnAddress(IPAddress address)
         {
             return address.MapToIPv4().ToString();
         }
 
         /// <summary>
-        /// Parses the MembershipData to a MembershipEntry
+        ///     Parses the MembershipData to a MembershipEntry
         /// </summary>
         /// <param name="membershipData">
-        /// The membership data.
+        ///     The membership data.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         internal async Task<Tuple<MembershipEntry, string>> Parse(MembershipCollection membershipData)
         {
@@ -355,14 +367,14 @@ namespace Orleans.Providers.MongoDB.Membership.Repository
 
                     // SiloName = TryGetSiloName(record),
                     HostName = membershipData.HostName,
-                    Status = (SiloStatus)membershipData.Status,
+                    Status = (SiloStatus) membershipData.Status,
                     ProxyPort = membershipData.ProxyPort,
                     StartTime = startTime.Value,
                     IAmAliveTime = membershipData.IAmAliveTime,
                     SiloName = membershipData.HostName
                 };
 
-                string suspectingSilos = membershipData.SuspectTimes;
+                var suspectingSilos = membershipData.SuspectTimes;
                 if (!string.IsNullOrWhiteSpace(suspectingSilos))
                 {
                     entry.SuspectTimes = new List<Tuple<SiloAddress, DateTime>>();
@@ -378,7 +390,7 @@ namespace Orleans.Providers.MongoDB.Membership.Repository
                 }
             }
 
-            BsonDocument membershipVersionDocument =
+            var membershipVersionDocument =
                 await
                     FindDocumentAsync(
                         MembershipVersionCollectionName,
@@ -389,30 +401,13 @@ namespace Orleans.Providers.MongoDB.Membership.Repository
         }
 
         /// <summary>
-        /// Deletes all memberships for a deployment as well as it version entry.
+        ///     Deletes all memberships for a deployment.
         /// </summary>
         /// <param name="deploymentId">
-        /// The deployment id.
+        ///     The deployment id.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
-        public async Task DeleteMembershipTableEntriesAsync(string deploymentId)
-        {
-            var version = DeleteVersionAsync(deploymentId);
-            var membership = DeleteMembershipAsync(deploymentId);
-
-            await Task.WhenAll(version, membership);
-        }
-
-        /// <summary>
-        /// Deletes all memberships for a deployment.
-        /// </summary>
-        /// <param name="deploymentId">
-        /// The deployment id.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         private static async Task DeleteMembershipAsync(string deploymentId)
         {
@@ -427,13 +422,13 @@ namespace Orleans.Providers.MongoDB.Membership.Repository
         }
 
         /// <summary>
-        /// Deletes version for deployment.
+        ///     Deletes version for deployment.
         /// </summary>
         /// <param name="deploymentId">
-        /// The deployment id.
+        ///     The deployment id.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         private async Task DeleteVersionAsync(string deploymentId)
         {
@@ -443,38 +438,33 @@ namespace Orleans.Providers.MongoDB.Membership.Repository
         }
 
         /// <summary>
-        /// Returns a MembershipTableData from a list of MembershipTable's
+        ///     Returns a MembershipTableData from a list of MembershipTable's
         /// </summary>
         /// <param name="membershipList">
-        /// The membership list to be converted.
+        ///     The membership list to be converted.
         /// </param>
         /// <param name="deploymentId">
-        /// The deployment id.
+        ///     The deployment id.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         private async Task<MembershipTableData> ReturnMembershipTableData(
             List<MembershipCollection> membershipList,
             string deploymentId)
         {
-            var membershipVersion = await FindDocumentAsync(MembershipVersionCollectionName, MembershipVersionKeyName, deploymentId);
+            var membershipVersion =
+                await FindDocumentAsync(MembershipVersionCollectionName, MembershipVersionKeyName, deploymentId);
             if (!membershipVersion.Contains("Version"))
-            {
                 membershipVersion["Version"] = 1;
-            }
 
             var tableVersionEtag = membershipVersion["Version"].AsInt32;
 
             var membershipEntries = new List<Tuple<MembershipEntry, string>>();
 
             if (membershipList.Count > 0)
-            {
                 foreach (var membership in membershipList)
-                {
                     membershipEntries.Add(await Parse(membership));
-                }
-            }
 
             return new MembershipTableData(
                 membershipEntries,

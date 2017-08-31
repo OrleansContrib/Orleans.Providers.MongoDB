@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Bson;
@@ -17,7 +16,8 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
         private const string ReminderName = "ReminderName";
         private readonly IGrainReferenceConverter grainReferenceConverter;
 
-        public MongoReminderTableRepository(string connectionsString, string databaseName, IGrainReferenceConverter grainReferenceConverter)
+        public MongoReminderTableRepository(string connectionsString, string databaseName,
+            IGrainReferenceConverter grainReferenceConverter)
             : base(connectionsString, databaseName)
         {
             this.grainReferenceConverter = grainReferenceConverter;
@@ -35,7 +35,8 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
             return await RemindersHelper.ProcessRemindersList(reminders, grainReferenceConverter);
         }
 
-        public async Task<ReminderEntry> ReadReminderRowAsync(string serviceId, GrainReference grainRef, string reminderName)
+        public async Task<ReminderEntry> ReadReminderRowAsync(string serviceId, GrainReference grainRef,
+            string reminderName)
         {
             var collection = ReturnOrCreateRemindersCollection();
             var reminderCursor = await collection.FindAsync(r =>
@@ -68,32 +69,17 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
             return await RemindersHelper.ProcessRemindersList(reminders, grainReferenceConverter);
         }
 
-        private IMongoCollection<RemindersCollection> ReturnOrCreateRemindersCollection()
-        {
-            var collection = Database.GetCollection<RemindersCollection>(RemindersCollectionName);
-
-            if (collection != null)
-            {
-                return collection;
-            }
-
-            Database.CreateCollection(RemindersCollectionName);
-            collection = Database.GetCollection<RemindersCollection>(RemindersCollectionName);
-
-            // Todo: Create Indexs
-
-            return collection;
-        }
-
-        public async Task<bool> RemoveRowAsync(string serviceId, GrainReference grainRef, string reminderName, string eTag)
+        public async Task<bool> RemoveRowAsync(string serviceId, GrainReference grainRef, string reminderName,
+            string eTag)
         {
             var collection = ReturnOrCreateRemindersCollection();
 
             var result = await
                 collection.DeleteOneAsync(
                     r =>
-                    r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString() && r.ReminderName == reminderName
-                    && r.Version == Convert.ToInt64(eTag));
+                        r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString() &&
+                        r.ReminderName == reminderName
+                        && r.Version == Convert.ToInt64(eTag));
 
             return result.DeletedCount > 0;
         }
@@ -117,10 +103,9 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
         public async Task InitTables()
         {
             if (!await CollectionExistsAsync(RemindersCollectionName))
-            {
-                // Create Index
-                await ReturnOrCreateCollection(RemindersCollectionName).Indexes.CreateOneAsync(Builders<BsonDocument>.IndexKeys.Ascending(ServiceId).Ascending(GrainId).Ascending(ReminderName), new CreateIndexOptions { Unique = true });
-            }
+                await ReturnOrCreateCollection(RemindersCollectionName).Indexes.CreateOneAsync(
+                    Builders<BsonDocument>.IndexKeys.Ascending(ServiceId).Ascending(GrainId).Ascending(ReminderName),
+                    new CreateIndexOptions {Unique = true});
         }
 
         public async Task<string> UpsertReminderRowAsync(
@@ -165,8 +150,25 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
                 .Set(x => x.GrainHash, grainRef.GetUniformHashCode())
                 .Set(x => x.Version, reminder.Version);
 
-            await collection.UpdateOneAsync(r => r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString() && r.ReminderName == reminderName, update);
+            await collection.UpdateOneAsync(
+                r => r.ServiceId == serviceId && r.GrainId == grainRef.ToKeyString() && r.ReminderName == reminderName,
+                update);
             return reminder.Version.ToString();
+        }
+
+        private IMongoCollection<RemindersCollection> ReturnOrCreateRemindersCollection()
+        {
+            var collection = Database.GetCollection<RemindersCollection>(RemindersCollectionName);
+
+            if (collection != null)
+                return collection;
+
+            Database.CreateCollection(RemindersCollectionName);
+            collection = Database.GetCollection<RemindersCollection>(RemindersCollectionName);
+
+            // Todo: Create Indexs
+
+            return collection;
         }
     }
 }

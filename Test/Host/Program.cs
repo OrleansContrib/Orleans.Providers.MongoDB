@@ -1,7 +1,6 @@
 #region Using
 
 using System;
-
 using Orleans.Runtime.Configuration;
 using Orleans.Runtime.Host;
 
@@ -46,7 +45,6 @@ internal class Program
         }
         catch (Exception ex)
         {
-            string a = "";
             throw;
         }
     }

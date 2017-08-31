@@ -1,53 +1,39 @@
-﻿
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
+using Orleans.Runtime;
+using Orleans.Serialization;
+using Orleans.Storage;
+
 namespace Orleans.Providers.MongoDB.StorageProviders
 {
-    using System;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Newtonsoft.Json;
-    using Orleans;
-    using Orleans.Providers;
-    using Orleans.Runtime;
-    using Orleans.Serialization;
-    using Orleans.Storage;
-    using Microsoft.Extensions.DependencyInjection;
-
-
     /// <summary>
-    /// Base class for JSON-based grain storage providers.
+    ///     Base class for JSON-based grain storage providers.
     /// </summary>
     public abstract class BaseJSONStorageProvider : IStorageProvider
     {
         private JsonSerializerSettings serializerSettings;
 
         /// <summary>
-        /// Logger object
-        /// </summary>
-        public Logger Log
-        {
-            get; protected set;
-        }
-
-        /// <summary>
-        /// Storage provider name
-        /// </summary>
-        public string Name { get; protected set; }
-
-        /// <summary>
-        /// Data manager instance
+        ///     Data manager instance
         /// </summary>
         /// <remarks>The data manager is responsible for reading and writing JSON strings.</remarks>
         protected IJSONStateDataManager DataManager { get; set; }
 
         /// <summary>
-        /// Constructor
+        ///     Logger object
         /// </summary>
-        protected BaseJSONStorageProvider()
-        {
-        }
+        public Logger Log { get; protected set; }
 
         /// <summary>
-        /// Initializes the storage provider.
+        ///     Storage provider name
+        /// </summary>
+        public string Name { get; protected set; }
+
+        /// <summary>
+        ///     Initializes the storage provider.
         /// </summary>
         /// <param name="name">The name of this provider instance.</param>
         /// <param name="providerRuntime">A Orleans runtime object managing all storage providers.</param>
@@ -55,28 +41,30 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// <returns>Completion promise for this operation.</returns>
         public virtual Task Init(string name, IProviderRuntime providerRuntime, IProviderConfiguration config)
         {
-            this.Log = providerRuntime.GetLogger(this.GetType().FullName);
+            Log = providerRuntime.GetLogger(GetType().FullName);
 
             var serializationManager = providerRuntime.ServiceProvider.GetRequiredService<SerializationManager>();
-            this.serializerSettings = OrleansJsonSerializer.UpdateSerializerSettings(OrleansJsonSerializer.GetDefaultSerializerSettings(serializationManager, providerRuntime.GrainFactory), config);
-            return TaskDone.Done;
+            serializerSettings = OrleansJsonSerializer.UpdateSerializerSettings(
+                OrleansJsonSerializer.GetDefaultSerializerSettings(serializationManager, providerRuntime.GrainFactory),
+                config);
+            return Task.CompletedTask;
         }
 
         /// <summary>
-        /// Closes the storage provider during silo shutdown.
+        ///     Closes the storage provider during silo shutdown.
         /// </summary>
         /// <returns>Completion promise for this operation.</returns>
         public Task Close()
         {
-            if (this.DataManager != null)
-                this.DataManager.Dispose();
-            this.DataManager = null;
-            return TaskDone.Done;
+            if (DataManager != null)
+                DataManager.Dispose();
+            DataManager = null;
+            return Task.CompletedTask;
         }
 
         /// <summary>
-        /// Reads persisted state from the backing store and deserializes it into the the target
-        /// grain state object.
+        ///     Reads persisted state from the backing store and deserializes it into the the target
+        ///     grain state object.
         /// </summary>
         /// <param name="grainType">A string holding the name of the grain class.</param>
         /// <param name="grainReference">Represents the long-lived identity of the grain.</param>
@@ -84,15 +72,47 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// <returns>Completion promise for this operation.</returns>
         public async Task ReadStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
         {
-            if (this.DataManager == null) throw new ArgumentException("DataManager property not initialized");
+            if (DataManager == null) throw new ArgumentException("DataManager property not initialized");
 
-            var grainTypeName = this.ReturnGrainName(grainType, grainReference);
+            var grainTypeName = ReturnGrainName(grainType, grainReference);
 
-            var entityData = await this.DataManager.Read(grainTypeName, grainReference.ToKeyString());
+            var entityData = await DataManager.Read(grainTypeName, grainReference.ToKeyString());
             if (entityData != null)
-            {
                 ConvertFromStorageFormat(grainState, entityData);
-            }
+        }
+
+        /// <summary>
+        ///     Writes the persisted state from a grain state object into its backing store.
+        /// </summary>
+        /// <param name="grainType">A string holding the name of the grain class.</param>
+        /// <param name="grainReference">Represents the long-lived identity of the grain.</param>
+        /// <param name="grainState">A reference to an object holding the persisted state of the grain.</param>
+        /// <returns>Completion promise for this operation.</returns>
+        public Task WriteStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
+        {
+            if (DataManager == null) throw new ArgumentException("DataManager property not initialized");
+
+            var grainTypeName = ReturnGrainName(grainType, grainReference);
+
+            var entityData = ConvertToStorageFormat(grainState);
+            return DataManager.Write(grainTypeName, grainReference.ToKeyString(), entityData);
+        }
+
+        /// <summary>
+        ///     Removes grain state from its backing store, if found.
+        /// </summary>
+        /// <param name="grainType">A string holding the name of the grain class.</param>
+        /// <param name="grainReference">Represents the long-lived identity of the grain.</param>
+        /// <param name="grainState">An object holding the persisted state of the grain.</param>
+        /// <returns></returns>
+        public Task ClearStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
+        {
+            if (DataManager == null) throw new ArgumentException("DataManager property not initialized");
+
+            var grainTypeName = ReturnGrainName(grainType, grainReference);
+
+            DataManager.Delete(grainTypeName, grainReference.ToKeyString());
+            return Task.CompletedTask;
         }
 
 
@@ -102,61 +122,27 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         }
 
         /// <summary>
-        /// Writes the persisted state from a grain state object into its backing store.
-        /// </summary>
-        /// <param name="grainType">A string holding the name of the grain class.</param>
-        /// <param name="grainReference">Represents the long-lived identity of the grain.</param>
-        /// <param name="grainState">A reference to an object holding the persisted state of the grain.</param>
-        /// <returns>Completion promise for this operation.</returns>
-        public Task WriteStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
-        {
-            if (this.DataManager == null) throw new ArgumentException("DataManager property not initialized");
-
-            var grainTypeName = this.ReturnGrainName(grainType, grainReference);
-
-            var entityData = this.ConvertToStorageFormat(grainState);
-            return this.DataManager.Write(grainTypeName, grainReference.ToKeyString(), entityData);
-        }
-
-        /// <summary>
-        /// Removes grain state from its backing store, if found.
-        /// </summary>
-        /// <param name="grainType">A string holding the name of the grain class.</param>
-        /// <param name="grainReference">Represents the long-lived identity of the grain.</param>
-        /// <param name="grainState">An object holding the persisted state of the grain.</param>
-        /// <returns></returns>
-        public Task ClearStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
-        {
-            if (this.DataManager == null) throw new ArgumentException("DataManager property not initialized");
-
-            var grainTypeName = this.ReturnGrainName(grainType, grainReference);
-
-            this.DataManager.Delete(grainTypeName, grainReference.ToKeyString());
-            return TaskDone.Done;
-        }
-
-        /// <summary>
-        /// Serializes from a grain instance to a JSON document.
+        ///     Serializes from a grain instance to a JSON document.
         /// </summary>
         /// <param name="grainState">Grain state to be converted into JSON storage format.</param>
         /// <remarks>
-        /// See:
-        /// http://msdn.microsoft.com/en-us/library/system.web.script.serialization.javascriptserializer.aspx
-        /// for more on the JSON serializer.
+        ///     See:
+        ///     http://msdn.microsoft.com/en-us/library/system.web.script.serialization.javascriptserializer.aspx
+        ///     for more on the JSON serializer.
         /// </remarks>
         protected string ConvertToStorageFormat(IGrainState grainState)
         {
-            return JsonConvert.SerializeObject(grainState.State, this.serializerSettings);
+            return JsonConvert.SerializeObject(grainState.State, serializerSettings);
         }
 
         /// <summary>
-        /// Constructs a grain state instance by deserializing a JSON document.
+        ///     Constructs a grain state instance by deserializing a JSON document.
         /// </summary>
         /// <param name="grainState">Grain state to be populated for storage.</param>
         /// <param name="entityData">JSON storage format representaiton of the grain state.</param>
         protected void ConvertFromStorageFormat(IGrainState grainState, string entityData)
         {
-            JsonConvert.PopulateObject(entityData, grainState.State, this.serializerSettings);
+            JsonConvert.PopulateObject(entityData, grainState.State, serializerSettings);
         }
     }
 }

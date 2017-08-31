@@ -1,22 +1,19 @@
-﻿namespace Orleans.Providers.MongoDB.Repository
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using Orleans.Providers.MongoDB.Repository.ConnectionManager;
+
+namespace Orleans.Providers.MongoDB.Repository
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-
-    using global::MongoDB.Bson;
-    using global::MongoDB.Driver;
-
-    using Orleans.Providers.MongoDB.Repository.ConnectionManager;
-    using Orleans.Runtime;
-
     public class DocumentRepository : IDocumentRepository
     {
         #region Static Fields
 
         /// <summary>
-        /// Mongo Database.
+        ///     Mongo Database.
         /// </summary>
         protected static IMongoDatabase Database;
 
@@ -25,31 +22,53 @@
         #region Constructors and Destructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DocumentRepository"/> class.
+        ///     Initializes a new instance of the <see cref="DocumentRepository" /> class.
         /// </summary>
         /// <param name="connectionsString">
-        /// The connections string.
+        ///     The connections string.
         /// </param>
         /// <param name="databaseName">
-        /// The database name.
+        ///     The database name.
         /// </param>
         public DocumentRepository(string connectionsString, string databaseName)
         {
             if (string.IsNullOrEmpty(connectionsString))
-            {
                 throw new ArgumentException("ConnectionString May Not be Empty");
-            }
 
-            this.ConnectionString = connectionsString;
-            this.DatabaseName = databaseName;
+            ConnectionString = connectionsString;
+            DatabaseName = databaseName;
 
             if (string.IsNullOrEmpty(databaseName))
-            {
-                this.DatabaseName = MongoUrl.Create(connectionsString).DatabaseName;
-            }
+                DatabaseName = MongoUrl.Create(connectionsString).DatabaseName;
 
-            IMongoClient client = MongoConnectionManager.Instance(connectionsString, databaseName);
-            Database = client.GetDatabase(this.DatabaseName);
+            var client = MongoConnectionManager.Instance(connectionsString, databaseName);
+            Database = client.GetDatabase(DatabaseName);
+        }
+
+        #endregion
+
+        #region Other Methods
+
+        /// <summary>
+        ///     Return or create collection.
+        /// </summary>
+        /// <param name="mongoCollectionName">
+        ///     The mongo collection name.
+        /// </param>
+        /// <returns>
+        ///     The <see cref="IMongoCollection" />.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// </exception>
+        protected IMongoCollection<BsonDocument> ReturnOrCreateCollection(string mongoCollectionName)
+        {
+            if (string.IsNullOrEmpty(mongoCollectionName))
+                throw new ArgumentException("MongoCollectionName may not be empty");
+
+            // A collection is created if one isn't found
+            var collection = Database.GetCollection<BsonDocument>(mongoCollectionName);
+
+            return collection;
         }
 
         #endregion
@@ -57,12 +76,12 @@
         #region Properties
 
         /// <summary>
-        /// Gets or sets the connection string.
+        ///     Gets or sets the connection string.
         /// </summary>
         public string ConnectionString { get; set; }
 
         /// <summary>
-        /// Gets or sets the database name.
+        ///     Gets or sets the database name.
         /// </summary>
         public string DatabaseName { get; set; }
 
@@ -71,46 +90,42 @@
         #region Public methods and operators
 
         /// <summary>
-        /// Clear collection.
+        ///     Clear collection.
         /// </summary>
         /// <param name="mongoCollectionName">
-        /// The mongo collection name.
+        ///     The mongo collection name.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         /// <exception cref="ArgumentException">
         /// </exception>
         public async Task ClearCollection(string mongoCollectionName)
         {
             if (string.IsNullOrEmpty(mongoCollectionName))
-            {
                 throw new ArgumentException("MongoCollectionName may not be empty");
-            }
 
             var collection = Database.GetCollection<BsonDocument>(mongoCollectionName);
             await collection.DeleteManyAsync(new BsonDocument()).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Collection exists async.
+        ///     Collection exists async.
         /// </summary>
         /// <param name="collectionName">
-        /// The collection name.
+        ///     The collection name.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         public async Task<bool> CollectionExistsAsync(string collectionName)
         {
             if (string.IsNullOrEmpty(collectionName))
-            {
                 throw new ArgumentException("CollectionName may not be empty");
-            }
 
             var filter = new BsonDocument("name", collectionName);
 
-            var collections = await Database.ListCollectionsAsync(new ListCollectionsOptions { Filter = filter });
+            var collections = await Database.ListCollectionsAsync(new ListCollectionsOptions {Filter = filter});
 
             // check for existence
             return (await collections.ToListAsync()).Any();
@@ -118,19 +133,19 @@
 
 
         /// <summary>
-        /// Delete document async.
+        ///     Delete document async.
         /// </summary>
         /// <param name="mongoCollectionName">
-        /// The mongo collection name.
+        ///     The mongo collection name.
         /// </param>
         /// <param name="keyName">
-        /// The key name.
+        ///     The key name.
         /// </param>
         /// <param name="key">
-        /// The key.
+        ///     The key.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         /// <exception cref="ArgumentException">
         /// </exception>
@@ -138,26 +153,18 @@
         /// </exception>
         public async Task<DeleteResult> DeleteDocumentAsync(string mongoCollectionName, string keyName, string key)
         {
-            if (string.IsNullOrEmpty(this.ConnectionString))
-            {
+            if (string.IsNullOrEmpty(ConnectionString))
                 throw new ArgumentException("ConnectionString may not be empty");
-            }
 
             if (string.IsNullOrEmpty(mongoCollectionName))
-            {
                 throw new ArgumentException("MongoCollectionName may not be empty");
-            }
 
             if (string.IsNullOrEmpty(key))
-            {
                 throw new ArgumentException("Key may not be empty");
-            }
 
-            var collection = this.ReturnOrCreateCollection(mongoCollectionName);
+            var collection = ReturnOrCreateCollection(mongoCollectionName);
             if (collection == null)
-            {
                 throw new Exception("Invalid Collection");
-            }
 
             var builder = Builders<BsonDocument>.Filter.Eq(keyName, key);
 
@@ -165,33 +172,30 @@
         }
 
         /// <summary>
-        /// Find document async.
+        ///     Find document async.
         /// </summary>
         /// <param name="mongoCollectionName">
-        /// The mongo collection name.
+        ///     The mongo collection name.
         /// </param>
         /// <param name="keyName">
-        /// The key name.
+        ///     The key name.
         /// </param>
         /// <param name="key">
-        /// The key.
+        ///     The key.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         /// <exception cref="ArgumentException">
         /// </exception>
-        public async Task<BsonDocument> FindDocumentAsync<KeyType>(string mongoCollectionName, string keyName, KeyType key)
+        public async Task<BsonDocument> FindDocumentAsync<KeyType>(string mongoCollectionName, string keyName,
+            KeyType key)
         {
-            if (string.IsNullOrEmpty(this.ConnectionString))
-            {
+            if (string.IsNullOrEmpty(ConnectionString))
                 throw new ArgumentException("ConnectionString may not be empty");
-            }
 
             if (string.IsNullOrEmpty(mongoCollectionName))
-            {
                 throw new ArgumentException("MongoCollectionName may not be empty");
-            }
 
             //if (string.IsNullOrEmpty(key))
             //{
@@ -199,63 +203,57 @@
             //    throw new ArgumentException("Key may not be empty");
             //}
 
-            var collection = this.ReturnOrCreateCollection(mongoCollectionName);
+            var collection = ReturnOrCreateCollection(mongoCollectionName);
             if (collection == null)
-            {
                 return null;
-            }
 
             var builder = Builders<BsonDocument>.Filter.Eq(keyName, key);
 
             var result = await collection.Find(builder).FirstOrDefaultAsync();
 
             if (result == null)
-            {
                 return null;
-            }
 
             return result;
         }
 
         /// <summary>
-        /// Return all async.
+        ///     Return all async.
         /// </summary>
         /// <param name="mongoCollectionName">
-        /// The mongo collection name.
+        ///     The mongo collection name.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         /// <exception cref="ArgumentException">
         /// </exception>
         public async Task<List<BsonDocument>> ReturnAllAsync(string mongoCollectionName)
         {
             if (string.IsNullOrEmpty(mongoCollectionName))
-            {
                 throw new ArgumentException("MongoCollectionName may not be empty");
-            }
 
             var collection = Database.GetCollection<BsonDocument>(mongoCollectionName);
             return await collection.Find(Builders<BsonDocument>.Filter.Empty).ToListAsync();
         }
 
         /// <summary>
-        /// Save document async.
+        ///     Save document async.
         /// </summary>
         /// <param name="mongoCollectionName">
-        /// The mongo collection name.
+        ///     The mongo collection name.
         /// </param>
         /// <param name="keyName">
-        /// The key name.
+        ///     The key name.
         /// </param>
         /// <param name="key">
-        /// The key.
+        ///     The key.
         /// </param>
         /// <param name="document">
-        /// The document.
+        ///     The document.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         /// <exception cref="ArgumentException">
         /// </exception>
@@ -265,212 +263,159 @@
             string key,
             BsonDocument document)
         {
-            if (string.IsNullOrEmpty(this.ConnectionString))
-            {
+            if (string.IsNullOrEmpty(ConnectionString))
                 throw new ArgumentException("ConnectionString may not be empty");
-            }
 
             if (string.IsNullOrEmpty(mongoCollectionName))
-            {
                 throw new ArgumentException("MongoCollectionName may not be empty");
-            }
 
             if (document == null)
-            {
                 throw new ArgumentException("Document may not be empty");
-            }
 
             if (string.IsNullOrEmpty(key))
-            {
                 throw new ArgumentException("Key may not be empty");
-            }
 
-            var collection = this.ReturnOrCreateCollection(mongoCollectionName);
+            var collection = ReturnOrCreateCollection(mongoCollectionName);
 
             var builder = Builders<BsonDocument>.Filter.Eq(keyName, key);
 
             var existing = await collection.Find(builder).FirstOrDefaultAsync();
 
             if (existing == null)
-            {
                 await collection.InsertOneAsync(document);
-            }
             else
-            {
                 await collection.ReplaceOneAsync(builder, document);
-            }
         }
 
         /// <summary>
-        /// Add documents.
+        ///     Add documents.
         /// </summary>
         /// <param name="documents">
-        /// The documents.
+        ///     The documents.
         /// </param>
         /// <param name="mongoCollectionName">
-        /// The mongo collection name.
+        ///     The mongo collection name.
         /// </param>
         /// <param name="isOrdered">
-        /// The is ordered.
+        ///     The is ordered.
         /// </param>
         /// <param name="bypassDocumentValidation">
-        /// The bypass document validation.
+        ///     The bypass document validation.
         /// </param>
         /// <exception cref="ArgumentException">
         /// </exception>
-        public void AddDocuments(List<BsonDocument> documents, string mongoCollectionName, bool isOrdered = true, bool bypassDocumentValidation = false)
+        public void AddDocuments(List<BsonDocument> documents, string mongoCollectionName, bool isOrdered = true,
+            bool bypassDocumentValidation = false)
         {
-            if (string.IsNullOrEmpty(this.ConnectionString))
-            {
+            if (string.IsNullOrEmpty(ConnectionString))
                 throw new ArgumentException("ConnectionString may not be empty");
-            }
 
             if (string.IsNullOrEmpty(mongoCollectionName))
-            {
                 throw new ArgumentException("MongoCollectionName may not be empty");
-            }
 
             if (documents == null || documents.Count == 0)
-            {
                 throw new ArgumentException("Document may not be empty");
-            }
 
-            var collection = this.ReturnOrCreateCollection(mongoCollectionName);
-            collection.InsertMany(documents, new InsertManyOptions { BypassDocumentValidation = bypassDocumentValidation, IsOrdered = isOrdered });
+            var collection = ReturnOrCreateCollection(mongoCollectionName);
+            collection.InsertMany(documents,
+                new InsertManyOptions {BypassDocumentValidation = bypassDocumentValidation, IsOrdered = isOrdered});
         }
 
         /// <summary>
-        /// Add documents async.
+        ///     Add documents async.
         /// </summary>
         /// <param name="documents">
-        /// The documents.
+        ///     The documents.
         /// </param>
         /// <param name="mongoCollectionName">
-        /// The mongo collection name.
+        ///     The mongo collection name.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         /// <exception cref="ArgumentException">
         /// </exception>
-        public async Task AddDocumentsAsync(List<BsonDocument> documents, string mongoCollectionName, bool isOrdered = true, bool bypassDocumentValidation = false)
+        public async Task AddDocumentsAsync(List<BsonDocument> documents, string mongoCollectionName,
+            bool isOrdered = true, bool bypassDocumentValidation = false)
         {
-            if (string.IsNullOrEmpty(this.ConnectionString))
-            {
+            if (string.IsNullOrEmpty(ConnectionString))
                 throw new ArgumentException("ConnectionString may not be empty");
-            }
 
             if (string.IsNullOrEmpty(mongoCollectionName))
-            {
                 throw new ArgumentException("MongoCollectionName may not be empty");
-            }
 
             if (documents == null)
-            {
                 throw new ArgumentException("Document may not be empty");
-            }
 
-            var collection = this.ReturnOrCreateCollection(mongoCollectionName);
+            var collection = ReturnOrCreateCollection(mongoCollectionName);
 
-            await collection.InsertManyAsync(documents, new InsertManyOptions { BypassDocumentValidation = bypassDocumentValidation, IsOrdered = isOrdered });
+            await collection.InsertManyAsync(documents,
+                new InsertManyOptions {BypassDocumentValidation = bypassDocumentValidation, IsOrdered = isOrdered});
         }
 
         /// <summary>
-        /// Upsert documents async.
+        ///     Upsert documents async.
         /// </summary>
         /// <param name="documents">
-        /// The documents.
+        ///     The documents.
         /// </param>
         /// <param name="lookupFieldName">
-        /// The lookup field name.
+        ///     The lookup field name.
         /// </param>
         /// <param name="mongoCollectionName">
-        /// The mongo collection name.
+        ///     The mongo collection name.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
-        public async Task UpsertDocumentsAsync(List<BsonDocument> documents, string lookupFieldName, string mongoCollectionName)
+        public async Task UpsertDocumentsAsync(List<BsonDocument> documents, string lookupFieldName,
+            string mongoCollectionName)
         {
-            WriteModel<BsonDocument>[] documentsWriteModel = new WriteModel<BsonDocument>[documents.Count];
+            var documentsWriteModel = new WriteModel<BsonDocument>[documents.Count];
             FilterDefinition<BsonDocument> filter = null;
 
             BsonDocument document = null;
 
-            for (int i = 0; i <= documents.Count - 1; i++)
+            for (var i = 0; i <= documents.Count - 1; i++)
             {
                 document = documents[i];
                 filter = Builders<BsonDocument>.Filter.Eq(lookupFieldName,
                     document[lookupFieldName].AsDouble);
 
-                documentsWriteModel[i] = new ReplaceOneModel<BsonDocument>(filter, document) { IsUpsert = true };
+                documentsWriteModel[i] = new ReplaceOneModel<BsonDocument>(filter, document) {IsUpsert = true};
             }
 
-            await this.BulkWriteAsync(documentsWriteModel, mongoCollectionName);
+            await BulkWriteAsync(documentsWriteModel, mongoCollectionName);
         }
 
         /// <summary>
-        /// Bulk write async.
+        ///     Bulk write async.
         /// </summary>
         /// <param name="documents">
-        /// The documents.
+        ///     The documents.
         /// </param>
         /// <param name="mongoCollectionName">
-        /// The mongo collection name.
+        ///     The mongo collection name.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        ///     The <see cref="Task" />.
         /// </returns>
         /// <exception cref="ArgumentException">
         /// </exception>
         public async Task BulkWriteAsync(WriteModel<BsonDocument>[] documents, string mongoCollectionName)
         {
-            if (string.IsNullOrEmpty(this.ConnectionString))
-            {
+            if (string.IsNullOrEmpty(ConnectionString))
                 throw new ArgumentException("ConnectionString may not be empty");
-            }
 
             if (string.IsNullOrEmpty(mongoCollectionName))
-            {
                 throw new ArgumentException("MongoCollectionName may not be empty");
-            }
 
             if (documents == null)
-            {
                 throw new ArgumentException("Document may not be empty");
-            }
 
-            var collection = this.ReturnOrCreateCollection(mongoCollectionName);
+            var collection = ReturnOrCreateCollection(mongoCollectionName);
 
-            var result = await collection.BulkWriteAsync(documents, new BulkWriteOptions { IsOrdered = false });
-        }
-
-        #endregion
-
-        #region Other Methods
-
-        /// <summary>
-        /// Return or create collection.
-        /// </summary>
-        /// <param name="mongoCollectionName">
-        /// The mongo collection name.
-        /// </param>
-        /// <returns>
-        /// The <see cref="IMongoCollection"/>.
-        /// </returns>
-        /// <exception cref="ArgumentException">
-        /// </exception>
-        protected IMongoCollection<BsonDocument> ReturnOrCreateCollection(string mongoCollectionName)
-        {
-            if (string.IsNullOrEmpty(mongoCollectionName))
-            {
-                throw new ArgumentException("MongoCollectionName may not be empty");
-            }
-
-            // A collection is created if one isn't found
-            var collection = Database.GetCollection<BsonDocument>(mongoCollectionName);
-
-            return collection;
+            var result = await collection.BulkWriteAsync(documents, new BulkWriteOptions {IsOrdered = false});
         }
 
         #endregion

@@ -1,100 +1,86 @@
-﻿namespace Orleans.Providers.MongoDB.Reminders
+﻿using System;
+using System.Threading.Tasks;
+using MongoDB.Driver;
+using Orleans.Providers.MongoDB.Reminders.Repository;
+using Orleans.Runtime;
+using Orleans.Runtime.Configuration;
+
+namespace Orleans.Providers.MongoDB.Reminders
 {
-    using System;
-    using System.Threading.Tasks;
-
-    using global::MongoDB.Driver;
-
-    using Orleans.Providers.MongoDB.Reminders.Repository;
-    using Orleans.Runtime;
-    using Orleans.Runtime.Configuration;
-
     public class MongoReminderTable : IReminderTable
     {
-        private IGrainReferenceConverter grainReferenceConverter;
+        private readonly IGrainReferenceConverter grainReferenceConverter;
+
+        private Logger logger;
+
+        private IMongoReminderTableRepository repository;
+        private string serviceId;
 
         public MongoReminderTable(IGrainReferenceConverter grainReferenceConverter)
         {
             this.grainReferenceConverter = grainReferenceConverter;
         }
 
-        private IMongoReminderTableRepository repository;
-        private string serviceId;
-
-        private Logger logger;
-
         public async Task Init(GlobalConfiguration config, Logger traceLogger)
         {
-            this.serviceId = config.ServiceId.ToString();
-            this.logger = traceLogger;
+            serviceId = config.ServiceId.ToString();
+            logger = traceLogger;
 
-            string connectionString = config.DataConnectionStringForReminders;
+            var connectionString = config.DataConnectionStringForReminders;
 
             if (string.IsNullOrEmpty(connectionString))
-            {
                 connectionString = config.DataConnectionString;
-            }
 
-            this.repository = new MongoReminderTableRepository(connectionString, MongoUrl.Create(config.DataConnectionString).DatabaseName, this.grainReferenceConverter);
-            await this.repository.InitTables();
+            repository = new MongoReminderTableRepository(connectionString,
+                MongoUrl.Create(config.DataConnectionString).DatabaseName, grainReferenceConverter);
+            await repository.InitTables();
         }
 
         public async Task<ReminderTableData> ReadRows(GrainReference key)
         {
             try
             {
-                if (this.logger.IsVerbose3)
-                {
-                    this.logger.Verbose3(
+                if (logger.IsVerbose3)
+                    logger.Verbose3(
                         string.Format(
                             "ReminderTable.ReadRows called with serviceId {0}.",
-                            this.serviceId));
-                }
+                            serviceId));
 
-                return await this.repository.ReadReminderRowAsync(this.serviceId, key);
+                return await repository.ReadReminderRowAsync(serviceId, key);
             }
             catch (Exception ex)
             {
-                if (this.logger.IsVerbose)
-                {
-                    this.logger.Verbose("ReminderTable.ReadRows failed: {0}", ex);
-                }
+                if (logger.IsVerbose)
+                    logger.Verbose("ReminderTable.ReadRows failed: {0}", ex);
 
                 throw;
             }
         }
 
         /// <summary>
-        /// Return all rows that have their GrainReference's.GetUniformHashCode() in the range (start, end]
+        ///     Return all rows that have their GrainReference's.GetUniformHashCode() in the range (start, end]
         /// </summary>
         /// <param name="begin"></param>
         /// <param name="end"></param>
         /// <returns></returns>
         public async Task<ReminderTableData> ReadRows(uint begin, uint end)
         {
-            if (this.logger.IsVerbose3)
-            {
-                this.logger.Verbose3(
-                    $"ReminderTable.ReadRows called with serviceId {this.serviceId}.");
-            }
+            if (logger.IsVerbose3)
+                logger.Verbose3(
+                    $"ReminderTable.ReadRows called with serviceId {serviceId}.");
 
             try
             {
-                if ((int)begin < (int)end)
-                {
-                    // ReadRangeRowsKey1Async
-                    return await this.repository.ReadRangeRowsKey1Async(this.serviceId, begin, end);
-                }
+                if ((int) begin < (int) end)
+                    return await repository.ReadRangeRowsKey1Async(serviceId, begin, end);
 
                 // ReadRangeRowsKey2Async
-                return await this.repository.ReadRangeRowsKey2Async(this.serviceId, begin, end);
+                return await repository.ReadRangeRowsKey2Async(serviceId, begin, end);
             }
             catch (Exception ex)
             {
-                if (this.logger.IsVerbose)
-                {
-                    this.logger.Verbose("ReminderTable.ReadRows failed: {0}", ex);
-                }
+                if (logger.IsVerbose)
+                    logger.Verbose("ReminderTable.ReadRows failed: {0}", ex);
 
                 throw;
             }
@@ -102,22 +88,18 @@
 
         public async Task<ReminderEntry> ReadRow(GrainReference grainRef, string reminderName)
         {
-            if (this.logger.IsVerbose3)
-            {
-                this.logger.Verbose3(
-                    $"ReminderTable.ReadRow called with serviceId {this.serviceId}.");
-            }
+            if (logger.IsVerbose3)
+                logger.Verbose3(
+                    $"ReminderTable.ReadRow called with serviceId {serviceId}.");
 
             try
             {
-                return await this.repository.ReadReminderRowAsync(this.serviceId, grainRef, reminderName);
+                return await repository.ReadReminderRowAsync(serviceId, grainRef, reminderName);
             }
             catch (Exception ex)
             {
-                if (this.logger.IsVerbose)
-                {
-                    this.logger.Verbose("ReminderTable.ReadRow failed: {0}", ex);
-                }
+                if (logger.IsVerbose)
+                    logger.Verbose("ReminderTable.ReadRow failed: {0}", ex);
 
                 throw;
             }
@@ -125,15 +107,13 @@
 
         public async Task<string> UpsertRow(ReminderEntry entry)
         {
-            if (this.logger.IsVerbose3)
-            {
-                this.logger.Verbose3(
-                    $"ReminderTable.UpsertRow called with serviceId {this.serviceId}.");
-            }
+            if (logger.IsVerbose3)
+                logger.Verbose3(
+                    $"ReminderTable.UpsertRow called with serviceId {serviceId}.");
 
             try
             {
-                return await this.repository.UpsertReminderRowAsync(this.serviceId,
+                return await repository.UpsertReminderRowAsync(serviceId,
                     entry.GrainRef,
                     entry.ReminderName,
                     entry.StartAt,
@@ -141,10 +121,8 @@
             }
             catch (Exception ex)
             {
-                if (this.logger.IsVerbose)
-                {
-                    this.logger.Verbose("ReminderTable.UpsertRow failed: {0}", ex);
-                }
+                if (logger.IsVerbose)
+                    logger.Verbose("ReminderTable.UpsertRow failed: {0}", ex);
 
                 throw;
             }
@@ -153,26 +131,26 @@
         /// <summary>Remove a row from the table.</summary>
         /// <param name="grainRef"></param>
         /// <param name="reminderName"></param>
-        ///             /// <param name="eTag"></param>
-        /// <returns>true if a row with <paramref name="grainRef" /> and <paramref name="reminderName" /> existed and was removed successfully, false otherwise</returns>
+        /// ///
+        /// <param name="eTag"></param>
+        /// <returns>
+        ///     true if a row with <paramref name="grainRef" /> and <paramref name="reminderName" /> existed and was removed
+        ///     successfully, false otherwise
+        /// </returns>
         public async Task<bool> RemoveRow(GrainReference grainRef, string reminderName, string eTag)
         {
-            if (this.logger.IsVerbose3)
-            {
-                this.logger.Verbose3(
-                    $"ReminderTable.RemoveRow called with serviceId {this.serviceId}.");
-            }
+            if (logger.IsVerbose3)
+                logger.Verbose3(
+                    $"ReminderTable.RemoveRow called with serviceId {serviceId}.");
 
             try
             {
-                return await this.repository.RemoveRowAsync(this.serviceId, grainRef, reminderName, eTag);
+                return await repository.RemoveRowAsync(serviceId, grainRef, reminderName, eTag);
             }
             catch (Exception ex)
             {
-                if (this.logger.IsVerbose)
-                {
-                    this.logger.Verbose("ReminderTable.RemoveRow failed: {0}", ex);
-                }
+                if (logger.IsVerbose)
+                    logger.Verbose("ReminderTable.RemoveRow failed: {0}", ex);
 
                 throw;
             }
@@ -180,27 +158,21 @@
 
         public async Task TestOnlyClearTable()
         {
-            if (this.logger.IsVerbose3)
-            {
-                this.logger.Verbose3(
-                    $"ReminderTable.TestOnlyClearTable called with serviceId {this.serviceId}.");
-            }
+            if (logger.IsVerbose3)
+                logger.Verbose3(
+                    $"ReminderTable.TestOnlyClearTable called with serviceId {serviceId}.");
 
             try
             {
-                await this.repository.RemoveReminderRowsAsync(serviceId);
+                await repository.RemoveReminderRowsAsync(serviceId);
             }
             catch (Exception ex)
             {
-
-                if (this.logger.IsVerbose)
-                {
-                    this.logger.Verbose("ReminderTable.TestOnlyClearTable failed: {0}", ex);
-                }
+                if (logger.IsVerbose)
+                    logger.Verbose("ReminderTable.TestOnlyClearTable failed: {0}", ex);
 
                 throw;
             }
-
         }
     }
 }

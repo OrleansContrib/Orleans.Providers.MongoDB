@@ -1,44 +1,40 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Orleans.Messaging;
 using Orleans.Providers.MongoDB.UnitTest.Membership;
-using Orleans.Providers.MongoDB.UnitTest.Reminders;
 using Orleans.Runtime;
 using Orleans.Runtime.Configuration;
 using Orleans.TestingHost.Utils;
-using Utils = Orleans.Providers.MongoDB.UnitTest.Reminders.Utils;
 
 namespace Orleans.Providers.MongoDB.UnitTest.Storage
 {
     public abstract class StorageTableTestsBase : IDisposable
     {
-        private static readonly string hostName = Dns.GetHostName();
-        private readonly Logger logger;
-        private readonly IMembershipTable membershipTable;
-        private readonly IGatewayListProvider gatewayListProvider;
-        private readonly string deploymentId;
-
-        protected const string testDatabaseName = "OrleansMembershipTest";//for relational storage
+        protected const string testDatabaseName = "OrleansMembershipTest"; //for relational storage
 
         private const bool IsTrue = true;
+        private static readonly string hostName = Dns.GetHostName();
+
+        private static int generation;
+        private readonly string deploymentId;
+        private readonly IGatewayListProvider gatewayListProvider;
+        private readonly Logger logger;
+        private readonly IMembershipTable membershipTable;
 
         protected StorageTableTestsBase(ClusterConfiguration clusterConfiguration)
         {
-            ConstructorInfo loggerGlobalConfiguration = typeof(Logger).GetConstructors
-           (BindingFlags.Instance | BindingFlags.NonPublic)[0];
+            var loggerGlobalConfiguration = typeof(Logger).GetConstructors
+                (BindingFlags.Instance | BindingFlags.NonPublic)[0];
 
-            this.logger = new NoOpTestLogger();
+            logger = new NoOpTestLogger();
 
-            ConstructorInfo ctorGlobalConfiguration = typeof(GlobalConfiguration).GetConstructors
-            (BindingFlags.Instance | BindingFlags.NonPublic)[0];
+            var ctorGlobalConfiguration = typeof(GlobalConfiguration).GetConstructors
+                (BindingFlags.Instance | BindingFlags.NonPublic)[0];
 
-            GlobalConfiguration globalConfiguration = (GlobalConfiguration)ctorGlobalConfiguration.Invoke(new object[] {});
+            var globalConfiguration = (GlobalConfiguration) ctorGlobalConfiguration.Invoke(new object[] { });
             globalConfiguration.DeploymentId = globalConfiguration.DeploymentId;
             //globalConfiguration.AdoInvariant = GetAdoInvariant();
             globalConfiguration.DataConnectionString = clusterConfiguration.Globals.DataConnectionString;
@@ -49,7 +45,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Storage
             globalConfiguration.MembershipTableAssembly = clusterConfiguration.Globals.MembershipTableAssembly;
             globalConfiguration.ReminderServiceType = clusterConfiguration.Globals.ReminderServiceType;
             globalConfiguration.DeploymentId = clusterConfiguration.Globals.DeploymentId;
-            
+
             //membershipTable = CreateMembershipTable(logger);
             //membershipTable.InitializeMembershipTable(globalConfiguration, IsTrue, logger).WithTimeout(TimeSpan.FromMinutes(1)).Wait();
 
@@ -67,9 +63,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Storage
         public void Dispose()
         {
             if (membershipTable != null && SiloInstanceTableTestConstants.DeleteEntriesAfterTest)
-            {
                 membershipTable.DeleteMembershipTableEntries(deploymentId).Wait();
-            }
         }
 
         //protected abstract IGatewayListProvider CreateGatewayListProvider(Logger logger);
@@ -393,11 +387,10 @@ namespace Orleans.Providers.MongoDB.UnitTest.Storage
             //Assert.AreEqual(1, tableData.Members.Count);
         }
 
-        private static int generation;
         // Utility methods
         private static MembershipEntry CreateMembershipEntryForTest()
         {
-            SiloAddress siloAddress = CreateSiloAddressForTest();
+            var siloAddress = CreateSiloAddressForTest();
 
 
             var membershipEntry = new MembershipEntry

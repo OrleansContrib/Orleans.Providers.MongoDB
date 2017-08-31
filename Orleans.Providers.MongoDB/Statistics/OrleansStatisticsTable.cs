@@ -1,15 +1,23 @@
-﻿namespace Orleans.Providers.MongoDB.Statistics
+﻿using System;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace Orleans.Providers.MongoDB.Statistics
 {
-    using System;
-
-    using global::MongoDB.Bson;
-    using global::MongoDB.Bson.Serialization.Attributes;
-
     /// <summary>
-    /// The orleans statistics table.
+    ///     The orleans statistics table.
     /// </summary>
     public class OrleansStatisticsTable
     {
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="OrleansStatisticsTable" /> class.
+        /// </summary>
+        public OrleansStatisticsTable()
+        {
+            Timestamp = DateTime.Now;
+            Id = ObjectId.GenerateNewId().ToString();
+        }
+
         public string Identity { get; set; }
 
         public string DeploymentId { get; set; }
@@ -29,14 +37,5 @@
 
         [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime Timestamp { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="OrleansStatisticsTable"/> class.
-        /// </summary>
-        public OrleansStatisticsTable()
-        {
-            this.Timestamp = DateTime.Now;
-            this.Id = ObjectId.GenerateNewId().ToString();
-        }
     }
 }

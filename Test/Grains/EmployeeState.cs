@@ -1,13 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Orleans.Providers.MongoDB.Test.Grains
 {
     public class EmployeeState
     {
+        public EmployeeState()
+        {
+            Address = new EmployeeAddress();
+            FavouriteColours = new[] {"Red", "Blue", "Green"};
+            RandomNumbersOwned = new List<int>();
+            RandomNumbersOwned.Add(1);
+            RandomNumbersOwned.Add(2);
+            RandomNumbersOwned.Add(3);
+            Status = EmployeeStatus.NotActive;
+        }
+
         public int Level { get; set; }
 
         public EmployeeAddress Address { get; set; }
@@ -17,16 +24,5 @@ namespace Orleans.Providers.MongoDB.Test.Grains
         public List<int> RandomNumbersOwned { get; set; }
 
         public EmployeeStatus Status { get; set; }
-
-        public EmployeeState()
-        {
-            this.Address = new EmployeeAddress();
-            this.FavouriteColours = new string[] { "Red", "Blue", "Green" };
-            this.RandomNumbersOwned = new List<int>();
-            this.RandomNumbersOwned.Add(1);
-            this.RandomNumbersOwned.Add(2);
-            this.RandomNumbersOwned.Add(3);
-            this.Status = EmployeeStatus.NotActive;
-        }
     }
 }

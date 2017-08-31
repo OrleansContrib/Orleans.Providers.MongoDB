@@ -1,14 +1,18 @@
-﻿namespace Orleans.Providers.MongoDB.Statistics
+﻿using System;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace Orleans.Providers.MongoDB.Statistics
 {
-    using System;
-
-    using global::MongoDB.Bson.Serialization.Attributes;
-
     /// <summary>
-    /// The Client Metrics Model
+    ///     The Client Metrics Model
     /// </summary>
     public class OrleansClientMetricsTable
     {
+        public OrleansClientMetricsTable()
+        {
+            DateTime = DateTime.Now;
+        }
+
         public string DeploymentId { get; set; }
 
         public string ClientId { get; set; }
@@ -33,11 +37,5 @@
 
         [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime DateTime { get; set; }
-
-        public OrleansClientMetricsTable()
-        {
-            this.DateTime = DateTime.Now;
-        }
-
     }
 }

@@ -1,56 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Orleans.Messaging;
+using Orleans.Providers.MongoDB.Membership;
+using Orleans.Runtime;
+using Orleans.Runtime.Configuration;
+using UnitTests.MembershipTests;
 
 namespace Orleans.Providers.MongoDB.UnitTest.Membership
 {
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-    using Orleans.Messaging;
-    using Orleans.Providers.MongoDB.Membership;
-    using Orleans.Providers.MongoDB.Reminders;
-    using Orleans.Runtime;
-    using Orleans.Runtime.Configuration;
-
-    using UnitTests.MembershipTests;
-
     [TestClass]
     public class MongoDbServerMembershipTableTests : MembershipTableTestsBase
     {
-        [Serializable]
-        public class MembershipClusterConfiguration : ClusterConfiguration
-        {
-            public MembershipClusterConfiguration()
-            {
-                //var config = ClusterConfiguration.LocalhostPrimarySilo();
-                this.LoadFromFile(@".\OrleansConfiguration.xml");
-
-                // Init Mongo Membership
-                this.Globals.LivenessType = GlobalConfiguration.LivenessProviderType.Custom;
-                this.Globals.MembershipTableAssembly = "Orleans.Providers.MongoDB";
-                this.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Disabled;
-
-                var n = new NodeConfiguration
-                {
-                    SiloName = "Primary",
-                    ProxyGatewayEndpoint = this.Defaults.ProxyGatewayEndpoint,
-                    Port = this.Defaults.Port
-                };
-                this.Overrides.Add(new KeyValuePair<string, NodeConfiguration>(n.SiloName, n));
-            }
-        }
-
         public MongoDbServerMembershipTableTests() : base(new MembershipClusterConfiguration())
         {
-            string a = "";
             //LogManager.AddTraceLevelOverride(typeof(SqlServerMembershipTableTests).Name, Severity.Verbose3);
         }
 
         protected override IMembershipTable CreateMembershipTable(Logger logger)
         {
-            return new MongoMembershipTable { };
+            return new MongoMembershipTable();
         }
 
         protected override IGatewayListProvider CreateGatewayListProvider(Logger logger)
@@ -103,6 +73,29 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
         public async Task MembershipTable_MongoDB_UpdateRowInParallel()
         {
             await MembershipTable_UpdateRowInParallel();
+        }
+
+        [Serializable]
+        public class MembershipClusterConfiguration : ClusterConfiguration
+        {
+            public MembershipClusterConfiguration()
+            {
+                //var config = ClusterConfiguration.LocalhostPrimarySilo();
+                LoadFromFile(@".\OrleansConfiguration.xml");
+
+                // Init Mongo Membership
+                Globals.LivenessType = GlobalConfiguration.LivenessProviderType.Custom;
+                Globals.MembershipTableAssembly = "Orleans.Providers.MongoDB";
+                Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Disabled;
+
+                var n = new NodeConfiguration
+                {
+                    SiloName = "Primary",
+                    ProxyGatewayEndpoint = Defaults.ProxyGatewayEndpoint,
+                    Port = Defaults.Port
+                };
+                Overrides.Add(new KeyValuePair<string, NodeConfiguration>(n.SiloName, n));
+            }
         }
     }
 }

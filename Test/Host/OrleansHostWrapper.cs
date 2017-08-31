@@ -1,35 +1,30 @@
+using System;
+using System.Net;
+using Orleans.Runtime.Configuration;
+using Orleans.Runtime.Host;
+
 namespace Orleans.Providers.MongoDB.Test.Host
 {
-    using System;
-    using System.Net;
-
-    using Orleans.Runtime.Configuration;
-    using Orleans.Runtime.Host;
-
     internal class OrleansHostWrapper : IDisposable
     {
         private SiloHost siloHost;
+
         public OrleansHostWrapper(string[] args)
         {
-            this.ParseArguments(args);
-            this.Init();
+            ParseArguments(args);
+            Init();
         }
 
         public bool Debug
         {
-            get
-            {
-                return this.siloHost != null && this.siloHost.Debug;
-            }
+            get => siloHost != null && siloHost.Debug;
 
-            set
-            {
-                this.siloHost.Debug = value;
-            }
+            set => siloHost.Debug = value;
         }
+
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
         }
 
         public void PrintUsage()
@@ -44,30 +39,27 @@ Where:
 
         public bool Run()
         {
-            bool ok = false;
+            var ok = false;
 
             try
             {
-                this.siloHost.InitializeOrleansSilo();
+                siloHost.InitializeOrleansSilo();
 
-                ok = this.siloHost.StartOrleansSilo();
+                ok = siloHost.StartOrleansSilo();
 
                 if (ok)
-                {
-                    Console.WriteLine("Successfully started Orleans silo '{0}' as a {1} node.", this.siloHost.Name, this.siloHost.Type);
-                }
+                    Console.WriteLine("Successfully started Orleans silo '{0}' as a {1} node.", siloHost.Name,
+                        siloHost.Type);
                 else
-                {
-                    throw new SystemException(
+                    throw new Exception(
                         string.Format(
                             "Failed to start Orleans silo '{0}' as a {1} node.",
-                            this.siloHost.Name,
-                            this.siloHost.Type));
-                }
+                            siloHost.Name,
+                            siloHost.Type));
             }
             catch (Exception exc)
             {
-                this.siloHost.ReportStartupError(exc);
+                siloHost.ReportStartupError(exc);
                 var msg = string.Format("{0}:\n{1}\n{2}", exc.GetType().FullName, exc.Message, exc.StackTrace);
                 Console.WriteLine(msg);
             }
@@ -77,17 +69,17 @@ Where:
 
         public bool Stop()
         {
-            bool ok = false;
+            var ok = false;
 
             try
             {
-                this.siloHost.StopOrleansSilo();
+                siloHost.StopOrleansSilo();
 
-                Console.WriteLine("Orleans silo '{0}' shutdown.", this.siloHost.Name);
+                Console.WriteLine("Orleans silo '{0}' shutdown.", siloHost.Name);
             }
             catch (Exception exc)
             {
-                this.siloHost.ReportStartupError(exc);
+                siloHost.ReportStartupError(exc);
                 var msg = string.Format("{0}:\n{1}\n{2}", exc.GetType().FullName, exc.Message, exc.StackTrace);
                 Console.WriteLine(msg);
             }
@@ -97,27 +89,26 @@ Where:
 
         protected virtual void Dispose(bool dispose)
         {
-            this.siloHost.Dispose();
-            this.siloHost = null;
+            siloHost.Dispose();
+            siloHost = null;
         }
 
         private void Init()
         {
-            this.siloHost.LoadOrleansConfig();
+            siloHost.LoadOrleansConfig();
         }
 
         private bool ParseArguments(string[] args)
         {
             string deploymentId = null;
 
-            string siloName = Dns.GetHostName(); // Default to machine name
+            var siloName = Dns.GetHostName(); // Default to machine name
 
-            int argPos = 1;
-            for (int i = 0; i < args.Length; i++)
+            var argPos = 1;
+            for (var i = 0; i < args.Length; i++)
             {
-                string a = args[i];
+                var a = args[i];
                 if (a.StartsWith("-") || a.StartsWith("/"))
-                {
                     switch (a.ToLowerInvariant())
                     {
                         case "/?":
@@ -131,11 +122,10 @@ Where:
                             Console.WriteLine("Bad command line arguments supplied: " + a);
                             return false;
                     }
-                }
 
                 if (a.Contains("="))
                 {
-                    string[] split = a.Split('=');
+                    var split = a.Split('=');
                     if (string.IsNullOrEmpty(split[1]))
                     {
                         Console.WriteLine("Bad command line arguments supplied: " + a);
@@ -178,12 +168,10 @@ Where:
             // props["Database"] = "orleanssamples";
             // props["ConnectionString"] = "mongodb://localhost:27017/";
             // config.Globals.RegisterStorageProvider<Samples.StorageProviders.MongoDBStorage>("TestStore", props);
-            this.siloHost = new SiloHost(siloName, config);
+            siloHost = new SiloHost(siloName, config);
 
             if (deploymentId != null)
-            {
-                this.siloHost.DeploymentId = deploymentId;
-            }
+                siloHost.DeploymentId = deploymentId;
 
             return true;
         }
