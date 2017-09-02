@@ -10,7 +10,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A MongoDb implementation of the Orleans Providers. This includes the Membership (IMembershipTable and IGatewayListProvider), Reminder (IReminderTable), MongoStatisticsPublisher and IStorageProvider providers.</description>
     <releaseNotes>Performance updates and included correct dll. Feedback would be appreciated. </releaseNotes>
-    <copyright>Copyright 2017</copyright>
+    <copyright>MIT</copyright>
     <tags>Orleans OrleansProviders MongoDB</tags>
     <dependencies>
       <dependency id="MongoDB.Driver" version="2.3.0" />

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orleans.Providers.MongoDB", "Orleans.Providers.MongoDB\Orleans.Providers.MongoDB.csproj", "{E49725D0-D9E8-4F68-8FE3-919F062D3041}"
 EndProject
@@ -31,7 +31,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{A29BB09A-B983-4BEC-80F0-FE28DE6B6CE9}"
 	ProjectSection(SolutionItems) = preProject
 		..\Build\Build.bat = ..\Build\Build.bat
-		Build\Orleans.Providers.MongoDB.dll.nuspec = Build\Orleans.Providers.MongoDB.dll.nuspec
 	EndProjectSection
 EndProject
 Global
