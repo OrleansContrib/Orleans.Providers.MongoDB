@@ -83,4 +83,4 @@ initialized = GrainClient.IsInitialized;
 
 ## Todo
 
-- .Net Core compatibility 
+- .Net Core compatibility ( Available as preview package)
