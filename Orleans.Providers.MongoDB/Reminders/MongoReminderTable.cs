@@ -32,7 +32,7 @@ namespace Orleans.Providers.MongoDB.Reminders
                 connectionString = config.DataConnectionString;
 
             repository = new MongoReminderTableRepository(connectionString,
-                MongoUrl.Create(config.DataConnectionString).DatabaseName, grainReferenceConverter);
+                MongoUrl.Create(connectionString).DatabaseName, grainReferenceConverter);
             await repository.InitTables();
         }
 
