@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.6</TargetFramework>
-    <Version>0.1.3-preview</Version>
+    <TargetFrameworks>net461;netstandard1.6</TargetFrameworks>
+    <Version>0.1.5-preview</Version>
     <Authors>laredoza</Authors>
     <Company>Orleans.Providers.MongoDB</Company>
     <Description>A MongoDb implementation of the Orleans Providers. This includes the Membership (IMembershipTable and IGatewayListProvider), Reminder (IReminderTable), MongoStatisticsPublisher and IStorageProvider providers.</Description>
@@ -16,8 +16,14 @@ Feedback would be appreciated.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Orleans.OrleansProviders" Version="2.0.0-preview2-20170724" />
+    <PackageReference Include="Microsoft.Orleans.OrleansProviders" Version="2.0.0-preview2-20170724" Condition="'$(TargetFramework)' == 'netstandard1.6'" />
     <PackageReference Include="MongoDB.Driver" Version="2.4.4" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <PackageReference Include="Microsoft.Orleans.OrleansRuntime">
+      <Version>1.5.1</Version>
+    </PackageReference>
   </ItemGroup>
 
 </Project>
