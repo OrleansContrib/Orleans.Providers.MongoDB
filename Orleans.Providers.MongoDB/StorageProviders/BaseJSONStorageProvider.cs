@@ -47,6 +47,8 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             serializerSettings = OrleansJsonSerializer.UpdateSerializerSettings(
                 OrleansJsonSerializer.GetDefaultSerializerSettings(serializationManager, providerRuntime.GrainFactory),
                 config);
+
+            serializerSettings.Converters.Add(new GrainReferenceConverter(providerRuntime.GrainFactory));
             return Task.CompletedTask;
         }
 

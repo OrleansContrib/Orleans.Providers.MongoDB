@@ -2,13 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
-    <Version>0.1.2</Version>
+    <Version>0.1.3-preview</Version>
     <Authors>laredoza</Authors>
     <Company>Orleans.Providers.MongoDB</Company>
     <Description>A MongoDb implementation of the Orleans Providers. This includes the Membership (IMembershipTable and IGatewayListProvider), Reminder (IReminderTable), MongoStatisticsPublisher and IStorageProvider providers.</Description>
     <Copyright>MIT</Copyright>
     <PackageTags>Orleans OrleansProviders MongoDB</PackageTags>
-    <PackageReleaseNotes>Targeting dotnetStandard 1.6. Feedback would be appreciated.</PackageReleaseNotes>
+    <PackageReleaseNotes>Orleans 1.5+ requires rebinding of deserialized grain references via IGrainFactory.BindGrainReference(). 
+Feedback would be appreciated.</PackageReleaseNotes>
     <PackageLicenseUrl>https://github.com/dotnet/Orleans#license</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/OrleansContrib/Orleans.Providers.MongoDB</PackageProjectUrl>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
