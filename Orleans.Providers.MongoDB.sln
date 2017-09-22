@@ -30,7 +30,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{F78B46D7
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{A29BB09A-B983-4BEC-80F0-FE28DE6B6CE9}"
 	ProjectSection(SolutionItems) = preProject
-		..\Build\Build.bat = ..\Build\Build.bat
+		Build\Build.bat = Build\Build.bat
 	EndProjectSection
 EndProject
 Global
