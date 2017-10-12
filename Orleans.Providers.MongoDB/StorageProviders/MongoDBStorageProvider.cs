@@ -1,6 +1,6 @@
-﻿using System;
+﻿using MongoDB.Driver;
+using System;
 using System.Threading.Tasks;
-using MongoDB.Driver;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
 {
@@ -42,6 +42,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         {
             Name = name;
             ConnectionString = config.Properties["ConnectionString"];
+            bool useJsonFormat = config.GetBoolProperty("UseJsonFormat", true);
 
             if (!config.Properties.ContainsKey("Database") || string.IsNullOrEmpty(config.Properties["Database"]))
                 Database = MongoUrl.Create(ConnectionString).DatabaseName;
@@ -51,13 +52,13 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             if (string.IsNullOrWhiteSpace(ConnectionString))
                 throw new ArgumentException("ConnectionString property not set");
             if (string.IsNullOrWhiteSpace(Database)) throw new ArgumentException("Database property not set");
-            DataManager = ReturnDataManager(Database, ConnectionString);
+            DataManager = ReturnDataManager(Database, ConnectionString, UseJsonFormat);
             return base.Init(name, providerRuntime, config);
         }
 
-        public virtual IJSONStateDataManager ReturnDataManager(string database, string connectionString)
+        public virtual IJSONStateDataManager ReturnDataManager(string database, string connectionString, bool UseJsonFormat)
         {
-            return new GrainStateMongoDataManager(database, connectionString);
+            return new GrainStateMongoDataManager(database, connectionString, UseJsonFormat);
         }
     }
 }
