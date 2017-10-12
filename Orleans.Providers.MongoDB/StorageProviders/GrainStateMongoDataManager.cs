@@ -1,16 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization;
+﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using Newtonsoft.Json;
-using Orleans.Providers.MongoDB.StorageProviders.Serializing;
-using JsonToken = Newtonsoft.Json.JsonToken;
-using JsonWriter = MongoDB.Bson.IO.JsonWriter;
-using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
 {
