@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using Orleans.Providers.MongoDB.StorageProviders.Serializing;
 using JsonToken = Newtonsoft.Json.JsonToken;
 using JsonWriter = MongoDB.Bson.IO.JsonWriter;
+using Newtonsoft.Json.Linq;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
 {
@@ -19,16 +20,18 @@ namespace Orleans.Providers.MongoDB.StorageProviders
     public class GrainStateMongoDataManager : IJSONStateDataManager
     {
         private readonly IMongoDatabase _database;
+        private readonly bool _useJsonFormat;
 
         /// <summary>
         ///     Constructor
         /// </summary>
         /// <param name="connectionString">A database name.</param>
         /// <param name="databaseName">A MongoDB database connection string.</param>
-        public GrainStateMongoDataManager(string databaseName, string connectionString)
+        public GrainStateMongoDataManager(string databaseName, string connectionString, bool useJsonFormat)
         {
             var client = new MongoClient(connectionString);
             _database = client.GetDatabase(databaseName);
+            _useJsonFormat = useJsonFormat;
         }
 
         /// <summary>
@@ -54,7 +57,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// <param name="collectionName">The type of the grain state object.</param>
         /// <param name="key">The grain id string.</param>
         /// <returns>Completion promise for this operation.</returns>
-        public async Task<string> Read(string collectionName, string key)
+        public async Task<BsonDocument> Read(string collectionName, string key)
         {
             var collection = GetCollection(collectionName);
             if (collection == null)
@@ -70,12 +73,15 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             existing.Remove("_id");
             existing.Remove("key");
 
-            var strwrtr = new StringWriter();
-            var writer = new JsonWriter(strwrtr, new JsonWriterSettings());
-            BsonSerializer.Serialize(writer, existing);
+            return existing;
 
-            // NewtonSoft generates a $type & $id which is incompatible with Mongo. Replacing $ with __
-            return ReverseInvalidValues(strwrtr.ToString());
+            //var strwrtr = new StringWriter();
+            
+            //var writer = new JsonWriter(strwrtr, new JsonWriterSettings());
+            //BsonSerializer.Serialize(writer, existing);
+
+            //// NewtonSoft generates a $type & $id which is incompatible with Mongo. Replacing $ with __
+            //return ReverseInvalidValues(strwrtr.ToString());
         }
 
         /// <summary>
@@ -85,7 +91,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// <param name="key">The grain id string.</param>
         /// <param name="entityData">The grain state data to be stored./</param>
         /// <returns>Completion promise for this operation.</returns>
-        public async Task Write(string collectionName, string key, string entityData)
+        public async Task Write(string collectionName, string key, BsonDocument entityData)
         {
             var collection = await GetOrCreateCollection(collectionName);
 
@@ -94,19 +100,20 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             var existing = await collection.Find(builder).FirstOrDefaultAsync();
 
             // NewtonSoft generates a $type & $id which is incompatible with Mongo. Replacing __ with $
-            entityData = ReverseInvalidValues(entityData);
-            var doc = BsonSerializer.Deserialize<BsonDocument>(entityData);
+            
+            //entityData = ReverseInvalidValues(entityData);
+            //var doc = BsonSerializer.Deserialize<BsonDocument>(entityData);
 
-            doc["key"] = key;
+            entityData["key"] = key;
 
             if (existing == null)
             {
-                await collection.InsertOneAsync(doc);
+                await collection.InsertOneAsync(entityData);
             }
             else
             {
-                doc["_id"] = existing["_id"];
-                await collection.ReplaceOneAsync(builder, doc);
+                entityData["_id"] = existing["_id"];
+                await collection.ReplaceOneAsync(builder, entityData);
             }
         }
 
@@ -115,112 +122,6 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// </summary>
         public void Dispose()
         {
-        }
-
-        /// <summary>
-        ///     NewtonSoft generates a $type & $id which is incompatible with Mongo. Replacing $ with __
-        /// </summary>
-        /// <param name="entityData"></param>
-        /// <returns></returns>
-        private string ReverseInvalidValues(string entityData)
-        {
-            var sb = new StringBuilder();
-            var writer = new CustomJsonWriter(new StringWriter(sb));
-            var reader = new JsonTextReader(new StringReader(entityData));
-
-            while (reader.Read())
-                if (reader.Value != null)
-                {
-                    Console.WriteLine("Token: {0}, Value: {1}", reader.TokenType, reader.Value);
-
-                    switch (reader.TokenType)
-                    {
-                        case JsonToken.PropertyName:
-
-                            if (reader.Value.ToString() == "$type")
-                                writer.WritePropertyName("__type");
-                            else if (reader.Value.ToString() == "__type")
-                                writer.WritePropertyName("$type");
-                            else if (reader.Value.ToString() == "$id")
-                                writer.WritePropertyName("__id");
-                            else if (reader.Value.ToString() == "__id")
-                                writer.WritePropertyName("$id");
-                            else if (reader.Value.ToString() == "$type")
-                                writer.WritePropertyName("__type");
-                            else if (reader.Value.ToString() == "__type")
-                                writer.WritePropertyName("$type");
-                            else if (reader.Value.ToString() == "$values")
-                                writer.WritePropertyName("__values");
-                            else if (reader.Value.ToString() == "__values")
-                                writer.WritePropertyName("$values");
-                            else
-                                writer.WritePropertyName(reader.Value.ToString());
-
-                            break;
-                        case JsonToken.None:
-                            break;
-                        case JsonToken.StartConstructor:
-                            writer.WriteStartConstructor(reader.Value.ToString());
-                            break;
-                        case JsonToken.Comment:
-                            writer.WriteComment(reader.Value.ToString());
-                            break;
-                        case JsonToken.Raw:
-                            writer.WriteRaw(reader.Value.ToString());
-                            break;
-                        case JsonToken.Integer:
-                        case JsonToken.Float:
-                        case JsonToken.String:
-                        case JsonToken.Boolean:
-                        case JsonToken.Date:
-                        case JsonToken.Bytes:
-                            writer.WriteValue(reader.Value);
-                            break;
-                        case JsonToken.Null:
-                            writer.WriteNull();
-                            break;
-                        case JsonToken.Undefined:
-                            writer.WriteUndefined();
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Token: {0}", reader.TokenType);
-
-                    switch (reader.TokenType)
-                    {
-                        case JsonToken.None:
-                            break;
-                        case JsonToken.StartObject:
-                            writer.WriteStartObject();
-                            break;
-                        case JsonToken.StartArray:
-                            writer.WriteStartArray();
-                            break;
-                        case JsonToken.Null:
-                            writer.WriteNull();
-                            break;
-                        case JsonToken.Undefined:
-                            writer.WriteUndefined();
-                            break;
-                        case JsonToken.EndObject:
-                            writer.WriteEndObject();
-                            break;
-                        case JsonToken.EndArray:
-                            writer.WriteEndArray();
-                            break;
-                        case JsonToken.EndConstructor:
-                            writer.WriteEndConstructor();
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-            return sb.ToString();
         }
 
         /// <summary>
