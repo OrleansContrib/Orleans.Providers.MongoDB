@@ -80,6 +80,10 @@ install-package Orleans.Providers.MongoDB
 GrainClient.Initialize(ClientConfiguration.LoadFromFile(@".\ClientConfiguration.xml"));
 initialized = GrainClient.IsInitialized;
 ```
+### Storage Provider Serialization
+Binary serialization has been added to the Storage Provider and is controlled by the UseJsonFormat="false" parameter.
+
+Switching the serialization type while there is data in the storage collections will lead to data loss. 
 
 ## Todo
 
