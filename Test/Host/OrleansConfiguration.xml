@@ -7,7 +7,9 @@
     
     <StorageProviders>
       <!--Standard MongoProvider-->
-      <Provider Type="Orleans.Providers.MongoDB.StorageProviders.MongoDBStorage" Name="MongoDBStore" Database="" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" />
+
+      <!--Switching the serialization type while there is data in the storage collections will lead to data loss.-->
+      <Provider Type="Orleans.Providers.MongoDB.StorageProviders.MongoDBStorage" Name="MongoDBStore" Database="" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" UseJsonFormat="true"/>
       <!--Custom StorageProvider that adds OrleansStorage Prefix to each collection-->
       <!--<Provider Type="Orleans.Providers.MongoDB.Test.Host.CustomStorageProvider.MongoDBStorageWithOrleansPrefix" Name="MongoDBStore" Database="" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" />-->
     </StorageProviders>
