@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 using FluentAssertions;
+using MongoDB.Bson;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
 {
@@ -79,6 +80,16 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             var target = JObject.FromObject(source).ToBson().ToJToken().ToObject<TestObject>();
 
             target.ShouldBeEquivalentTo(source);
+        }
+
+        [TestMethod]
+        public void Should_keep_binary_Data()
+        {
+            var source = TestObject.CreateWithValues();
+            var json = JObject.FromObject(source);
+            var bson = json.ToBson();
+
+            Assert.AreEqual(BsonType.Binary, bson["Bytes"].BsonType);
         }
     }
 }
