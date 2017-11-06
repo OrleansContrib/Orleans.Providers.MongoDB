@@ -7,14 +7,14 @@ namespace Orleans.Providers.MongoDB.Reminders
 {
     public class RemindersHelper
     {
-        public static Task<ReminderTableData> ProcessRemindersList(List<RemindersCollection> reminders,
+        public static ReminderTableData ProcessRemindersList(List<RemindersCollection> reminders,
             IGrainReferenceConverter grainReferenceConverter)
         {
             var reminderEntryList = new List<ReminderEntry>();
             foreach (var reminder in reminders)
                 reminderEntryList.Add(Parse(reminder, grainReferenceConverter));
 
-            return Task.FromResult(new ReminderTableData(reminderEntryList));
+            return new ReminderTableData(reminderEntryList);
         }
 
         public static ReminderEntry Parse(RemindersCollection reminder,

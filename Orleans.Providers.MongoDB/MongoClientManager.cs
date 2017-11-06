@@ -14,7 +14,14 @@ namespace Orleans.Providers.MongoDB
 
         public static IMongoClient Instance(string connectionString)
         {
-            return Instances.GetOrAdd(connectionString, cs => new MongoClient(cs));
+            var urlBuilder = new MongoUrlBuilder(connectionString)
+            {
+                DatabaseName = null
+            };
+
+            var sanitizedConnectionString = urlBuilder.ToString();
+
+            return Instances.GetOrAdd(sanitizedConnectionString, cs => new MongoClient(cs));
         }
     }
 }

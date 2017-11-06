@@ -13,7 +13,7 @@ namespace Orleans.Providers.MongoDB.Reminders
 
         private Logger logger;
 
-        private IMongoReminderTableRepository repository;
+        private MongoReminderTableRepository repository;
         private string serviceId;
 
         public MongoReminderTable(IGrainReferenceConverter grainReferenceConverter)
@@ -21,7 +21,7 @@ namespace Orleans.Providers.MongoDB.Reminders
             this.grainReferenceConverter = grainReferenceConverter;
         }
 
-        public async Task Init(GlobalConfiguration config, Logger traceLogger)
+        public Task Init(GlobalConfiguration config, Logger traceLogger)
         {
             serviceId = config.ServiceId.ToString();
             logger = traceLogger;
@@ -33,7 +33,8 @@ namespace Orleans.Providers.MongoDB.Reminders
 
             repository = new MongoReminderTableRepository(connectionString,
                 MongoUrl.Create(connectionString).DatabaseName, grainReferenceConverter);
-            await repository.InitTables();
+
+            return Task.CompletedTask;
         }
 
         public async Task<ReminderTableData> ReadRows(GrainReference key)
