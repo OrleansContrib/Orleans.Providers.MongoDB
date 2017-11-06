@@ -42,7 +42,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         {
             Name = name;
             ConnectionString = config.Properties["ConnectionString"];
-            bool useJsonFormat = config.GetBoolProperty("UseJsonFormat", true);
+            var useJsonFormat = config.GetBoolProperty("UseJsonFormat", true);
 
             if (!config.Properties.ContainsKey("Database") || string.IsNullOrEmpty(config.Properties["Database"]))
                 Database = MongoUrl.Create(ConnectionString).DatabaseName;
@@ -58,7 +58,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
         public virtual IJSONStateDataManager ReturnDataManager(string database, string connectionString, bool UseJsonFormat)
         {
-            return new GrainStateMongoDataManager(database, connectionString, UseJsonFormat);
+            return new GrainStateMongoDataManager(database, connectionString);
         }
     }
 }

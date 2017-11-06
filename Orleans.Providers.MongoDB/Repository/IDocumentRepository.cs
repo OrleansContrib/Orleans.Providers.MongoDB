@@ -14,17 +14,11 @@ using MongoDB.Driver;
 
 namespace Orleans.Providers.MongoDB.Repository
 {
-    #region Using
-
-    #endregion
-
     /// <summary>
     ///     The DocumentRepository interface.
     /// </summary>
     public interface IDocumentRepository
     {
-        #region Properties
-
         /// <summary>
         ///     Gets or sets the connection string.
         /// </summary>
@@ -34,10 +28,6 @@ namespace Orleans.Providers.MongoDB.Repository
         ///     Gets or sets the database name.
         /// </summary>
         string DatabaseName { get; set; }
-
-        #endregion
-
-        #region Public methods and operators
 
         /// <summary>
         ///     Add documents.
@@ -97,17 +87,6 @@ namespace Orleans.Providers.MongoDB.Repository
         ///     The <see cref="Task" />.
         /// </returns>
         Task BulkWriteAsync(WriteModel<BsonDocument>[] documents, string mongoCollectionName);
-
-        /// <summary>
-        ///     Clear collection.
-        /// </summary>
-        /// <param name="collectionName">
-        ///     The collection name.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="Task" />.
-        /// </returns>
-        Task ClearCollection(string collectionName);
 
         /// <summary>
         ///     Delete document async.
@@ -190,7 +169,5 @@ namespace Orleans.Providers.MongoDB.Repository
         ///     The <see cref="Task" />.
         /// </returns>
         Task UpsertDocumentsAsync(List<BsonDocument> documents, string lookupFieldName, string mongoCollectionName);
-
-        #endregion
     }
 }

@@ -1,5 +1,5 @@
 ﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
+using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -84,7 +84,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// <param name="collectionName">The type of the grain state object.</param>
         /// <param name="key">The grain id string.</param>
         /// <returns>Completion promise for this operation.</returns>
-        public async Task<BsonDocument> Read(string collectionName, string key)
+        public async Task<JObject> Read(string collectionName, string key)
         {
             var fileInfo = GetStorageFilePath(collectionName, key);
 
@@ -94,7 +94,8 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             using (var stream = fileInfo.OpenText())
             {
                 var json = await stream.ReadToEndAsync();
-                return BsonSerializer.Deserialize<BsonDocument>(json);
+
+                return JObject.Parse(json);
             }
         }
 
@@ -105,7 +106,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// <param name="key">The grain id string.</param>
         /// <param name="entityData">The grain state data to be stored./</param>
         /// <returns>Completion promise for this operation.</returns>
-        public async Task Write(string collectionName, string key, BsonDocument entityData)
+        public async Task Write(string collectionName, string key, JObject entityData)
         {
             var fileInfo = GetStorageFilePath(collectionName, key);
 

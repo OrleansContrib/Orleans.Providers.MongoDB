@@ -1,10 +1,6 @@
-#region Using
-
 using System;
 using Orleans.Runtime.Configuration;
 using Orleans.Runtime.Host;
-
-#endregion
 
 internal class Program
 {
