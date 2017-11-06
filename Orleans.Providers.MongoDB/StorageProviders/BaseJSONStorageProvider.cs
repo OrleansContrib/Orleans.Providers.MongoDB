@@ -155,7 +155,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             {
                 var byteArray = serializationManager.SerializeToByteArray(grainState.State);
 
-                return new JObject(new JProperty("stateData", byteArray));
+                return new JObject(new JProperty("statedata", byteArray));
             }
         }
 
