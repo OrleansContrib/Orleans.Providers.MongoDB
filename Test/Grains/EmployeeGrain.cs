@@ -6,8 +6,6 @@ namespace Orleans.Providers.MongoDB.Test.Grains
     [StorageProvider(ProviderName = "MongoDBStore")]
     public class EmployeeGrain : Grain<EmployeeState>, IEmployeeGrain
     {
-        #region Overrides of Grain
-
         /// <summary>
         ///     This method is called at the end of the process of activating a grain.
         ///     It is called before any messages have been dispatched to the grain.
@@ -17,10 +15,6 @@ namespace Orleans.Providers.MongoDB.Test.Grains
         {
             return base.OnActivateAsync();
         }
-
-        #endregion
-
-        #region Implementation of IEmployeeGrain
 
         public Task SetLevel(int level)
         {
@@ -33,7 +27,5 @@ namespace Orleans.Providers.MongoDB.Test.Grains
             await ReadStateAsync();
             return State.Level;
         }
-
-        #endregion
     }
 }

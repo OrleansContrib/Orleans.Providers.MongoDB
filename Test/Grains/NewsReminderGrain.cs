@@ -9,8 +9,6 @@ namespace Orleans.Providers.MongoDB.Test.Grains
     {
         internal IGrainRuntime Runtime { get; set; }
 
-        #region Implementation of IRemindable
-
         /// <summary>
         ///     Registers a persistent, reliable reminder to send regular notifications (reminders) to the grain.
         ///     The grain must implement the <c>Orleans.IRemindable</c> interface, and reminders for this grain will be sent to the
@@ -60,7 +58,5 @@ namespace Orleans.Providers.MongoDB.Test.Grains
             Console.WriteLine("Thanks for reminding me-- I almost forgot!");
             return Task.CompletedTask;
         }
-
-        #endregion
     }
 }
