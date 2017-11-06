@@ -128,6 +128,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Repository
                     r.GrainId == grainId && 
                     r.ReminderName == reminderName,
                     Update
+                        .SetOnInsert(x => x.Id, Guid.NewGuid().ToString())
                         .Set(x => x.StartTime, startTime)
                         .Set(x => x.Period, period.TotalMilliseconds)
                         .Set(x => x.GrainHash, grainRef.GetUniformHashCode())
