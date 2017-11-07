@@ -6,7 +6,7 @@ using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Statistics.Repository
 {
-    public class MongoStatisticsCounterRepository : DocumentRepository2<OrleansStatisticsTable>
+    public class MongoStatisticsCounterRepository : CollectionBase<OrleansStatisticsTable>
     {
         private static readonly UpdateOptions UpsertNoValidation = new UpdateOptions { BypassDocumentValidation = true, IsUpsert = true };
 

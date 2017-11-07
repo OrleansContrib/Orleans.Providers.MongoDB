@@ -131,7 +131,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
         public virtual string ReturnGrainName(string grainType, GrainReference grainReference)
         {
-            return grainType.Split('.').Last();
+            return grainType.Split('.', '+').Last();
         }
 
         /// <summary>

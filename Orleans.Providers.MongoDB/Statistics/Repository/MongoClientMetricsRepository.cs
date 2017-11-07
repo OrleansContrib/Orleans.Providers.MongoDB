@@ -6,7 +6,7 @@ using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Statistics.Repository
 {
-    public class MongoClientMetricsRepository : DocumentRepository2<OrleansClientMetricsTable>
+    public class MongoClientMetricsRepository : CollectionBase<OrleansClientMetricsTable>
     {
         private static readonly UpdateOptions UpsertNoValidation = new UpdateOptions { BypassDocumentValidation = true, IsUpsert = true };
         private readonly TimeSpan? expireAfter;
@@ -22,16 +22,16 @@ namespace Orleans.Providers.MongoDB.Statistics.Repository
             return "OrleansClientMetricsTable";
         }
 
-        protected override Task SetupCollectionAsync(IMongoCollection<OrleansClientMetricsTable> collection)
+        protected override void SetupCollection(IMongoCollection<OrleansClientMetricsTable> collection)
         {
             if (!expireAfter.HasValue)
             {
-                return collection.Indexes.CreateOneAsync(Index.Ascending(x => x.DateTime), 
+                collection.Indexes.CreateOne(Index.Ascending(x => x.DateTime), 
                     new CreateIndexOptions { ExpireAfter = expireAfter });
             }
             else
             {
-                return collection.Indexes.CreateOneAsync(Index.Ascending(x => x.DeploymentId).Ascending(x => x.ClientId), 
+                collection.Indexes.CreateOne(Index.Ascending(x => x.DeploymentId).Ascending(x => x.ClientId), 
                     new CreateIndexOptions { Unique = true });
             }
         }

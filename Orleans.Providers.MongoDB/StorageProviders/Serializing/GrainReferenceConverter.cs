@@ -26,14 +26,6 @@ public class GrainReferenceConverter : JsonConverter
             NullValueHandling = NullValueHandling.Ignore,
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
             Formatting = Formatting.None,
-            //Converters =
-            //    {
-            //        new IPAddressConverter(),
-            //        new IPEndPointConverter(),
-            //        new GrainIdConverter(),
-            //        new SiloAddressConverter(),
-            //        new UniqueKeyConverter()
-            //    }
         });
     }
 

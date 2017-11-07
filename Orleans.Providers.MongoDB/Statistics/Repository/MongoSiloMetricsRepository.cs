@@ -6,7 +6,7 @@ using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Statistics.Repository
 {
-    public class MongoSiloMetricsRepository : DocumentRepository2<OrleansSiloMetricsTable>
+    public class MongoSiloMetricsRepository : CollectionBase<OrleansSiloMetricsTable>
     {
         private static readonly UpdateOptions UpsertNoValidation = new UpdateOptions { BypassDocumentValidation = true, IsUpsert = true };
         private readonly TimeSpan? expireAfter;
@@ -22,16 +22,16 @@ namespace Orleans.Providers.MongoDB.Statistics.Repository
             return "OrleansSiloMetricsTable";
         }
 
-        protected override Task SetupCollectionAsync(IMongoCollection<OrleansSiloMetricsTable> collection)
+        protected override void SetupCollection(IMongoCollection<OrleansSiloMetricsTable> collection)
         {
             if (!expireAfter.HasValue)
             {
-                return collection.Indexes.CreateOneAsync(Index.Ascending(x => x.TimeStamp), 
+                collection.Indexes.CreateOne(Index.Ascending(x => x.TimeStamp), 
                     new CreateIndexOptions { ExpireAfter = expireAfter });
             }
             else
             {
-                return collection.Indexes.CreateOneAsync(Index.Ascending(x => x.DeploymentId).Ascending(x => x.SiloId), 
+                collection.Indexes.CreateOne(Index.Ascending(x => x.DeploymentId).Ascending(x => x.SiloId), 
                     new CreateIndexOptions { Unique = true });
             }
         }

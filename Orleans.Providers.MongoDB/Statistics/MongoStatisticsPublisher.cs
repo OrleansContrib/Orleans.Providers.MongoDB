@@ -182,10 +182,7 @@ namespace Orleans.Providers.MongoDB.Statistics
             this.hostName = hostName;
             if (!isSilo)
                 generation = SiloAddress.AllocateNewGeneration();
-
-
         }
-
 
         Task IStatisticsPublisher.Init(
             bool isSilo,

@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace Orleans.Providers.MongoDB.Repository
 {
-    public class DocumentRepository2<TEntity>
+    public class CollectionBase<TEntity>
     {
         private const string CollectionFormat = "{0}Set";
 
@@ -28,7 +28,7 @@ namespace Orleans.Providers.MongoDB.Repository
             get { return mongoDatabase; }
         }
 
-        protected DocumentRepository2(string connectionString, string databaseName)
+        protected CollectionBase(string connectionString, string databaseName)
         {
             var client = MongoClientManager.Instance(connectionString);
 
@@ -46,9 +46,8 @@ namespace Orleans.Providers.MongoDB.Repository
             return string.Format(CultureInfo.InvariantCulture, CollectionFormat, typeof(TEntity).Name);
         }
 
-        protected virtual Task SetupCollectionAsync(IMongoCollection<TEntity> collection)
+        protected virtual void SetupCollection(IMongoCollection<TEntity> collection)
         {
-            return Task.CompletedTask;
         }
 
         private Lazy<IMongoCollection<TEntity>> CreateCollection()
@@ -59,7 +58,7 @@ namespace Orleans.Providers.MongoDB.Repository
                     CollectionName(),
                     CollectionSettings() ?? new MongoCollectionSettings());
 
-                SetupCollectionAsync(databaseCollection).Wait();
+                SetupCollection(databaseCollection);
 
                 return databaseCollection;
             });

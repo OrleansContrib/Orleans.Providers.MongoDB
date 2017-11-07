@@ -6,7 +6,7 @@ namespace Orleans.Providers.MongoDB.Reminders
 {
     public class RemindersHelper
     {
-        public static ReminderTableData ProcessRemindersList(List<RemindersCollection> reminders,
+        public static ReminderTableData ProcessRemindersList(List<MongoReminderDocument> reminders,
             IGrainReferenceConverter grainReferenceConverter)
         {
             var reminderEntryList = new List<ReminderEntry>();
@@ -16,7 +16,7 @@ namespace Orleans.Providers.MongoDB.Reminders
             return new ReminderTableData(reminderEntryList);
         }
 
-        public static ReminderEntry Parse(RemindersCollection reminder,
+        public static ReminderEntry Parse(MongoReminderDocument reminder,
             IGrainReferenceConverter grainReferenceConverter)
         {
             if (reminder != null)

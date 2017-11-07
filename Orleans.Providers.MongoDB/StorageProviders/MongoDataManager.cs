@@ -8,7 +8,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
     /// <summary>
     ///     Interfaces with a MongoDB database driver.
     /// </summary>
-    public class GrainStateMongoDataManager : IJSONStateDataManager
+    public class MongoDataManager : IJSONStateDataManager
     {
         private static UpdateOptions Upsert = new UpdateOptions { IsUpsert = true };
         private readonly IMongoDatabase _database;
@@ -18,7 +18,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// </summary>
         /// <param name="connectionString">A database name.</param>
         /// <param name="databaseName">A MongoDB database connection string.</param>
-        public GrainStateMongoDataManager(string databaseName, string connectionString)
+        public MongoDataManager(string databaseName, string connectionString)
         {
             var client = MongoClientManager.Instance(connectionString);
             _database = client.GetDatabase(databaseName);
