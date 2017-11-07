@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using System.Reflection;
+using Newtonsoft.Json;
 using Orleans;
 using Orleans.Runtime;
-using System;
-using System.Reflection;
 
 public class GrainReferenceConverter : JsonConverter
 {

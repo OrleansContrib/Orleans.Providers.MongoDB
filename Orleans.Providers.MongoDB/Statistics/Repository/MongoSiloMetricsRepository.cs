@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
+using MongoDB.Driver;
 using Orleans.Providers.MongoDB.Repository;
 using Orleans.Runtime;
-using MongoDB.Driver;
-using System;
 
 namespace Orleans.Providers.MongoDB.Statistics.Repository
 {

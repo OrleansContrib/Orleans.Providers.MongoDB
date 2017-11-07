@@ -1,13 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IDocumentRepository.cs" company="">
-//   
-// </copyright>
-// <summary>
-//   The DocumentRepository interface.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Reminders

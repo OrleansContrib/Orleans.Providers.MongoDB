@@ -1,6 +1,6 @@
-﻿using MongoDB.Driver;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using MongoDB.Driver;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
 {
