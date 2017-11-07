@@ -4,10 +4,6 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Orleans.Providers.MongoDB.Membership
 {
-    #region Using
-
-    #endregion
-
     /// <summary>
     ///     The membership table.
     /// </summary>

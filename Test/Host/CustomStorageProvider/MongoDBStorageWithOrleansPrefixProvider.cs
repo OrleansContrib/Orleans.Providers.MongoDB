@@ -3,7 +3,7 @@ using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Test.Host.CustomStorageProvider
 {
-    public class MongoDBStorageWithOrleansPrefix : MongoDBStorage
+    public class MongoDBStorageWithOrleansPrefix : MongoStorageProvider
     {
         public override string ReturnGrainName(string grainType, GrainReference grainReference)
         {

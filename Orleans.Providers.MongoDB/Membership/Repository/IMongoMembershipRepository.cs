@@ -5,17 +5,11 @@ using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Membership.Repository
 {
-    #region Using
-
-    #endregion
-
     /// <summary>
     ///     The MongoMembershipProviderRepository interface.
     /// </summary>
     internal interface IMongoMembershipRepository : IDocumentRepository
     {
-        #region Public methods and operators
-
         /// <summary>
         ///     Init membership version collection.
         /// </summary>
@@ -117,7 +111,5 @@ namespace Orleans.Providers.MongoDB.Membership.Repository
         ///     The <see cref="Task" />.
         /// </returns>
         Task DeleteMembershipTableEntriesAsync(string deploymentId);
-
-        #endregion
     }
 }

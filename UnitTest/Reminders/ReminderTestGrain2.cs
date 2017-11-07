@@ -13,6 +13,7 @@ using Orleans.Runtime.Configuration;
 using Utils = Orleans.Providers.MongoDB.UnitTest.Reminders.Utils;
 
 #pragma warning disable 612,618
+
 namespace UnitTests.Grains
 {
     // NOTE: if you make any changes here, copy them to ReminderTestCopyGrain
@@ -155,7 +156,7 @@ namespace UnitTests.Grains
 
         public async Task EraseReminderTable(string connectionString)
         {
-            IMongoReminderTableRepository repository = new MongoReminderTableRepository(connectionString,
+            MongoReminderCollection repository = new MongoReminderCollection(connectionString,
                 MongoUrl.Create(connectionString).DatabaseName, null);
 
             var config = new ClusterConfiguration();
@@ -214,8 +215,6 @@ namespace UnitTests.Grains
             return reminderPeriod;
         }
     }
-
-    #region Copy of ReminderTestGrain ... to test reminders for different grain types
 
     // NOTE: do not make changes here ... this is a copy of ReminderTestGrain
     // changes to make when copying:
@@ -383,10 +382,6 @@ namespace UnitTests.Grains
         }
     }
 
-    #endregion
-
-    #region The wrong reminder grain
-
     public class WrongReminderGrain : Grain, IReminderGrainWrong
     {
         private Logger logger;
@@ -416,7 +411,6 @@ namespace UnitTests.Grains
             var a = field.GetValue(null);
         }
     }
-
-    #endregion
 }
+
 #pragma warning restore 612, 618

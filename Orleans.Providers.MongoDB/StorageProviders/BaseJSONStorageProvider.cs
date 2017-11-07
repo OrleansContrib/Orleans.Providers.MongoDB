@@ -1,16 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using Orleans.Providers.MongoDB.StorageProviders.Serializing;
+using Newtonsoft.Json.Linq;
 using Orleans.Runtime;
 using Orleans.Serialization;
 using Orleans.Storage;
-using System;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
 {
@@ -20,6 +16,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
     public abstract class BaseJSONStorageProvider : IStorageProvider
     {
         private JsonSerializerSettings serializerSettings;
+        private JsonSerializer serializer;
         
         /// <summary>
         ///     Data manager instance
@@ -59,6 +56,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             serializerSettings = OrleansJsonSerializer.UpdateSerializerSettings(
                 OrleansJsonSerializer.GetDefaultSerializerSettings(serializationManager, providerRuntime.GrainFactory),
                 config);
+            serializer = JsonSerializer.Create(serializerSettings);
 
             UseJsonFormat = config.GetBoolProperty("UseJsonFormat", true);
             serializerSettings.Converters.Add(new GrainReferenceConverter(providerRuntime.GrainFactory));
@@ -133,7 +131,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
         public virtual string ReturnGrainName(string grainType, GrainReference grainReference)
         {
-            return grainType.Split('.').Last();
+            return grainType.Split('.', '+').Last();
         }
 
         /// <summary>
@@ -145,21 +143,19 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         ///     http://msdn.microsoft.com/en-us/library/system.web.script.serialization.javascriptserializer.aspx
         ///     for more on the JSON serializer.
         /// </remarks>
-        protected BsonDocument ConvertToStorageFormat(IGrainState grainState)
+        protected JObject ConvertToStorageFormat(IGrainState grainState)
         {
             if (UseJsonFormat)
             {
-                var json = JsonConvert.SerializeObject(grainState.State, serializerSettings);
-                json = ReverseInvalidValues(json);
-                return BsonSerializer.Deserialize<BsonDocument>(json);
+                var json = JObject.FromObject(grainState.State, serializer);
+
+                return json;
             }
             else
             {
-                var bindata = serializationManager.SerializeToByteArray(grainState.State);
-                return new BsonDocument
-                {
-                    ["statedata"] = bindata,
-                };
+                var byteArray = serializationManager.SerializeToByteArray(grainState.State);
+
+                return new JObject(new JProperty("statedata", byteArray));
             }
         }
 
@@ -168,120 +164,18 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// </summary>
         /// <param name="grainState">Grain state to be populated for storage.</param>
         /// <param name="entityData">JSON storage format representaiton of the grain state.</param>
-        protected void ConvertFromStorageFormat(IGrainState grainState, BsonDocument entityData)
+        protected void ConvertFromStorageFormat(IGrainState grainState, JObject entityData)
         {
-            if(UseJsonFormat)
+            if (UseJsonFormat)
             {
-                var json = entityData.ToJson();
-                json = ReverseInvalidValues(json);
-                JsonConvert.PopulateObject(json, grainState.State, serializerSettings);
+                var jsonReader = new JTokenReader(entityData);
+
+                serializer.Populate(jsonReader, grainState.State);
             }
             else
             {
-                grainState.State = serializationManager.DeserializeFromByteArray<object>((byte[])entityData["statedata"]);
+                grainState.State = serializationManager.DeserializeFromByteArray<object>((byte[]) entityData["statedata"]);
             }
-        }
-
-        /// <summary>
-        ///     NewtonSoft generates a $type & $id which is incompatible with Mongo. Replacing $ with __
-        /// </summary>
-        /// <param name="entityData"></param>
-        /// <returns></returns>
-        private string ReverseInvalidValues(string entityData)
-        {
-            var sb = new StringBuilder();
-            var writer = new CustomJsonWriter(new StringWriter(sb));
-            var reader = new JsonTextReader(new StringReader(entityData));
-
-            while (reader.Read())
-                if (reader.Value != null)
-                {
-                    switch (reader.TokenType)
-                    {
-                        case JsonToken.PropertyName:
-
-                            if (reader.Value.ToString() == "$type")
-                                writer.WritePropertyName("__type");
-                            else if (reader.Value.ToString() == "__type")
-                                writer.WritePropertyName("$type");
-                            else if (reader.Value.ToString() == "$id")
-                                writer.WritePropertyName("__id");
-                            else if (reader.Value.ToString() == "__id")
-                                writer.WritePropertyName("$id");
-                            else if (reader.Value.ToString() == "$type")
-                                writer.WritePropertyName("__type");
-                            else if (reader.Value.ToString() == "__type")
-                                writer.WritePropertyName("$type");
-                            else if (reader.Value.ToString() == "$values")
-                                writer.WritePropertyName("__values");
-                            else if (reader.Value.ToString() == "__values")
-                                writer.WritePropertyName("$values");
-                            else
-                                writer.WritePropertyName(reader.Value.ToString());
-
-                            break;
-                        case JsonToken.None:
-                            break;
-                        case JsonToken.StartConstructor:
-                            writer.WriteStartConstructor(reader.Value.ToString());
-                            break;
-                        case JsonToken.Comment:
-                            writer.WriteComment(reader.Value.ToString());
-                            break;
-                        case JsonToken.Raw:
-                            writer.WriteRaw(reader.Value.ToString());
-                            break;
-                        case JsonToken.Integer:
-                        case JsonToken.Float:
-                        case JsonToken.String:
-                        case JsonToken.Boolean:
-                        case JsonToken.Date:
-                        case JsonToken.Bytes:
-                            writer.WriteValue(reader.Value);
-                            break;
-                        case JsonToken.Null:
-                            writer.WriteNull();
-                            break;
-                        case JsonToken.Undefined:
-                            writer.WriteUndefined();
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                else
-                {
-                    switch (reader.TokenType)
-                    {
-                        case JsonToken.None:
-                            break;
-                        case JsonToken.StartObject:
-                            writer.WriteStartObject();
-                            break;
-                        case JsonToken.StartArray:
-                            writer.WriteStartArray();
-                            break;
-                        case JsonToken.Null:
-                            writer.WriteNull();
-                            break;
-                        case JsonToken.Undefined:
-                            writer.WriteUndefined();
-                            break;
-                        case JsonToken.EndObject:
-                            writer.WriteEndObject();
-                            break;
-                        case JsonToken.EndArray:
-                            writer.WriteEndArray();
-                            break;
-                        case JsonToken.EndConstructor:
-                            writer.WriteEndConstructor();
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-            return sb.ToString();
         }
     }
 }

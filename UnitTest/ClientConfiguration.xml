@@ -12,7 +12,7 @@
   <GatewayProvider ProviderType="SqlServer"/>
              -->
 
-  <SystemStore SystemStoreType="Custom" CustomGatewayProviderAssemblyName="Orleans.Providers.MongoDB" DataConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" DeploymentId="OrleansTest" />
+  <SystemStore SystemStoreType="Custom" CustomGatewayProviderAssemblyName="Orleans.Providers.MongoDB" DataConnectionString="mongodb://localhost:27017/Orleans" DeploymentId="OrleansTest" />
   <!--<GatewayProvider ProviderType="Custom"/>-->
 
 </ClientConfiguration>

@@ -1,6 +1,6 @@
-﻿using MongoDB.Bson;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
 {
@@ -28,7 +28,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// <param name="collectionName">The name of a collection, such as a type name.</param>
         /// <param name="key">The primary key of the object to read.</param>
         /// <returns>A string containing a JSON representation of the entity, if it exists; null otherwise.</returns>
-        Task<BsonDocument> Read(string collectionName, string key);
+        Task<JObject> Read(string collectionName, string key);
 
         /// <summary>
         ///     Writes grain state to storage.
@@ -36,6 +36,6 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// <param name="collectionName">The name of a collection, such as a type name.</param>
         /// <param name="key">The primary key of the object to write.</param>
         /// <param name="entityData">A string containing a JSON representation of the entity.</param>
-        Task Write(string collectionName, string key, BsonDocument entityData);
+        Task Write(string collectionName, string key, JObject entityData);
     }
 }

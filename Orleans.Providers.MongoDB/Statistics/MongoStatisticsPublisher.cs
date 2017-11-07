@@ -18,25 +18,18 @@ namespace Orleans.Providers.MongoDB.Statistics
         IConfigurableClientMetricsDataPublisher,
         IProvider
     {
-        private IPAddress clientAddress;
-
         private string clientId;
         private string deploymentId;
-
+        private IPAddress clientAddress;
         private IPEndPoint gateway;
-
         private long generation;
-
         private string hostName;
-
         private bool isSilo;
-
         private Logger logger;
-
-        private IMongoStatisticsPublisherRepository repository;
-
+        private MongoClientMetricsRepository clientMetricsRepository;
+        private MongoSiloMetricsRepository siloMetricsRepository;
+        private MongoStatisticsCounterRepository statisticsCounterRepository;
         private SiloAddress siloAddress;
-
         private string siloName;
 
         /// <summary>
@@ -73,8 +66,8 @@ namespace Orleans.Providers.MongoDB.Statistics
         /// </returns>
         Task IClientMetricsDataPublisher.Init(ClientConfiguration config, IPAddress address, string clientId)
         {
-            repository = new MongoStatisticsPublisherRepository(config.DataConnectionString,
-                MongoUrl.Create(config.DataConnectionString).DatabaseName);
+            clientMetricsRepository = new MongoClientMetricsRepository(config.DataConnectionString,
+                MongoUrl.Create(config.DataConnectionString).DatabaseName, null);
             return Task.CompletedTask;
         }
 
@@ -91,7 +84,7 @@ namespace Orleans.Providers.MongoDB.Statistics
                     metricsData);
             try
             {
-                await repository.UpsertReportClientMetricsAsync(
+                await clientMetricsRepository.UpsertReportClientMetricsAsync(
                     new OrleansClientMetricsTable
                     {
                         DeploymentId = deploymentId,
@@ -119,6 +112,9 @@ namespace Orleans.Providers.MongoDB.Statistics
             IPEndPoint gateway,
             string hostName)
         {
+            siloMetricsRepository = new MongoSiloMetricsRepository(storageConnectionString,
+                MongoUrl.Create(storageConnectionString).DatabaseName, null);
+
             this.gateway = gateway;
             return Task.CompletedTask;
         }
@@ -139,7 +135,7 @@ namespace Orleans.Providers.MongoDB.Statistics
                 if (gateway != null)
                     gateWayPort = gateway.Port;
 
-                await repository.UpsertSiloMetricsAsync(
+                await siloMetricsRepository.UpsertSiloMetricsAsync(
                     new OrleansSiloMetricsTable
                     {
                         DeploymentId = deploymentId,
@@ -188,7 +184,6 @@ namespace Orleans.Providers.MongoDB.Statistics
                 generation = SiloAddress.AllocateNewGeneration();
         }
 
-
         Task IStatisticsPublisher.Init(
             bool isSilo,
             string storageConnectionString,
@@ -197,6 +192,7 @@ namespace Orleans.Providers.MongoDB.Statistics
             string siloName,
             string hostName)
         {
+            statisticsCounterRepository = new MongoStatisticsCounterRepository(storageConnectionString, MongoUrl.Create(storageConnectionString).DatabaseName);
             return Task.CompletedTask;
         }
 
@@ -230,7 +226,7 @@ namespace Orleans.Providers.MongoDB.Statistics
                 foreach (var counterBatch in counterBatches)
                     //The query template from which to retrieve the set of columns that are being inserted.
 
-                    insertTasks.Add(repository.InsertStatisticsCountersAsync(
+                    insertTasks.Add(statisticsCounterRepository.InsertStatisticsCountersAsync(
                         new OrleansStatisticsTable
                         {
                             DeploymentId = deploymentId,
@@ -272,16 +268,6 @@ namespace Orleans.Providers.MongoDB.Statistics
             Name = name;
             logger = providerRuntime.GetLogger("MongoStatisticsPublisher");
 
-            var connectionString = config.Properties["ConnectionString"];
-            var database = string.Empty;
-
-            if (!config.Properties.ContainsKey("Database") || string.IsNullOrEmpty(config.Properties["Database"]))
-                database = MongoUrl.Create(connectionString).DatabaseName;
-            else
-                database = config.Properties["Database"];
-
-
-            repository = new MongoStatisticsPublisherRepository(connectionString, database);
             return Task.CompletedTask;
         }
 

@@ -4,22 +4,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using Orleans.Providers.MongoDB.Repository.ConnectionManager;
 
 namespace Orleans.Providers.MongoDB.Repository
 {
     public class DocumentRepository : IDocumentRepository
     {
-        #region Static Fields
-
         /// <summary>
         ///     Mongo Database.
         /// </summary>
         protected static IMongoDatabase Database;
-
-        #endregion
-
-        #region Constructors and Destructors
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="DocumentRepository" /> class.
@@ -41,14 +34,10 @@ namespace Orleans.Providers.MongoDB.Repository
             if (string.IsNullOrEmpty(databaseName))
                 DatabaseName = MongoUrl.Create(connectionsString).DatabaseName;
 
-            var client = MongoConnectionManager.Instance(connectionsString, databaseName);
+            var client = MongoClientManager.Instance(connectionsString);
             Database = client.GetDatabase(DatabaseName);
         }
-
-        #endregion
-
-        #region Other Methods
-
+        
         /// <summary>
         ///     Return or create collection.
         /// </summary>
@@ -71,10 +60,6 @@ namespace Orleans.Providers.MongoDB.Repository
             return collection;
         }
 
-        #endregion
-
-        #region Properties
-
         /// <summary>
         ///     Gets or sets the connection string.
         /// </summary>
@@ -84,30 +69,6 @@ namespace Orleans.Providers.MongoDB.Repository
         ///     Gets or sets the database name.
         /// </summary>
         public string DatabaseName { get; set; }
-
-        #endregion
-
-        #region Public methods and operators
-
-        /// <summary>
-        ///     Clear collection.
-        /// </summary>
-        /// <param name="mongoCollectionName">
-        ///     The mongo collection name.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="Task" />.
-        /// </returns>
-        /// <exception cref="ArgumentException">
-        /// </exception>
-        public async Task ClearCollection(string mongoCollectionName)
-        {
-            if (string.IsNullOrEmpty(mongoCollectionName))
-                throw new ArgumentException("MongoCollectionName may not be empty");
-
-            var collection = Database.GetCollection<BsonDocument>(mongoCollectionName);
-            await collection.DeleteManyAsync(new BsonDocument()).ConfigureAwait(false);
-        }
 
         /// <summary>
         ///     Collection exists async.
@@ -417,7 +378,5 @@ namespace Orleans.Providers.MongoDB.Repository
 
             var result = await collection.BulkWriteAsync(documents, new BulkWriteOptions {IsOrdered = false});
         }
-
-        #endregion
     }
 }
