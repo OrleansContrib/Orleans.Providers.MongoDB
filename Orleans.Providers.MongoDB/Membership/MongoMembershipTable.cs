@@ -16,10 +16,10 @@ namespace Orleans.Providers.MongoDB.Membership
         private MongoMembershipCollection gatewaysCollection;
         private Logger logger;
 
-        /// <inheritoc />
+        /// <inheritdoc />
         public bool IsUpdatable { get; } = true;
 
-        /// <inheritoc />
+        /// <inheritdoc />
         public TimeSpan MaxStaleness { get; private set; }
 
         public Task InitializeGatewayListProvider(ClientConfiguration clientConfiguration, Logger traceLogger)
@@ -49,7 +49,7 @@ namespace Orleans.Providers.MongoDB.Membership
             return Task.CompletedTask;
         }
 
-        /// <inheritoc />
+        /// <inheritdoc />
         public Task<IList<Uri>> GetGateways()
         {
             return DoAndLog(nameof(GetGateways), () =>
@@ -58,7 +58,7 @@ namespace Orleans.Providers.MongoDB.Membership
             });
         }
 
-        /// <inheritoc />
+        /// <inheritdoc />
         public Task DeleteMembershipTableEntries(string deploymentId)
         {
             return DoAndLog(nameof(DeleteMembershipTableEntries), () =>
@@ -67,7 +67,7 @@ namespace Orleans.Providers.MongoDB.Membership
             });
         }
 
-        /// <inheritoc />
+        /// <inheritdoc />
         public Task<MembershipTableData> ReadRow(SiloAddress key)
         {
             return DoAndLog(nameof(ReadRow), () =>
@@ -76,7 +76,7 @@ namespace Orleans.Providers.MongoDB.Membership
             });
         }
 
-        /// <inheritoc />
+        /// <inheritdoc />
         public Task<MembershipTableData> ReadAll()
         {
             return DoAndLog(nameof(ReadAll), () =>
@@ -85,7 +85,7 @@ namespace Orleans.Providers.MongoDB.Membership
             });
         }
 
-        /// <inheritoc />
+        /// <inheritdoc />
         public Task<bool> InsertRow(MembershipEntry entry, TableVersion tableVersion)
         {
             return DoAndLog(nameof(InsertRow), () =>
@@ -94,7 +94,7 @@ namespace Orleans.Providers.MongoDB.Membership
             });
         }
 
-        /// <inheritoc />
+        /// <inheritdoc />
         public Task<bool> UpdateRow(MembershipEntry entry, string etag, TableVersion tableVersion)
         {
             return DoAndLog(nameof(UpdateRow), () =>
@@ -103,7 +103,7 @@ namespace Orleans.Providers.MongoDB.Membership
             });
         }
 
-        /// <inheritoc />
+        /// <inheritdoc />
         public Task UpdateIAmAlive(MembershipEntry entry)
         {
             return DoAndLog(nameof(UpdateRow), () =>

@@ -23,13 +23,13 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// </summary>
         public bool UseJsonFormat { get; private set; }
 
-        /// <inheritoc />
+        /// <inheritdoc />
         public string Name { get; private set; }
 
-        /// <inheritoc />
+        /// <inheritdoc />
         public Logger Log { get; private set; }
 
-        /// <inheritoc />
+        /// <inheritdoc />
         public virtual Task Init(string name, IProviderRuntime providerRuntime, IProviderConfiguration config)
         {
             Name = name;
@@ -48,7 +48,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             return Task.CompletedTask;
         }
 
-        /// <inheritoc />
+        /// <inheritdoc />
         public Task Close()
         {
             DataManager?.Dispose();
@@ -57,7 +57,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             return Task.CompletedTask;
         }
 
-        /// <inheritoc />
+        /// <inheritdoc />
         public async Task ReadStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
         {
             EnsureInitialized();
@@ -83,7 +83,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             }
         }
 
-        /// <inheritoc />
+        /// <inheritdoc />
         public async Task WriteStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
         {
             EnsureInitialized();
@@ -104,7 +104,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             }
         }
 
-        /// <inheritoc />
+        /// <inheritdoc />
         public async Task ClearStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
         {
             EnsureInitialized();
