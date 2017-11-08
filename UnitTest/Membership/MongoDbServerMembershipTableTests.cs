@@ -7,11 +7,14 @@ using Orleans.Runtime;
 using Orleans.Runtime.Configuration;
 using UnitTests.MembershipTests;
 using Xunit;
+using System.Threading;
 
 namespace Orleans.Providers.MongoDB.UnitTest.Membership
 {
     public class MongoDbServerMembershipTableTests : MembershipTableTestsBase
     {
+        private static long Counter = DateTime.UtcNow.Ticks;
+
         public MongoDbServerMembershipTableTests() : 
             base(new MembershipClusterConfiguration())
         {
@@ -78,6 +81,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
                 LoadFromFile(@".\OrleansConfiguration.xml");
 
                 // Init Mongo Membership
+                Globals.DeploymentId = $"OrleansTest{Interlocked.Increment(ref Counter)}";
                 Globals.LivenessType = GlobalConfiguration.LivenessProviderType.Custom;
                 Globals.MembershipTableAssembly = "Orleans.Providers.MongoDB";
                 Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Disabled;

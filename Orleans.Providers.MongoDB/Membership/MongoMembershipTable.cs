@@ -24,29 +24,36 @@ namespace Orleans.Providers.MongoDB.Membership
 
         public Task InitializeGatewayListProvider(ClientConfiguration clientConfiguration, Logger traceLogger)
         {
-            logger = traceLogger;
+            return DoAndLog(nameof(InitializeGatewayListProvider), () =>
+            {
+                logger = traceLogger;
 
-            deploymentId = clientConfiguration.DeploymentId;
-            MaxStaleness = clientConfiguration.GatewayListRefreshPeriod;
+                deploymentId = clientConfiguration.DeploymentId;
 
-            gatewaysCollection = 
-                new MongoMembershipCollection(clientConfiguration.DataConnectionString, 
-                    MongoUrl.Create(clientConfiguration.DataConnectionString).DatabaseName);
+                gatewaysCollection =
+                    new MongoMembershipCollection(clientConfiguration.DataConnectionString,
+                        MongoUrl.Create(clientConfiguration.DataConnectionString).DatabaseName);
 
-            return Task.CompletedTask;
+                MaxStaleness = clientConfiguration.GatewayListRefreshPeriod;
+
+                return Task.CompletedTask;
+            });
         }
 
         public Task InitializeMembershipTable(GlobalConfiguration globalConfiguration, bool tryInitTableVersion, Logger traceLogger)
         {
-            logger = traceLogger;
+            return DoAndLog(nameof(InitializeMembershipTable), () =>
+            {
+                logger = traceLogger;
 
-            deploymentId = globalConfiguration.DeploymentId;
+                deploymentId = globalConfiguration.DeploymentId;
 
-            membershipCollection = 
-                new MongoMembershipCollection(globalConfiguration.DataConnectionString, 
-                    MongoUrl.Create(globalConfiguration.DataConnectionString).DatabaseName);
+                membershipCollection =
+                    new MongoMembershipCollection(globalConfiguration.DataConnectionString,
+                        MongoUrl.Create(globalConfiguration.DataConnectionString).DatabaseName);
 
-            return Task.CompletedTask;
+                return Task.CompletedTask;
+            });
         }
 
         /// <inheritdoc />
