@@ -69,9 +69,9 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// <returns>Completion promise for this operation.</returns>
         public Task Close()
         {
-            if (DataManager != null)
-                DataManager.Dispose();
+            DataManager?.Dispose();
             DataManager = null;
+
             return Task.CompletedTask;
         }
 
@@ -85,13 +85,18 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// <returns>Completion promise for this operation.</returns>
         public async Task ReadStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
         {
-            if (DataManager == null) throw new ArgumentException("DataManager property not initialized");
+            EnsureInitialized();
 
             var grainTypeName = ReturnGrainName(grainType, grainReference);
 
-            var entityData = await DataManager.Read(grainTypeName, grainReference.ToKeyString());
-            if (entityData != null)
-                ConvertFromStorageFormat(grainState, entityData);
+            var result = await DataManager.Read(grainTypeName, grainReference.ToKeyString());
+
+            if (result.Value != null)
+            {
+                ConvertFromStorageFormat(grainState, result.Value);
+
+                grainState.ETag = result.Etag;
+            }
         }
 
         /// <summary>
@@ -101,14 +106,14 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// <param name="grainReference">Represents the long-lived identity of the grain.</param>
         /// <param name="grainState">A reference to an object holding the persisted state of the grain.</param>
         /// <returns>Completion promise for this operation.</returns>
-        public Task WriteStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
+        public async Task WriteStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
         {
-            if (DataManager == null) throw new ArgumentException("DataManager property not initialized");
+            EnsureInitialized();
 
             var grainTypeName = ReturnGrainName(grainType, grainReference);
+            var grainData = ConvertToStorageFormat(grainState);
 
-            var entityData = ConvertToStorageFormat(grainState);
-            return DataManager.Write(grainTypeName, grainReference.ToKeyString(), entityData);
+            grainState.ETag = await DataManager.Write(grainTypeName, grainReference.ToKeyString(), grainData, grainState.ETag);
         }
 
         /// <summary>
@@ -120,18 +125,11 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// <returns></returns>
         public Task ClearStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
         {
-            if (DataManager == null) throw new ArgumentException("DataManager property not initialized");
+            EnsureInitialized();
 
             var grainTypeName = ReturnGrainName(grainType, grainReference);
 
-            DataManager.Delete(grainTypeName, grainReference.ToKeyString());
-            return Task.CompletedTask;
-        }
-
-
-        public virtual string ReturnGrainName(string grainType, GrainReference grainReference)
-        {
-            return grainType.Split('.', '+').Last();
+            return DataManager.Delete(grainTypeName, grainReference.ToKeyString());
         }
 
         /// <summary>
@@ -175,6 +173,19 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             else
             {
                 grainState.State = serializationManager.DeserializeFromByteArray<object>((byte[]) entityData["statedata"]);
+            }
+        }
+
+        public virtual string ReturnGrainName(string grainType, GrainReference grainReference)
+        {
+            return grainType.Split('.', '+').Last();
+        }
+
+        private void EnsureInitialized()
+        {
+            if (DataManager == null)
+            {
+                throw new ArgumentException("DataManager property not initialized");
             }
         }
     }

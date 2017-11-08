@@ -45,18 +45,18 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// <param name="collectionName">The type of the grain state object.</param>
         /// <param name="key">The grain id string.</param>
         /// <returns>Completion promise for this operation.</returns>
-        public async Task<JObject> Read(string collectionName, string key)
+        public async Task<(string Etag, JObject Value)> Read(string collectionName, string key)
         {
             var fileInfo = GetStorageFilePath(collectionName, key);
 
             if (!fileInfo.Exists)
-                return null;
+                return (null, null);
 
             using (var stream = fileInfo.OpenText())
             {
                 var json = await stream.ReadToEndAsync();
 
-                return JObject.Parse(json);
+                return (null, JObject.Parse(json));
             }
         }
 
@@ -67,13 +67,15 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// <param name="key">The grain id string.</param>
         /// <param name="entityData">The grain state data to be stored./</param>
         /// <returns>Completion promise for this operation.</returns>
-        public async Task Write(string collectionName, string key, JObject entityData)
+        public async Task<string> Write(string collectionName, string key, JObject entityData, string etag)
         {
             var fileInfo = GetStorageFilePath(collectionName, key);
 
             using (var stream = new StreamWriter(fileInfo.Open(FileMode.Create, FileAccess.Write)))
             {
                 await stream.WriteAsync(entityData.ToJson());
+
+                return null;
             }
         }
 
