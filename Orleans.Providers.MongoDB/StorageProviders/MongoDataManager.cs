@@ -7,9 +7,6 @@ using Orleans.Storage;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
 {
-    /// <summary>
-    ///     Interfaces with a MongoDB database driver.
-    /// </summary>
     public class MongoDataManager : IJSONStateDataManager
     {
         private static readonly UpdateOptions Upsert = new UpdateOptions { IsUpsert = true };
@@ -25,37 +22,21 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         {
             get { return _database; }
         }
-
-        /// <summary>
-        ///     Constructor
-        /// </summary>
-        /// <param name="connectionString">A database name.</param>
-        /// <param name="databaseName">A MongoDB database connection string.</param>
+        
         public MongoDataManager(string databaseName, string connectionString)
         {
-            var client = MongoClientManager.Instance(connectionString);
+            var client = MongoClientPool.Instance(connectionString);
+
             _database = client.GetDatabase(databaseName);
         }
-
-        /// <summary>
-        ///     Deletes a file representing a grain state object.
-        /// </summary>
-        /// <param name="collectionName">The type of the grain state object.</param>
-        /// <param name="key">The grain id string.</param>
-        /// <returns>Completion promise for this operation.</returns>
+        
         public Task Delete(string collectionName, string key)
         {
             var collection = GetCollection(collectionName);
             
             return collection.DeleteManyAsync(Filter.Eq(FieldId, key));
         }
-
-        /// <summary>
-        ///     Reads a file representing a grain state object.
-        /// </summary>
-        /// <param name="collectionName">The type of the grain state object.</param>
-        /// <param name="key">The grain id string.</param>
-        /// <returns>Completion promise for this operation.</returns>
+        
         public async Task<(string Etag, JObject Value)> Read(string collectionName, string key)
         {
             var collection = GetCollection(collectionName);
@@ -80,14 +61,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
             return (null, null);
         }
-
-        /// <summary>
-        ///     Writes a file representing a grain state object.
-        /// </summary>
-        /// <param name="collectionName">The type of the grain state object.</param>
-        /// <param name="key">The grain id string.</param>
-        /// <param name="entityData">The grain state data to be stored./</param>
-        /// <returns>Completion promise for this operation.</returns>
+        
         public async Task<string> Write(string collectionName, string key, JObject entityData, string etag)
         {
             var collection = GetCollection(collectionName);
@@ -152,24 +126,11 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                 throw new InconsistentStateException(existingEtag[FieldEtag].AsString, etag, ex);
             }
         }
-
-        private static FilterDefinition<BsonDocument> ById(string key)
-        {
-            return Builders<BsonDocument>.Filter.Eq("_id", key);
-        }
-
-        /// <summary>
-        ///     Clean up.
-        /// </summary>
+        
         public void Dispose()
         {
         }
-
-        /// <summary>
-        ///     Gets a collection from the MongoDB database.
-        /// </summary>
-        /// <param name="name">The name of the collection.</param>
-        /// <returns></returns>
+        
         private IMongoCollection<BsonDocument> GetCollection(string name)
         {
             return _database.GetCollection<BsonDocument>(name);

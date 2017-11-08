@@ -1,7 +1,4 @@
-﻿using System.Threading.Tasks;
-using Orleans.Providers.MongoDB.Test.GrainInterfaces;
-
-namespace Orleans.Providers.MongoDB.Test.Grains
+﻿namespace Orleans.Providers.MongoDB.Test.Grains
 {
     [StorageProvider(ProviderName = "MongoDBStore")]
     public class EmployeeGrain : Grain<EmployeeState>, IEmployeeGrain

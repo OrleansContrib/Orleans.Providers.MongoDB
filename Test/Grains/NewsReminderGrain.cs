@@ -1,9 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Orleans.Providers.MongoDB.Test.GrainInterfaces;
-using Orleans.Runtime;
-
-namespace Orleans.Providers.MongoDB.Test.Grains
+﻿namespace Orleans.Providers.MongoDB.Test.Grains
 {
     public class NewsReminderGrain : Grain, INewsReminderGrain
     {

@@ -44,12 +44,14 @@ public class GrainReferenceConverter : JsonConverter
     {
         // Deserialize using the internal serializer which will use the concrete GrainReference implementation's
         // ISerializable constructor.
-        var result = this.internalSerializer.Deserialize(reader, objectType);
-        var grainRef = result as IAddressable;
-        if (grainRef == null) return result;
+        var grainRef = this.internalSerializer.Deserialize(reader, objectType) as IAddressable;
+    
+        if (grainRef != null)
+        {
+            // Bind the deserialized grain reference to the runtime.
+            this.grainFactory.BindGrainReference(grainRef);
+        }
 
-        // Bind the deserialized grain reference to the runtime.
-        this.grainFactory.BindGrainReference(grainRef);
         return grainRef;
     }
 }

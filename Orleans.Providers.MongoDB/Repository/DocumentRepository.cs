@@ -34,7 +34,7 @@ namespace Orleans.Providers.MongoDB.Repository
             if (string.IsNullOrEmpty(databaseName))
                 DatabaseName = MongoUrl.Create(connectionsString).DatabaseName;
 
-            var client = MongoClientManager.Instance(connectionsString);
+            var client = MongoClientPool.Instance(connectionsString);
             Database = client.GetDatabase(DatabaseName);
         }
         

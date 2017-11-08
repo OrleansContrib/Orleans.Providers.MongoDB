@@ -3,11 +3,7 @@ using MongoDB.Driver;
 
 namespace Orleans.Providers.MongoDB
 {
-    /// <summary>
-    ///     Mongo connection manager. Prevents connections being created everytime.
-    ///     Only one connection will be created per connectionstring
-    /// </summary>
-    public static class MongoClientManager
+    public static class MongoClientPool
     {
         private static readonly ConcurrentDictionary<string, IMongoClient> Instances =
             new ConcurrentDictionary<string, IMongoClient>();

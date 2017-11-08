@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Orleans.Providers.MongoDB.Test.Grains
+﻿namespace Orleans.Providers.MongoDB.Test.Grains
 {
     public class EmployeeState
     {

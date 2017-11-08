@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.Threading.Tasks;
 using MongoDB.Driver;
 
 namespace Orleans.Providers.MongoDB.Repository
@@ -30,7 +29,7 @@ namespace Orleans.Providers.MongoDB.Repository
 
         protected CollectionBase(string connectionString, string databaseName)
         {
-            var client = MongoClientManager.Instance(connectionString);
+            var client = MongoClientPool.Instance(connectionString);
 
             mongoDatabase = client.GetDatabase(databaseName);
             mongoCollection = CreateCollection();
