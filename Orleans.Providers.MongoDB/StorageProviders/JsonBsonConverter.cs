@@ -128,24 +128,29 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
         private static string Escape(string value)
         {
-            return ReplaceFirstCharacter(value, '$', '§');
-        }
-
-        private static string Unescape(string value)
-        {
-            return ReplaceFirstCharacter(value, '§', '$');
-        }
-
-        private static string ReplaceFirstCharacter(string value, char source, char target)
-        {
             if (value.Length == 0)
             {
                 return value;
             }
 
-            if (value[0] == source)
+            if (value[0] == '$')
             {
-                return target + value.Substring(1);
+                return "__" + value.Substring(1);
+            }
+
+            return value;
+        }
+
+        private static string Unescape(string value)
+        {
+            if (value.Length < 2)
+            {
+                return value;
+            }
+
+            if (value[0] == '_' && value[1] == '_')
+            {
+                return "$" + value.Substring(2);
             }
 
             return value;
