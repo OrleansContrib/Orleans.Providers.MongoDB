@@ -173,7 +173,9 @@ namespace UnitTests.TimerTests
             catch (Exception exc)
             {
                 if (log != null)
+                {
                     log.Info("Couldn't remove {0}, as expected. Exception received = {1}", r1, exc);
+                }
             }
 
             await grain.StopReminder(r2);
@@ -192,13 +194,17 @@ namespace UnitTests.TimerTests
         {
             var id = Guid.NewGuid();
             if (log != null)
+            {
                 log.Info("Start Grain Id = {0}", id);
+            }
 
             var grain = GrainClient.GrainFactory.GetGrain<IReminderTestGrain2>(id);
             const int count = 5;
             var startReminderTasks = new Task<IGrainReminder>[count];
             for (var i = 0; i < count; i++)
+            {
                 startReminderTasks[i] = grain.StartReminder(DR + "_" + i);
+            }
 
             await Task.WhenAll(startReminderTasks);
             // do comparison on strings
@@ -208,15 +214,20 @@ namespace UnitTests.TimerTests
             var fetched = (from reminder in remindersList select reminder.ReminderName).ToList();
 
             foreach (var remRegistered in registered)
+            {
                 Assert.IsTrue(fetched.Remove(remRegistered), $"Couldn't get reminder {remRegistered}. " +
                                                              $"Registered list: {Utils.EnumerableToString(registered)}, " +
                                                              $"fetched list: {Utils.EnumerableToString(remindersList, r => r.ReminderName)}");
+            }
+
             Assert.IsTrue(fetched.Count == 0,
                 $"More than registered reminders. Extra: {Utils.EnumerableToString(fetched)}");
 
             // do some time tests as well
             if (log != null)
+            {
                 log.Info("Time tests");
+            }
 
             var period = await grain.GetReminderPeriod(DR);
             Thread.Sleep(period.Multiply(2) + LEEWAY); // giving some leeway
@@ -254,7 +265,9 @@ namespace UnitTests.TimerTests
             // start another silo ... although it will take it a while before it stabilizes
 
             if (log != null)
+            {
                 log.Info("Starting another silo");
+            }
 
             StartAdditionalSilos(1);
             Thread.Sleep(period.Multiply(5));
@@ -381,6 +394,7 @@ namespace UnitTests.TimerTests
             TimeSpan? period = null, bool validate = false)
         {
             for (long i = 1; i <= retries; i++)
+            {
                 try
                 {
                     await function(reminderName, period, validate).WithTimeout(TestConstants.InitTimeout);
@@ -394,6 +408,7 @@ namespace UnitTests.TimerTests
                 {
                     HandleError(exc, i);
                 }
+            }
 
             // execute one last time and bubble up errors if any
             await function(reminderName, period, validate).WithTimeout(TestConstants.InitTimeout);
@@ -403,6 +418,7 @@ namespace UnitTests.TimerTests
         protected async Task ExecuteWithRetriesStop(Func<string, Task> function, string reminderName)
         {
             for (long i = 1; i <= retries; i++)
+            {
                 try
                 {
                     await function(reminderName).WithTimeout(TestConstants.InitTimeout);
@@ -416,6 +432,7 @@ namespace UnitTests.TimerTests
                 {
                     HandleError(exc, i);
                 }
+            }
 
             // execute one last time and bubble up errors if any
             await function(reminderName).WithTimeout(TestConstants.InitTimeout);
@@ -424,7 +441,9 @@ namespace UnitTests.TimerTests
         private bool HandleError(Exception ex, long i)
         {
             if (ex is AggregateException)
+            {
                 ex = ((AggregateException) ex).Flatten().InnerException;
+            }
 
             if (ex is ReminderException)
             {

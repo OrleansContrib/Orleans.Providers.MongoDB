@@ -48,14 +48,18 @@ Where:
                 ok = siloHost.StartOrleansSilo();
 
                 if (ok)
+                {
                     Console.WriteLine("Successfully started Orleans silo '{0}' as a {1} node.", siloHost.Name,
                         siloHost.Type);
+                }
                 else
+                {
                     throw new Exception(
                         string.Format(
                             "Failed to start Orleans silo '{0}' as a {1} node.",
                             siloHost.Name,
                             siloHost.Type));
+                }
             }
             catch (Exception exc)
             {
@@ -109,6 +113,7 @@ Where:
             {
                 var a = args[i];
                 if (a.StartsWith("-") || a.StartsWith("/"))
+                {
                     switch (a.ToLowerInvariant())
                     {
                         case "/?":
@@ -122,6 +127,7 @@ Where:
                             Console.WriteLine("Bad command line arguments supplied: " + a);
                             return false;
                     }
+                }
 
                 if (a.Contains("="))
                 {
@@ -171,7 +177,9 @@ Where:
             siloHost = new SiloHost(siloName, config);
 
             if (deploymentId != null)
+            {
                 siloHost.DeploymentId = deploymentId;
+            }
 
             return true;
         }

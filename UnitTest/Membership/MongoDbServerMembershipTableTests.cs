@@ -1,21 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Orleans.Messaging;
 using Orleans.Providers.MongoDB.Membership;
 using Orleans.Runtime;
 using Orleans.Runtime.Configuration;
 using UnitTests.MembershipTests;
+using Xunit;
 
 namespace Orleans.Providers.MongoDB.UnitTest.Membership
 {
-    [TestClass]
     public class MongoDbServerMembershipTableTests : MembershipTableTestsBase
     {
-        public MongoDbServerMembershipTableTests() : base(new MembershipClusterConfiguration())
+        public MongoDbServerMembershipTableTests() : 
+            base(new MembershipClusterConfiguration())
         {
-            //LogManager.AddTraceLevelOverride(typeof(SqlServerMembershipTableTests).Name, Severity.Verbose3);
         }
 
         protected override IMembershipTable CreateMembershipTable(Logger logger)
@@ -28,51 +27,46 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
             return new MongoMembershipTable();
         }
 
-        [TestMethod]
-        public void MembershipTable_MongoDB_Init()
-        {
-        }
-
-        [TestMethod]
+        [Fact]
         public async Task MembershipTable_MongoDB_GetGateways()
         {
             await MembershipTable_GetGateways();
         }
 
-        [TestMethod]
+        [Fact]
         public async Task MembershipTable_MongoDB_ReadAll_EmptyTable()
         {
             await MembershipTable_ReadAll_EmptyTable();
         }
 
-        [TestMethod]
+        [Fact]
         public async Task MembershipTable_MongoDB_InsertRow()
         {
-            await MembershipTable_InsertRow();
+            await MembershipTable_InsertRow(false);
         }
 
-        [TestMethod]
+        [Fact]
         public async Task MembershipTable_MongoDB_ReadRow_Insert_Read()
         {
-            await MembershipTable_ReadRow_Insert_Read();
+            await MembershipTable_ReadRow_Insert_Read(false);
         }
 
-        [TestMethod]
+        [Fact]
         public async Task MembershipTable_MongoDB_ReadAll_Insert_ReadAll()
         {
-            await MembershipTable_ReadAll_Insert_ReadAll();
+            await MembershipTable_ReadAll_Insert_ReadAll(false);
         }
 
-        [TestMethod]
+        [Fact]
         public async Task MembershipTable_MongoDB_UpdateRow()
         {
-            await MembershipTable_UpdateRow();
+            await MembershipTable_UpdateRow(false);
         }
 
-        [TestMethod]
+        [Fact]
         public async Task MembershipTable_MongoDB_UpdateRowInParallel()
         {
-            await MembershipTable_UpdateRowInParallel();
+            await MembershipTable_UpdateRowInParallel(false);
         }
 
         [Serializable]

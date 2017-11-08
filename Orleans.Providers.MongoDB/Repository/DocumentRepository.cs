@@ -26,13 +26,17 @@ namespace Orleans.Providers.MongoDB.Repository
         public DocumentRepository(string connectionsString, string databaseName)
         {
             if (string.IsNullOrEmpty(connectionsString))
+            {
                 throw new ArgumentException("ConnectionString May Not be Empty");
+            }
 
             ConnectionString = connectionsString;
             DatabaseName = databaseName;
 
             if (string.IsNullOrEmpty(databaseName))
+            {
                 DatabaseName = MongoUrl.Create(connectionsString).DatabaseName;
+            }
 
             var client = MongoClientPool.Instance(connectionsString);
             Database = client.GetDatabase(DatabaseName);
@@ -52,7 +56,9 @@ namespace Orleans.Providers.MongoDB.Repository
         protected IMongoCollection<BsonDocument> ReturnOrCreateCollection(string mongoCollectionName)
         {
             if (string.IsNullOrEmpty(mongoCollectionName))
+            {
                 throw new ArgumentException("MongoCollectionName may not be empty");
+            }
 
             // A collection is created if one isn't found
             var collection = Database.GetCollection<BsonDocument>(mongoCollectionName);
@@ -82,7 +88,9 @@ namespace Orleans.Providers.MongoDB.Repository
         public async Task<bool> CollectionExistsAsync(string collectionName)
         {
             if (string.IsNullOrEmpty(collectionName))
+            {
                 throw new ArgumentException("CollectionName may not be empty");
+            }
 
             var filter = new BsonDocument("name", collectionName);
 
@@ -115,17 +123,25 @@ namespace Orleans.Providers.MongoDB.Repository
         public async Task<DeleteResult> DeleteDocumentAsync(string mongoCollectionName, string keyName, string key)
         {
             if (string.IsNullOrEmpty(ConnectionString))
+            {
                 throw new ArgumentException("ConnectionString may not be empty");
+            }
 
             if (string.IsNullOrEmpty(mongoCollectionName))
+            {
                 throw new ArgumentException("MongoCollectionName may not be empty");
+            }
 
             if (string.IsNullOrEmpty(key))
+            {
                 throw new ArgumentException("Key may not be empty");
+            }
 
             var collection = ReturnOrCreateCollection(mongoCollectionName);
             if (collection == null)
+            {
                 throw new Exception("Invalid Collection");
+            }
 
             var builder = Builders<BsonDocument>.Filter.Eq(keyName, key);
 
@@ -153,10 +169,14 @@ namespace Orleans.Providers.MongoDB.Repository
             KeyType key)
         {
             if (string.IsNullOrEmpty(ConnectionString))
+            {
                 throw new ArgumentException("ConnectionString may not be empty");
+            }
 
             if (string.IsNullOrEmpty(mongoCollectionName))
+            {
                 throw new ArgumentException("MongoCollectionName may not be empty");
+            }
 
             //if (string.IsNullOrEmpty(key))
             //{
@@ -166,14 +186,18 @@ namespace Orleans.Providers.MongoDB.Repository
 
             var collection = ReturnOrCreateCollection(mongoCollectionName);
             if (collection == null)
+            {
                 return null;
+            }
 
             var builder = Builders<BsonDocument>.Filter.Eq(keyName, key);
 
             var result = await collection.Find(builder).FirstOrDefaultAsync();
 
             if (result == null)
+            {
                 return null;
+            }
 
             return result;
         }
@@ -192,7 +216,9 @@ namespace Orleans.Providers.MongoDB.Repository
         public async Task<List<BsonDocument>> ReturnAllAsync(string mongoCollectionName)
         {
             if (string.IsNullOrEmpty(mongoCollectionName))
+            {
                 throw new ArgumentException("MongoCollectionName may not be empty");
+            }
 
             var collection = Database.GetCollection<BsonDocument>(mongoCollectionName);
             return await collection.Find(Builders<BsonDocument>.Filter.Empty).ToListAsync();
@@ -225,16 +251,24 @@ namespace Orleans.Providers.MongoDB.Repository
             BsonDocument document)
         {
             if (string.IsNullOrEmpty(ConnectionString))
+            {
                 throw new ArgumentException("ConnectionString may not be empty");
+            }
 
             if (string.IsNullOrEmpty(mongoCollectionName))
+            {
                 throw new ArgumentException("MongoCollectionName may not be empty");
+            }
 
             if (document == null)
+            {
                 throw new ArgumentException("Document may not be empty");
+            }
 
             if (string.IsNullOrEmpty(key))
+            {
                 throw new ArgumentException("Key may not be empty");
+            }
 
             var collection = ReturnOrCreateCollection(mongoCollectionName);
 
@@ -243,9 +277,13 @@ namespace Orleans.Providers.MongoDB.Repository
             var existing = await collection.Find(builder).FirstOrDefaultAsync();
 
             if (existing == null)
+            {
                 await collection.InsertOneAsync(document);
+            }
             else
+            {
                 await collection.ReplaceOneAsync(builder, document);
+            }
         }
 
         /// <summary>
@@ -269,13 +307,19 @@ namespace Orleans.Providers.MongoDB.Repository
             bool bypassDocumentValidation = false)
         {
             if (string.IsNullOrEmpty(ConnectionString))
+            {
                 throw new ArgumentException("ConnectionString may not be empty");
+            }
 
             if (string.IsNullOrEmpty(mongoCollectionName))
+            {
                 throw new ArgumentException("MongoCollectionName may not be empty");
+            }
 
             if (documents == null || documents.Count == 0)
+            {
                 throw new ArgumentException("Document may not be empty");
+            }
 
             var collection = ReturnOrCreateCollection(mongoCollectionName);
             collection.InsertMany(documents,
@@ -300,13 +344,19 @@ namespace Orleans.Providers.MongoDB.Repository
             bool isOrdered = true, bool bypassDocumentValidation = false)
         {
             if (string.IsNullOrEmpty(ConnectionString))
+            {
                 throw new ArgumentException("ConnectionString may not be empty");
+            }
 
             if (string.IsNullOrEmpty(mongoCollectionName))
+            {
                 throw new ArgumentException("MongoCollectionName may not be empty");
+            }
 
             if (documents == null)
+            {
                 throw new ArgumentException("Document may not be empty");
+            }
 
             var collection = ReturnOrCreateCollection(mongoCollectionName);
 
@@ -366,13 +416,19 @@ namespace Orleans.Providers.MongoDB.Repository
         public async Task BulkWriteAsync(WriteModel<BsonDocument>[] documents, string mongoCollectionName)
         {
             if (string.IsNullOrEmpty(ConnectionString))
+            {
                 throw new ArgumentException("ConnectionString may not be empty");
+            }
 
             if (string.IsNullOrEmpty(mongoCollectionName))
+            {
                 throw new ArgumentException("MongoCollectionName may not be empty");
+            }
 
             if (documents == null)
+            {
                 throw new ArgumentException("Document may not be empty");
+            }
 
             var collection = ReturnOrCreateCollection(mongoCollectionName);
 

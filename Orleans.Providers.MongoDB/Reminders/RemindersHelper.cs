@@ -11,7 +11,9 @@ namespace Orleans.Providers.MongoDB.Reminders
         {
             var reminderEntryList = new List<ReminderEntry>();
             foreach (var reminder in reminders)
+            {
                 reminderEntryList.Add(Parse(reminder, grainReferenceConverter));
+            }
 
             return new ReminderTableData(reminderEntryList);
         }
@@ -24,6 +26,7 @@ namespace Orleans.Providers.MongoDB.Reminders
                 var grainId = reminder.GrainId;
 
                 if (!string.IsNullOrEmpty(grainId))
+                {
                     return new ReminderEntry
                     {
                         GrainRef = grainReferenceConverter.GetGrainFromKeyString(grainId),
@@ -32,6 +35,7 @@ namespace Orleans.Providers.MongoDB.Reminders
                         Period = TimeSpan.FromMilliseconds(reminder.Period),
                         ETag = reminder.Version.ToString()
                     };
+                }
             }
 
             return null;

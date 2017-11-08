@@ -23,9 +23,11 @@
             TimeSpan period)
         {
             if (!(this is IRemindable))
+            {
                 throw new InvalidOperationException(string.Format(
                     "Grain {0} is not 'IRemindable'. A grain should implement IRemindable to use the persistent reminder service",
                     IdentityString));
+            }
 
             return base.RegisterOrUpdateReminder(reminderName, dueTime, period);
         }

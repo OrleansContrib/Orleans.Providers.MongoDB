@@ -79,9 +79,12 @@ namespace Orleans.Providers.MongoDB.Statistics
         public async Task ReportMetrics(IClientPerformanceMetrics metricsData)
         {
             if (logger != null && logger.IsVerbose3)
+            {
                 logger.Verbose3(
                     "MongoStatisticsPublisher.ReportMetrics (client) called with data: {0}.",
                     metricsData);
+            }
+
             try
             {
                 await clientMetricsRepository.UpsertReportClientMetricsAsync(
@@ -97,7 +100,9 @@ namespace Orleans.Providers.MongoDB.Statistics
             catch (Exception ex)
             {
                 if (logger != null && logger.IsVerbose)
+                {
                     logger.Verbose("MongoStatisticsPublisher.ReportMetrics (client) failed: {0}", ex);
+                }
 
                 throw;
             }
@@ -127,13 +132,18 @@ namespace Orleans.Providers.MongoDB.Statistics
         public async Task ReportMetrics(ISiloPerformanceMetrics metricsData)
         {
             if (logger != null && logger.IsVerbose3)
+            {
                 logger.Verbose3("MongoStatisticsPublisher.ReportMetrics (silo) called with data: {0}.", metricsData);
+            }
+
             try
             {
                 var gateWayPort = 0;
 
                 if (gateway != null)
+                {
                     gateWayPort = gateway.Port;
+                }
 
                 await siloMetricsRepository.UpsertSiloMetricsAsync(
                     new OrleansSiloMetricsTable
@@ -152,7 +162,10 @@ namespace Orleans.Providers.MongoDB.Statistics
             catch (Exception ex)
             {
                 if (logger != null && logger.IsVerbose)
+                {
                     logger.Verbose("MongoStatisticsPublisher.ReportMetrics (silo) failed: {0}", ex);
+                }
+
                 throw;
             }
         }
@@ -181,7 +194,9 @@ namespace Orleans.Providers.MongoDB.Statistics
             gateway = gatewayAddress;
             this.hostName = hostName;
             if (!isSilo)
+            {
                 generation = SiloAddress.AllocateNewGeneration();
+            }
         }
 
         Task IStatisticsPublisher.Init(
@@ -208,11 +223,13 @@ namespace Orleans.Providers.MongoDB.Statistics
                 ? siloAddress.ToLongString()
                 : string.Format("{0}:{1}", siloOrClientName, generation);
             if (logger != null && logger.IsVerbose3)
+            {
                 logger.Verbose3(
                     "ReportStats called with {0} counters, name: {1}, id: {2}",
                     statsCounters.Count,
                     siloOrClientName,
                     id);
+            }
 
             var insertTasks = new List<Task>();
             try
@@ -224,6 +241,7 @@ namespace Orleans.Providers.MongoDB.Statistics
                 var counterBatches = BatchCounters(statsCounters, maxBatchSizeInclusive);
 
                 foreach (var counterBatch in counterBatches)
+                {
                     //The query template from which to retrieve the set of columns that are being inserted.
 
                     insertTasks.Add(statisticsCounterRepository.InsertStatisticsCountersAsync(
@@ -235,20 +253,32 @@ namespace Orleans.Providers.MongoDB.Statistics
                             Id = id
                         },
                         counterBatch));
+                }
 
                 await Task.WhenAll(insertTasks);
             }
             catch (Exception ex)
             {
-                if (logger != null && logger.IsVerbose) logger.Verbose("ReportStats faulted: {0}", ex.ToString());
+                if (logger != null && logger.IsVerbose)
+                {
+                    logger.Verbose("ReportStats faulted: {0}", ex.ToString());
+                }
+
                 foreach (var faultedTask in insertTasks.Where(t => t.IsFaulted))
+                {
                     if (logger != null && logger.IsVerbose)
+                    {
                         logger.Verbose("Faulted task exception: {0}", faultedTask.ToString());
+                    }
+                }
 
                 throw;
             }
 
-            if (logger != null && logger.IsVerbose) logger.Verbose("ReportStats SUCCESS");
+            if (logger != null && logger.IsVerbose)
+            {
+                logger.Verbose("ReportStats SUCCESS");
+            }
         }
 
         /// <summary>
@@ -291,7 +321,9 @@ namespace Orleans.Providers.MongoDB.Statistics
         {
             var batches = new List<List<ICounter>>();
             for (var i = 0; i < counters.Count; i += maxBatchSizeInclusive)
+            {
                 batches.Add(counters.GetRange(i, Math.Min(maxBatchSizeInclusive, counters.Count - i)));
+            }
 
             return batches;
         }

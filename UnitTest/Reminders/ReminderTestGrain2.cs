@@ -38,8 +38,10 @@ namespace UnitTests.Grains
             // hence, this activation may receive a reminder that it didn't register itself, but
             // the previous activation (incarnation of the grain) registered... so, play it safe
             if (!sequence.ContainsKey(reminderName))
+            {
                 sequence.Add(reminderName,
                     0); // we'll get upto date to the latest sequence number while processing this tick
+            }
 
             // calculating tick sequence number
 
@@ -87,9 +89,13 @@ namespace UnitTests.Grains
             IGrainReminder r = null;
 
             if (validate)
+            {
                 r = await RegisterOrUpdateReminder(reminderName, usePeriod - TimeSpan.FromSeconds(2), usePeriod);
+            }
             else
+            {
                 r = await RegisterOrUpdateReminder(reminderName, usePeriod - TimeSpan.FromSeconds(2), usePeriod);
+            }
 
             allReminders[reminderName] = r;
             sequence[reminderName] = 0;
@@ -116,10 +122,14 @@ namespace UnitTests.Grains
                 // therefore, we need to update our local cache 
                 await GetMissingReminders();
                 if (allReminders.TryGetValue(reminderName, out reminder))
+                {
                     await UnregisterReminder(reminder);
+                }
                 else
+                {
                     throw new OrleansException(string.Format(
                         "Could not find reminder {0} in grain {1}", reminderName, IdentityString));
+                }
             }
         }
 
@@ -192,8 +202,12 @@ namespace UnitTests.Grains
             var reminders = await GetReminders();
             logger.Info("Got missing reminders {0}", Utils.EnumerableToString(reminders));
             foreach (var l in reminders)
+            {
                 if (!allReminders.ContainsKey(l.ReminderName))
+                {
                     allReminders.Add(l.ReminderName, l);
+                }
+            }
         }
 
         private string GetFileName(string reminderName)
@@ -241,8 +255,10 @@ namespace UnitTests.Grains
             // hence, this activation may receive a reminder that it didn't register itself, but
             // the previous activation (incarnation of the grain) registered... so, play it safe
             if (!sequence.ContainsKey(reminderName))
+            {
                 sequence.Add(reminderName,
                     0); // we'll get upto date to the latest sequence number while processing this tick
+            }
 
             // calculating tick sequence number
 
@@ -279,11 +295,16 @@ namespace UnitTests.Grains
             logger.Info("Starting reminder {0} for {1}", reminderName, RuntimeIdentity);
             IGrainReminder r = null;
             if (validate)
+            {
                 r = await RegisterOrUpdateReminder(reminderName, /*TimeSpan.FromSeconds(3)*/
                     usePeriod - TimeSpan.FromSeconds(2), usePeriod);
+            }
             else
+            {
                 r = await RegisterOrUpdateReminder(reminderName, /*TimeSpan.FromSeconds(3)*/
                     usePeriod - TimeSpan.FromSeconds(2), usePeriod);
+            }
+
             if (allReminders.ContainsKey(reminderName))
             {
                 allReminders[reminderName] = r;
@@ -354,8 +375,12 @@ namespace UnitTests.Grains
         {
             var reminders = await GetReminders();
             foreach (var l in reminders)
+            {
                 if (!allReminders.ContainsKey(l.ReminderName))
+                {
                     allReminders.Add(l.ReminderName, l);
+                }
+            }
         }
 
         public async Task StopReminder(IGrainReminder reminder)

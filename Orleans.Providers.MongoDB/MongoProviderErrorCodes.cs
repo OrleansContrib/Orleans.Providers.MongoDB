@@ -8,5 +8,7 @@
         StorageProvider_Reading = StorageProviderBase + 4,
         StorageProvider_Writing = StorageProviderBase + 5,
         StorageProvider_Deleting = StorageProviderBase + 6,
+
+        MembershipTable_Operations = ProvidersBase + 200
     }
 }

@@ -18,7 +18,9 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
         public static void WaitWithThrow(this Task task, TimeSpan timeout)
         {
             if (!task.Wait(timeout))
+            {
                 throw new TimeoutException(string.Format("Task.WaitWithThrow has timed out after {0}.", timeout));
+            }
         }
 
         /// <summary>
@@ -34,10 +36,23 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
             string separator = ", ", bool putInBrackets = true)
         {
             if (collection == null)
-                if (putInBrackets) return "[]";
-                else return "null";
+            {
+                if (putInBrackets)
+                {
+                    return "[]";
+                }
+                else
+                {
+                    return "null";
+                }
+            }
+
             var sb = new StringBuilder();
-            if (putInBrackets) sb.Append("[");
+            if (putInBrackets)
+            {
+                sb.Append("[");
+            }
+
             var enumerator = collection.GetEnumerator();
             var firstDone = false;
             while (enumerator.MoveNext())
@@ -45,9 +60,13 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
                 var value = enumerator.Current;
                 string val;
                 if (toString != null)
+                {
                     val = toString(value);
+                }
                 else
+                {
                     val = value == null ? "null" : value.ToString();
+                }
 
                 if (firstDone)
                 {
@@ -60,7 +79,11 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
                     firstDone = true;
                 }
             }
-            if (putInBrackets) sb.Append("]");
+            if (putInBrackets)
+            {
+                sb.Append("]");
+            }
+
             return sb.ToString();
         }
 
