@@ -65,13 +65,21 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             var grainTypeName = ReturnGrainName(grainType, grainReference);
             var grainKey = grainReference.ToKeyString();
 
-            var result = await DataManager.Read(grainTypeName, grainKey);
-
-            if (result.Value != null)
+            try
             {
-                ConvertFromStorageFormat(grainState, result.Value);
+                var result = await DataManager.Read(grainTypeName, grainKey);
 
-                grainState.ETag = result.Etag;
+                if (result.Value != null)
+                {
+                    ConvertFromStorageFormat(grainState, result.Value);
+
+                    grainState.ETag = result.Etag;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error((int) MongoProviderErrorCode.StorageProvider_Reading, $"Error Reading: GrainType={grainType} GrainId={grainKey} ETag={grainState.ETag} from Collection={grainTypeName} Exception={ex.Message}", ex);
+                throw;
             }
         }
 
@@ -83,20 +91,36 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             var grainTypeName = ReturnGrainName(grainType, grainReference);
             var grainKey = grainReference.ToKeyString();
 
-            var grainData = ConvertToStorageFormat(grainState);
+            try
+            {
+                var grainData = ConvertToStorageFormat(grainState);
 
-            grainState.ETag = await DataManager.Write(grainTypeName, grainKey, grainData, grainState.ETag);
+                grainState.ETag = await DataManager.Write(grainTypeName, grainKey, grainData, grainState.ETag);
+            }
+            catch (Exception ex)
+            {
+                Log.Error((int)MongoProviderErrorCode.StorageProvider_Writing, $"Error Writing: GrainType={grainType} GrainId={grainKey} ETag={grainState.ETag} to Collection={grainTypeName} Exception={ex.Message}", ex);
+                throw;
+            }
         }
 
         /// <inheritoc />
-        public Task ClearStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
+        public async Task ClearStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
         {
             EnsureInitialized();
 
             var grainTypeName = ReturnGrainName(grainType, grainReference);
             var grainKey = grainReference.ToKeyString();
 
-            return DataManager.Delete(grainTypeName, grainKey);
+            try
+            {
+                await DataManager.Delete(grainTypeName, grainKey);
+            }
+            catch (Exception ex)
+            {
+                Log.Error((int)MongoProviderErrorCode.StorageProvider_Deleting, $"Error Deleting: GrainType={grainType} GrainId={grainKey} ETag={grainState.ETag} from Collection={grainTypeName} Exception={ex.Message}", ex);
+                throw;
+            }
         }
         
         protected JObject ConvertToStorageFormat(IGrainState grainState)
