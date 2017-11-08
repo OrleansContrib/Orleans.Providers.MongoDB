@@ -98,8 +98,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
             return DataManager.Delete(grainTypeName, grainKey);
         }
-
-        /// <inheritoc />
+        
         protected JObject ConvertToStorageFormat(IGrainState grainState)
         {
             if (UseJsonFormat)
@@ -115,8 +114,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                 return new JObject(new JProperty("statedata", byteArray));
             }
         }
-
-        /// <inheritoc />
+        
         protected void ConvertFromStorageFormat(IGrainState grainState, JObject entityData)
         {
             if (UseJsonFormat)
