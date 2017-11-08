@@ -104,6 +104,10 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                         {
                             await ThrowForOtherEtag(collection, key, etag, ex2);
                         }
+                        else
+                        {
+                            throw;
+                        }
                     }
                 }
                 else
