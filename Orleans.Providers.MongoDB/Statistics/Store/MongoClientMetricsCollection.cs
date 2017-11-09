@@ -9,9 +9,9 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
     public class MongoClientMetricsCollection : CollectionBase<MongoClientMetricsDocument>
     {
         private static readonly UpdateOptions UpsertNoValidation = new UpdateOptions { BypassDocumentValidation = true, IsUpsert = true };
-        private readonly TimeSpan? expireAfter;
+        private readonly TimeSpan expireAfter;
 
-        public MongoClientMetricsCollection(string connectionString, string databaseName, TimeSpan? expireAfter)
+        public MongoClientMetricsCollection(string connectionString, string databaseName, TimeSpan expireAfter)
             : base(connectionString, databaseName)
         {
             this.expireAfter = expireAfter;
@@ -24,7 +24,7 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
 
         protected override void SetupCollection(IMongoCollection<MongoClientMetricsDocument> collection)
         {
-            if (!expireAfter.HasValue)
+            if (expireAfter != TimeSpan.Zero)
             {
                 collection.Indexes.CreateOne(Index.Ascending(x => x.Timestamp), new CreateIndexOptions { ExpireAfter = expireAfter });
             }
@@ -37,7 +37,7 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
             string hostName, 
             IClientPerformanceMetrics clientMetrics)
         {
-            var id = ReturnId(deploymentId, clientId, expireAfter.HasValue);
+            var id = ReturnId(deploymentId, clientId, expireAfter != TimeSpan.Zero);
 
             var document = new MongoClientMetricsDocument
             {
@@ -55,7 +55,7 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
                 Timestamp = DateTime.UtcNow
             };
 
-            if (expireAfter.HasValue)
+            if (expireAfter != TimeSpan.Zero)
             {
                 return Collection.InsertOneAsync(document);
             }
@@ -71,7 +71,7 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
 
             if (multiple)
             {
-                id += $"{DateTime.UtcNow:yyyy-MM-dd_hh:mm:ss}";
+                id += Guid.NewGuid();
             }
 
             return id;

@@ -54,6 +54,7 @@ namespace Orleans.Providers.MongoDB.Statistics
         private MongoClientMetricsCollection clientMetricsCollection;
         private MongoSiloMetricsCollection siloMetricsCollection;
         private MongoStatisticsCounterCollection statisticsCounterCollection;
+        private TimeSpan expireAfter;
 
         /// <inheritdoc />
         public string Name { get; private set; }
@@ -70,6 +71,8 @@ namespace Orleans.Providers.MongoDB.Statistics
             Name = name;
 
             logger = providerRuntime.GetLogger("MongoStatisticsPublisher");
+
+            expireAfter = config.GetTimeSpanProperty("ExpireAfter", TimeSpan.Zero);
 
             return Task.CompletedTask;
         }
@@ -121,7 +124,7 @@ namespace Orleans.Providers.MongoDB.Statistics
             {
                 clientMetricsCollection =
                     new MongoClientMetricsCollection(config.DataConnectionString,
-                        MongoUrl.Create(config.DataConnectionString).DatabaseName, null);
+                        MongoUrl.Create(config.DataConnectionString).DatabaseName, expireAfter);
 
                 return Task.CompletedTask;
             });
@@ -134,7 +137,7 @@ namespace Orleans.Providers.MongoDB.Statistics
             {
                 siloMetricsCollection =
                     new MongoSiloMetricsCollection(storageConnectionString,
-                        MongoUrl.Create(storageConnectionString).DatabaseName, null);
+                        MongoUrl.Create(storageConnectionString).DatabaseName, expireAfter);
 
                 return Task.CompletedTask;
             });

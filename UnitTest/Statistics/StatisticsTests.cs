@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -18,11 +19,62 @@ namespace Orleans.Providers.MongoDB.UnitTest.Statistics
         public MongoStatisticsPublisherTests()
         {
             statisticsPublisher = new MongoStatisticsPublisher();
-            statisticsPublisher.Init("Test", A.Fake<IProviderRuntime>(), A.Fake<IProviderConfiguration>());
         }
 
         [Fact]
         public async Task MongoStatisticsPublisher_ReportMetrics_Client()
+        {
+            await InitProvider(TimeSpan.Zero);
+            await TestClientMetrics();
+        }
+
+        [Fact]
+        public async Task MongoStatisticsPublisher_ReportMetrics_Client_Over_Time()
+        {
+            await InitProvider(TimeSpan.FromDays(1));
+            await TestClientMetrics();
+        }
+
+        [Fact]
+        public async Task MongoStatisticsPublisher_ReportMetrics_Silo()
+        {
+            await InitProvider(TimeSpan.Zero);
+            await TestSiloMetrics();
+        }
+
+        [Fact]
+        public async Task MongoStatisticsPublisher_ReportMetrics_Silo_Over_Time()
+        {
+            await InitProvider(TimeSpan.FromDays(1));
+            await TestSiloMetrics();
+        }
+
+        [Fact]
+        public async Task MongoStatisticsPublisher_ReportStats()
+        {
+            await InitProvider(TimeSpan.Zero);
+
+            var publisher = (IConfigurableStatisticsPublisher)statisticsPublisher;
+
+            await publisher.Init(true, "mongodb://localhost/OrleansTest", "statisticsDeployment", "statisticsAddress", "statisticsSilo", "statisticsHostName");
+
+            publisher.AddConfiguration("statisticsDeployment", false, "statisticsSilo", SiloAddress.Zero, new IPEndPoint(IPAddress.Loopback, 66), "statisticsHostName");
+
+            await RunParallel(100, () => statisticsPublisher.ReportStats(new List<ICounter> { new DummyCounter(), new DummyCounter() }));
+        }
+
+        private async Task TestSiloMetrics()
+        {
+            var publisher = (IConfigurableSiloMetricsDataPublisher) statisticsPublisher;
+
+            await publisher.Init("statisticsDeployment", "mongodb://localhost/OrleansTest", SiloAddress.Zero, "statisticsSilo", new IPEndPoint(IPAddress.Loopback, 66), "statisticsHostName");
+
+            publisher.AddConfiguration("statisticsDeployment", true, "statisticsSiloId", SiloAddress.Zero, new IPEndPoint(IPAddress.Loopback, 12345), "statisticsHostName");
+
+            await RunParallel(100, () => statisticsPublisher.ReportMetrics((ISiloPerformanceMetrics) new DummyPerformanceMetrics()));
+        }
+
+        private async Task TestClientMetrics()
         {
             var publisher = (IConfigurableClientMetricsDataPublisher)statisticsPublisher;
 
@@ -33,28 +85,17 @@ namespace Orleans.Providers.MongoDB.UnitTest.Statistics
             await RunParallel(100, () => publisher.ReportMetrics(new DummyPerformanceMetrics()));
         }
 
-        [Fact]
-        public async Task MongoStatisticsPublisher_ReportStats()
+        private async Task InitProvider(TimeSpan expireAfter)
         {
-            var publisher = (IConfigurableStatisticsPublisher)statisticsPublisher;
+            var configService = A.Fake<IProviderConfiguration>();
+            var configProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["expireAfter"] = expireAfter.ToString()
+            };
 
-            await publisher.Init(true, "mongodb://localhost/OrleansTest", "statisticsDeployment", "statisticsAddress", "statisticsSilo", "statisticsHostName");
+            A.CallTo(() => configService.Properties).Returns(new ReadOnlyDictionary<string, string>(configProperties));
 
-            publisher.AddConfiguration("statisticsDeployment", false, "statisticsSilo", SiloAddress.Zero, new IPEndPoint(IPAddress.Loopback, 66), "statisticsHostName");
-
-            await RunParallel(100, () => statisticsPublisher.ReportStats(new List<ICounter> { new DummyCounter(), new DummyCounter() }));
-        }
-
-        [Fact]
-        public async Task MongoStatisticsPublisher_ReportMetrics_Silo()
-        {
-            var publisher = (IConfigurableSiloMetricsDataPublisher)statisticsPublisher;
-
-            await publisher.Init("statisticsDeployment", "mongodb://localhost/OrleansTest", SiloAddress.Zero, "statisticsSilo", new IPEndPoint(IPAddress.Loopback, 66), "statisticsHostName");
-
-            publisher.AddConfiguration("statisticsDeployment", true, "statisticsSiloId", SiloAddress.Zero, new IPEndPoint(IPAddress.Loopback, 12345), "statisticsHostName");
-
-            await RunParallel(10, () => statisticsPublisher.ReportMetrics((ISiloPerformanceMetrics)new DummyPerformanceMetrics()));
+            await statisticsPublisher.Init("Test", A.Fake<IProviderRuntime>(), configService);
         }
 
         private static Task RunParallel(int count, Func<Task> taskFactory)

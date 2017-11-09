@@ -9,9 +9,9 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
     public class MongoSiloMetricsCollection : CollectionBase<MongoSiloMetricsDocument>
     {
         private static readonly UpdateOptions UpsertNoValidation = new UpdateOptions { BypassDocumentValidation = true, IsUpsert = true };
-        private readonly TimeSpan? expireAfter;
+        private readonly TimeSpan expireAfter;
 
-        public MongoSiloMetricsCollection(string connectionString, string databaseName, TimeSpan? expireAfter)
+        public MongoSiloMetricsCollection(string connectionString, string databaseName, TimeSpan expireAfter)
             : base(connectionString, databaseName)
         {
             this.expireAfter = expireAfter;
@@ -24,7 +24,7 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
 
         protected override void SetupCollection(IMongoCollection<MongoSiloMetricsDocument> collection)
         {
-            if (!expireAfter.HasValue)
+            if (expireAfter != TimeSpan.Zero)
             {
                 collection.Indexes.CreateOne(Index.Ascending(x => x.TimeStamp), new CreateIndexOptions { ExpireAfter = expireAfter });
             }
@@ -39,7 +39,7 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
             int generation,
             ISiloPerformanceMetrics siloPerformanceMetrics)
         {
-            var id = ReturnId(deploymentId, siloId, expireAfter.HasValue);
+            var id = ReturnId(deploymentId, siloId, expireAfter != TimeSpan.Zero);
 
             var siloMetricsTable = new MongoSiloMetricsDocument
             {
@@ -68,7 +68,7 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
                 TotalPhysicalMemory = siloPerformanceMetrics.TotalPhysicalMemory
             };
 
-            if (expireAfter.HasValue)
+            if (expireAfter != TimeSpan.Zero)
             {
                 return Collection.InsertOneAsync(siloMetricsTable);
             }
@@ -84,7 +84,7 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
 
             if (multiple)
             {
-                id += $"{DateTime.UtcNow:yyyy-MM-dd_hh:mm:ss}";
+                id += Guid.NewGuid();
             }
 
             return id;
