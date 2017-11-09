@@ -30,11 +30,11 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
             }
         }
 
-        public virtual Task UpsertReportClientMetricsAsync(
-            string deploymentId, 
-            string clientId, 
-            string address, 
-            string hostName, 
+        public virtual async Task UpsertReportClientMetricsAsync(
+            string deploymentId,
+            string clientId,
+            string address,
+            string hostName,
             IClientPerformanceMetrics clientMetrics)
         {
             var id = ReturnId(deploymentId, clientId, expireAfter != TimeSpan.Zero);
@@ -55,13 +55,24 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
                 Timestamp = DateTime.UtcNow
             };
 
-            if (expireAfter != TimeSpan.Zero)
+            try
             {
-                return Collection.InsertOneAsync(document);
+                if (expireAfter != TimeSpan.Zero)
+                {
+                    await Collection.InsertOneAsync(document);
+                }
+                else
+                {
+
+                    await Collection.ReplaceOneAsync(x => x.Id == id, document, UpsertNoValidation);
+                }
             }
-            else
+            catch (MongoWriteException ex)
             {
-                return Collection.ReplaceOneAsync(x => x.Id == id, document, UpsertNoValidation);
+                if (ex.WriteError.Category != ServerErrorCategory.DuplicateKey)
+                {
+                    throw;
+                }
             }
         }
 

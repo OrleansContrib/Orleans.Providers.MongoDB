@@ -24,6 +24,36 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="Tester">
+      <HintPath>..\libs\Tester.dll</HintPath>
+    </Reference>
+    <Reference Include="TesterInternal">
+      <HintPath>..\libs\TesterInternal.dll</HintPath>
+    </Reference>
+    <Reference Include="TestExtensions">
+      <HintPath>..\libs\TestExtensions.dll</HintPath>
+    </Reference>
+    <Reference Include="TestGrainInterfaces">
+      <HintPath>..\libs\TestGrainInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="TestGrains">
+      <HintPath>..\libs\TestGrains.dll</HintPath>
+    </Reference>
+    <Reference Include="TestInterfaces">
+      <HintPath>..\libs\TestInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="TestInternalGrainInterfaces">
+      <HintPath>..\libs\TestInternalGrainInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="TestInternalGrains">
+      <HintPath>..\libs\TestInternalGrains.dll</HintPath>
+    </Reference>
+    <Reference Include="TestVersionGrains">
+      <HintPath>..\libs\TestVersionGrains.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="ClientConfiguration.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -30,7 +30,7 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
             }
         }
 
-        public Task UpsertSiloMetricsAsync(
+        public virtual async Task UpsertSiloMetricsAsync(
             string deploymentId,
             string siloId,
             string siloAddress, int siloPort,
@@ -68,13 +68,23 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
                 TotalPhysicalMemory = siloPerformanceMetrics.TotalPhysicalMemory
             };
 
-            if (expireAfter != TimeSpan.Zero)
+            try
             {
-                return Collection.InsertOneAsync(siloMetricsTable);
+                if (expireAfter != TimeSpan.Zero)
+                {
+                    await Collection.InsertOneAsync(siloMetricsTable);
+                }
+                else
+                {
+                    await Collection.ReplaceOneAsync(x => x.Id == id, siloMetricsTable, UpsertNoValidation);
+                }
             }
-            else
+            catch (MongoWriteException ex)
             {
-                return Collection.ReplaceOneAsync(x => x.Id == id, siloMetricsTable, UpsertNoValidation);
+                if (ex.WriteError.Category != ServerErrorCategory.DuplicateKey)
+                {
+                    throw;
+                }
             }
         }
 

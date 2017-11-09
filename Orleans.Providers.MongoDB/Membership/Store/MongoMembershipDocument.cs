@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using Orleans.Runtime;
+using SiloAddressClass = Orleans.Runtime.SiloAddress;
 
 namespace Orleans.Providers.MongoDB.Membership.Store
 {
@@ -13,9 +13,6 @@ namespace Orleans.Providers.MongoDB.Membership.Store
         public string Id { get; set; }
 
         [BsonRequired]
-        public MongoMembershipAddress SiloAddress { get; set; }
-
-        [BsonRequired]
         public string Etag { get; set; }
 
         [BsonRequired]
@@ -23,6 +20,9 @@ namespace Orleans.Providers.MongoDB.Membership.Store
 
         [BsonRequired]
         public string HostName { get; set; }
+
+        [BsonRequired]
+        public string SiloAddress { get; set; }
 
         [BsonRequired]
         public string SiloName { get; set; }
@@ -46,19 +46,15 @@ namespace Orleans.Providers.MongoDB.Membership.Store
         public List<MongoSuspectTime> SuspectTimes { get; set; }
 
         [BsonRequired]
-        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
-        public DateTime IAmAliveTime { get; set; }
+        public string IAmAliveTime { get; set; }
 
         [BsonRequired]
-        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
-        public DateTime StartTime { get; set; }
+        public string StartTime { get; set; }
 
         public static MongoMembershipDocument Create(MembershipEntry entry, string deploymentId, string etag, string id)
         {
             var suspectTimes =
                 entry.SuspectTimes?.Select(MongoSuspectTime.Create).ToList() ?? new List<MongoSuspectTime>();
-
-            var siloAddress = MongoMembershipAddress.Create(entry.SiloAddress);
 
             return new MongoMembershipDocument
             {
@@ -67,13 +63,13 @@ namespace Orleans.Providers.MongoDB.Membership.Store
                 Etag = etag,
                 FaultZone = entry.FaultZone,
                 HostName = entry.HostName,
-                IAmAliveTime = entry.IAmAliveTime,
+                IAmAliveTime = LogFormatter.PrintDate(entry.IAmAliveTime),
                 ProxyPort = entry.ProxyPort,
                 RoleName = entry.RoleName,
-                SiloAddress = siloAddress,
+                SiloAddress = entry.SiloAddress.ToParsableString(),
                 SiloName = entry.SiloName,
                 Status = (int)entry.Status,
-                StartTime = entry.StartTime,
+                StartTime = LogFormatter.PrintDate(entry.StartTime),
                 SuspectTimes = suspectTimes,
                 UpdateZone = entry.UpdateZone
             };
@@ -85,13 +81,13 @@ namespace Orleans.Providers.MongoDB.Membership.Store
             {
                 FaultZone = FaultZone,
                 HostName = HostName,
-                IAmAliveTime = IAmAliveTime,
+                IAmAliveTime = LogFormatter.ParseDate(IAmAliveTime),
                 ProxyPort = ProxyPort,
                 RoleName = RoleName,
-                SiloAddress = SiloAddress.ToSiloAddress(),
+                SiloAddress = SiloAddressClass.FromParsableString(SiloAddress),
                 SiloName = SiloName,
                 Status = (SiloStatus) Status,
-                StartTime = StartTime,
+                StartTime = LogFormatter.ParseDate(StartTime),
                 SuspectTimes = SuspectTimes.Select(x => x.ToTuple()).ToList(),
                 UpdateZone = UpdateZone
             };

@@ -43,7 +43,7 @@ namespace Orleans.Providers.MongoDB.Reminders
         {
             return DoAndLog(nameof(ReadRows), () =>
             {
-                return repository.ReadReminderRowAsync(key);
+                return repository.ReadRow(key);
             });
         }
 
@@ -52,7 +52,7 @@ namespace Orleans.Providers.MongoDB.Reminders
         {
             return DoAndLog(nameof(RemoveRow), () =>
             {
-                return repository.RemoveRowAsync(grainRef, reminderName, eTag);
+                return repository.RemoveRow(grainRef, reminderName, eTag);
             });
         }
 
@@ -61,7 +61,7 @@ namespace Orleans.Providers.MongoDB.Reminders
         {
             return DoAndLog(nameof(ReadRow), () =>
             {
-                return repository.ReadReminderRowAsync(grainRef, reminderName);
+                return repository.ReadRow(grainRef, reminderName);
             });
         }
 
@@ -70,7 +70,7 @@ namespace Orleans.Providers.MongoDB.Reminders
         {
             return DoAndLog(nameof(TestOnlyClearTable), () =>
             {
-                return repository.RemoveReminderRowsAsync();
+                return repository.RemoveRows();
             });
         }
 
@@ -79,7 +79,7 @@ namespace Orleans.Providers.MongoDB.Reminders
         {
             return DoAndLog(nameof(UpsertRow), () =>
             {
-                return repository.UpsertReminderRowAsync(entry);
+                return repository.UpsertRow(entry);
             });
         }
 
@@ -90,11 +90,11 @@ namespace Orleans.Providers.MongoDB.Reminders
             {
                 if (begin < end)
                 {
-                    return repository.ReadInRangeAsync(begin, end);
+                    return repository.ReadRowsInRange(begin, end);
                 }
                 else
                 {
-                    return repository.ReadOutRangeAsync(begin, end);
+                    return repository.ReadRowsOutRange(begin, end);
                 }
             });
         }

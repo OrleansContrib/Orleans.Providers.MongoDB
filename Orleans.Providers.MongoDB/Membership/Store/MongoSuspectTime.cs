@@ -7,20 +7,19 @@ namespace Orleans.Providers.MongoDB.Membership.Store
     public sealed class MongoSuspectTime
     {
         [BsonRequired]
-        public MongoMembershipAddress Address { get; set; }
+        public string Address { get; set; }
 
         [BsonRequired]
-        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
-        public DateTime LastTime { get; set; }
+        public string IAmAliveTime { get; set; }
 
         public static MongoSuspectTime Create(Tuple<SiloAddress, DateTime> tuple)
         {
-            return new MongoSuspectTime { Address = MongoMembershipAddress.Create(tuple.Item1), LastTime = tuple.Item2 };
+            return new MongoSuspectTime { Address = tuple.Item1.ToParsableString(), IAmAliveTime = LogFormatter.PrintDate(tuple.Item2) };
         }
 
         public Tuple<SiloAddress, DateTime> ToTuple()
         {
-            return Tuple.Create(Address.ToSiloAddress(), LastTime);
+            return Tuple.Create(SiloAddress.FromParsableString(Address), LogFormatter.ParseDate(IAmAliveTime));
         }
     }
 }

@@ -58,7 +58,10 @@ namespace Orleans.Providers.MongoDB.Membership.Store
                 await Collection.Find(x => x.DeploymentId == deploymentId)
                     .ToListAsync();
 
-            return entries.Select(ReturnGatewayUri).ToList();
+            return entries
+                .Where(x => x.Status == (int)SiloStatus.Active)
+                .Where(x => x.ProxyPort > 0)
+                .Select(ReturnGatewayUri).ToList();
         }
 
         public async Task<MembershipTableData> ReadAll(string deploymentId)
@@ -85,7 +88,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store
         {
             var id = ReturnId(deploymentId, address);
 
-            return Collection.UpdateOneAsync(x => x.Id == id, Update.Set(x => x.IAmAliveTime, iAmAliveTime));
+            return Collection.UpdateOneAsync(x => x.Id == id, Update.Set(x => x.IAmAliveTime, LogFormatter.PrintDate(iAmAliveTime)));
         }
         
         public Task DeleteMembershipTableEntries(string deploymentId)
@@ -105,7 +108,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store
 
         private static Uri ReturnGatewayUri(MongoMembershipDocument record)
         {
-            return record.SiloAddress.ToSiloAddress().ToGatewayUri();
+            return SiloAddress.FromParsableString(record.SiloAddress).ToGatewayUri();
         }
 
         private static string ReturnId(string deploymentId, SiloAddress address)
