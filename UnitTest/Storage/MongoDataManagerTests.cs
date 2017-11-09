@@ -74,7 +74,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Storage
 
             for (var i = 0; i < 10; i++)
             {
-                etag = await sut.Write(dataType, dataId, JObject.FromObject(data), etag);
+                await sut.Write(dataType, dataId, JObject.FromObject(data), etag);
 
                 var result = (await sut.Read(dataType, dataId));
 
