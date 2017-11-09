@@ -12,6 +12,8 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 {
     public abstract class BaseJSONStorageProvider : IStorageProvider
     {
+        public const string UseJsonFormatProperty = "UseJsonFormat";
+
         private JsonSerializerSettings serializerSettings;
         private JsonSerializer serializer;
         private SerializationManager serializationManager;
@@ -42,7 +44,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                     OrleansJsonSerializer.GetDefaultSerializerSettings(serializationManager, providerRuntime.GrainFactory), config);
             serializer = JsonSerializer.Create(serializerSettings);
 
-            UseJsonFormat = config.GetBoolProperty("UseJsonFormat", true);;
+            UseJsonFormat = config.GetBoolProperty(UseJsonFormatProperty, true);
 
             return Task.CompletedTask;
         }
