@@ -28,7 +28,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
 
         protected override string CollectionName()
         {
-            return "OrleansReminder";
+            return "OrleansReminderV2";
         }
 
         protected override void SetupCollection(IMongoCollection<MongoReminderDocument> collection)
