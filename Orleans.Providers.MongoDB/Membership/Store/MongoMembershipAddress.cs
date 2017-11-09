@@ -2,7 +2,7 @@
 using MongoDB.Bson.Serialization.Attributes;
 using Orleans.Runtime;
 
-namespace Orleans.Providers.MongoDB.Membership
+namespace Orleans.Providers.MongoDB.Membership.Store
 {
     public sealed class MongoMembershipAddress
     {

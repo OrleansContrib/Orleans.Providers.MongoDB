@@ -58,7 +58,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store
                 await Collection.Find(x => x.DeploymentId == deploymentId)
                     .ToListAsync();
 
-            return entries.Select(x => ReturnGatewayUri(x)).ToList();
+            return entries.Select(ReturnGatewayUri).ToList();
         }
 
         public async Task<MembershipTableData> ReadAll(string deploymentId)
@@ -67,7 +67,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store
                 await Collection.Find(x => x.DeploymentId == deploymentId)
                     .ToListAsync();
 
-            return ReturnMembershipTableData(entries, deploymentId);
+            return ReturnMembershipTableData(entries);
         }
         
         public async Task<MembershipTableData> ReadRow(string deploymentId, SiloAddress address)
@@ -78,7 +78,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store
                 await Collection.Find(x => x.Id == id)
                     .ToListAsync();
 
-            return ReturnMembershipTableData(entries, deploymentId);
+            return ReturnMembershipTableData(entries);
         }
         
         public Task UpdateIAmAlive(string deploymentId, SiloAddress address, DateTime iAmAliveTime)
@@ -93,7 +93,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store
             return Collection.DeleteManyAsync(x => x.DeploymentId == deploymentId);
         }
 
-        private static MembershipTableData ReturnMembershipTableData(List<MongoMembershipDocument> membershipList, string deploymentId)
+        private static MembershipTableData ReturnMembershipTableData(IEnumerable<MongoMembershipDocument> membershipList)
         {
             return new MembershipTableData(membershipList.Select(x => Tuple.Create(x.ToEntry(), x.Etag)).ToList(), tableVersion);
         }
@@ -108,7 +108,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store
             return record.SiloAddress.ToSiloAddress().ToGatewayUri();
         }
 
-        private string ReturnId(string deploymentId, SiloAddress address)
+        private static string ReturnId(string deploymentId, SiloAddress address)
         {
             return $"{deploymentId}@{ReturnAddress(address.Endpoint.Address)}:{address.Endpoint.Port}/{address.Generation}";
         }

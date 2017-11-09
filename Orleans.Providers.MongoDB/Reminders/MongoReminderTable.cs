@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using MongoDB.Driver;
-using Orleans.Providers.MongoDB.Reminders.Repository;
 using Orleans.Runtime;
 using Orleans.Runtime.Configuration;
 

@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using Orleans;
-using Orleans.Providers.MongoDB.Reminders.Repository;
+using Orleans.Providers.MongoDB.Reminders;
 using Orleans.Providers.MongoDB.UnitTest.Reminders;
 using Orleans.Runtime;
 using Orleans.Runtime.Configuration;

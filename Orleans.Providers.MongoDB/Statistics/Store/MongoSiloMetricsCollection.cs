@@ -39,7 +39,7 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
             int generation,
             ISiloPerformanceMetrics siloPerformanceMetrics)
         {
-            var id = ReturnId(deploymentId, siloId, this.expireAfter.HasValue);
+            var id = ReturnId(deploymentId, siloId, expireAfter.HasValue);
 
             var siloMetricsTable = new MongoSiloMetricsDocument
             {
@@ -68,7 +68,7 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
                 TotalPhysicalMemory = siloPerformanceMetrics.TotalPhysicalMemory
             };
 
-            if (this.expireAfter.HasValue)
+            if (expireAfter.HasValue)
             {
                 return Collection.InsertOneAsync(siloMetricsTable);
             }
@@ -88,11 +88,6 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
             }
 
             return id;
-        }
-
-        internal Task UpsertSiloMetricsAsync(string deploymentId, string siloName, string siloAddress, int siloPort, string gatewayAddress, int gatewayPort, string hostName, object generation, ISiloPerformanceMetrics metricsData)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
             string hostName, 
             IClientPerformanceMetrics clientMetrics)
         {
-            var id = ReturnId(deploymentId, clientId, this.expireAfter.HasValue);
+            var id = ReturnId(deploymentId, clientId, expireAfter.HasValue);
 
             var document = new MongoClientMetricsDocument
             {
@@ -55,7 +55,7 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
                 Timestamp = DateTime.UtcNow
             };
 
-            if (this.expireAfter.HasValue)
+            if (expireAfter.HasValue)
             {
                 return Collection.InsertOneAsync(document);
             }

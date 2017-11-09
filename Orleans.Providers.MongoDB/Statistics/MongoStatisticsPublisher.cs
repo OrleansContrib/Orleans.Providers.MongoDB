@@ -7,6 +7,8 @@ using Orleans.Providers.MongoDB.Statistics.Store;
 using Orleans.Runtime;
 using Orleans.Runtime.Configuration;
 
+// ReSharper disable ConvertToLambdaExpression
+
 // HINT: There is no Client st
 
 namespace Orleans.Providers.MongoDB.Statistics
@@ -92,6 +94,7 @@ namespace Orleans.Providers.MongoDB.Statistics
                 DeploymentId = deploymentId,
                 GatewayAddress = gateway?.Address.MapToIPv4().ToString(),
                 GatewayPort = gateway?.Port ?? 0,
+                Generation = address?.Generation ?? 0,
                 HostName = hostName,
                 SiloAddress = address?.Endpoint.Address.MapToIPv4().ToString(),
                 SiloName = siloName,

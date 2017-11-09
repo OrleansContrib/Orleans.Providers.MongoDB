@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Orleans.Providers.MongoDB.StorageProviders.Serializing;
 using Orleans.Runtime;
 using Orleans.Serialization;
 using Orleans.Storage;

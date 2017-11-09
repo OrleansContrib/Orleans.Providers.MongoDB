@@ -5,7 +5,7 @@ using MongoDB.Driver;
 using Orleans.Providers.MongoDB.Repository;
 using Orleans.Runtime;
 
-namespace Orleans.Providers.MongoDB.Reminders.Repository
+namespace Orleans.Providers.MongoDB.Reminders
 {
     public class MongoReminderCollection : CollectionBase<MongoReminderDocument>
     {

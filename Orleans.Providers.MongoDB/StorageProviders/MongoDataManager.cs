@@ -16,18 +16,18 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         private const string FieldId = "_id";
         private const string FieldDoc = "_doc";
         private const string FieldEtag = "_etag";
-        private readonly IMongoDatabase _database;
+        private readonly IMongoDatabase database;
 
         public IMongoDatabase Database
         {
-            get { return _database; }
+            get { return database; }
         }
         
         public MongoDataManager(string databaseName, string connectionString)
         {
             var client = MongoClientPool.Instance(connectionString);
 
-            _database = client.GetDatabase(databaseName);
+            database = client.GetDatabase(databaseName);
         }
         
         public Task Delete(string collectionName, string key)
@@ -137,7 +137,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         
         private IMongoCollection<BsonDocument> GetCollection(string name)
         {
-            return _database.GetCollection<BsonDocument>(name);
+            return database.GetCollection<BsonDocument>(name);
         }
     }
 }

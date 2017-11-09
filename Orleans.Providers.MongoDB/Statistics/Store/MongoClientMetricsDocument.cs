@@ -2,7 +2,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Orleans.Providers.MongoDB.Statistics
+namespace Orleans.Providers.MongoDB.Statistics.Store
 {
     public sealed class MongoClientMetricsDocument
     {

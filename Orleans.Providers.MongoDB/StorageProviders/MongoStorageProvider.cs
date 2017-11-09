@@ -14,8 +14,6 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             {
                 throw new ArgumentException("ConnectionString property not set");
             }
-        
-            var useJsonFormat = config.GetBoolProperty("UseJsonFormat", true);
 
             var database = config.Properties["Database"];
 
@@ -29,12 +27,12 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                 throw new ArgumentException("Database property not set");
             }
 
-            DataManager = ReturnDataManager(database, connectionString, UseJsonFormat);
+            DataManager = ReturnDataManager(database, connectionString);
 
             return base.Init(name, providerRuntime, config);
         }
 
-        public virtual IJSONStateDataManager ReturnDataManager(string database, string connectionString, bool UseJsonFormat)
+        public virtual IJSONStateDataManager ReturnDataManager(string database, string connectionString)
         {
             return new MongoDataManager(database, connectionString);
         }

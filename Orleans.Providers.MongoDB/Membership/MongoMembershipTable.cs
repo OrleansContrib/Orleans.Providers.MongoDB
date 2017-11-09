@@ -7,11 +7,13 @@ using Orleans.Providers.MongoDB.Membership.Store;
 using Orleans.Runtime;
 using Orleans.Runtime.Configuration;
 
+// ReSharper disable ConvertToLambdaExpression
+
 namespace Orleans.Providers.MongoDB.Membership
 {
     public class MongoMembershipTable : IMembershipTable, IGatewayListProvider
     {
-        private string deploymentId;
+        private string configurationDeploymentId;
         private MongoMembershipCollection membershipCollection;
         private MongoMembershipCollection gatewaysCollection;
         private Logger logger;
@@ -28,7 +30,7 @@ namespace Orleans.Providers.MongoDB.Membership
             {
                 logger = traceLogger;
 
-                deploymentId = clientConfiguration.DeploymentId;
+                configurationDeploymentId = clientConfiguration.DeploymentId;
 
                 gatewaysCollection =
                     new MongoMembershipCollection(clientConfiguration.DataConnectionString,
@@ -46,7 +48,7 @@ namespace Orleans.Providers.MongoDB.Membership
             {
                 logger = traceLogger;
 
-                deploymentId = globalConfiguration.DeploymentId;
+                configurationDeploymentId = globalConfiguration.DeploymentId;
 
                 membershipCollection =
                     new MongoMembershipCollection(globalConfiguration.DataConnectionString,
@@ -61,7 +63,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(GetGateways), () =>
             {
-                return gatewaysCollection.GetGateways(deploymentId);
+                return gatewaysCollection.GetGateways(configurationDeploymentId);
             });
         }
 
@@ -79,7 +81,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(ReadRow), () =>
             {
-                return membershipCollection.ReadRow(deploymentId, key);
+                return membershipCollection.ReadRow(configurationDeploymentId, key);
             });
         }
 
@@ -88,7 +90,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(ReadAll), () =>
             {
-                return membershipCollection.ReadAll(deploymentId);
+                return membershipCollection.ReadAll(configurationDeploymentId);
             });
         }
 
@@ -97,7 +99,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(InsertRow), () =>
             {
-                return membershipCollection.UpsertRow(deploymentId, entry, null);
+                return membershipCollection.UpsertRow(configurationDeploymentId, entry, null);
             });
         }
 
@@ -106,7 +108,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(UpdateRow), () =>
             {
-                return membershipCollection.UpsertRow(deploymentId, entry, etag);
+                return membershipCollection.UpsertRow(configurationDeploymentId, entry, etag);
             });
         }
 
@@ -115,7 +117,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(UpdateRow), () =>
             {
-                return membershipCollection.UpdateIAmAlive(deploymentId, entry.SiloAddress, entry.IAmAliveTime);
+                return membershipCollection.UpdateIAmAlive(configurationDeploymentId, entry.SiloAddress, entry.IAmAliveTime);
             });
         }
 

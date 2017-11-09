@@ -56,7 +56,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store
         public static MongoMembershipDocument Create(MembershipEntry entry, string deploymentId, string etag, string id)
         {
             var suspectTimes =
-                entry.SuspectTimes?.Select(x => MongoSuspectTime.Create(x)).ToList() ?? new List<MongoSuspectTime>();
+                entry.SuspectTimes?.Select(MongoSuspectTime.Create).ToList() ?? new List<MongoSuspectTime>();
 
             var siloAddress = MongoMembershipAddress.Create(entry.SiloAddress);
 
