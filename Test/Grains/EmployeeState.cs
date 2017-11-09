@@ -1,4 +1,6 @@
-﻿namespace Orleans.Providers.MongoDB.Test.Grains
+﻿using System.Collections.Generic;
+
+namespace Orleans.Providers.MongoDB.Test.Grains
 {
     public class EmployeeState
     {

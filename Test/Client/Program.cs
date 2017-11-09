@@ -1,60 +1,58 @@
 ﻿using System;
-using System.Threading;
-using Orleans;
+using Microsoft.Extensions.Logging;
 using Orleans.Providers.MongoDB.Test.GrainInterfaces;
 using Orleans.Runtime.Configuration;
 
-internal class Program
+namespace Orleans.Providers.MongoDB.Test.Client
 {
-    private static void Main(string[] args)
+    public static class Program
     {
-        // initialize the grain client, with some retry logic
-        var initialized = false;
-        while (!initialized)
+        public static void Main(string[] args)
         {
-            try
+            var config = ClientConfiguration.LocalhostSilo();
+
+            config.ClientName = "Foo";
+            config.DeploymentId = "OrleansWithMongoDB";
+            config.DataConnectionString = "mongodb://localhost/OrleansTestApp";
+
+            var client = new ClientBuilder()
+                .UseConfiguration(config)
+                .UseMongoGatewayListProvider()
+                .AddApplicationPartsFromReferences(typeof(IHelloWorldGrain).Assembly)
+                .ConfigureLogging(logging => logging.AddConsole())
+                .Build();
+
+            client.Connect().Wait();
+
+            // get a reference to the grain from the grain factory
+            var helloWorldGrain = client.GetGrain<IHelloWorldGrain>(1);
+
+            // call the grain
+            helloWorldGrain.SayHello("World").Wait();
+
+            var reminderGrain = client.GetGrain<INewsReminderGrain>(1);
+
+            reminderGrain.StartReminder("TestReminder", TimeSpan.FromMinutes(10)).Wait();
+            reminderGrain.RemoveReminder("TestReminder");
+
+            // Test State 
+
+            var employee = client.GetGrain<IEmployeeGrain>(1);
+            var employeeId = employee.ReturnLevel().Result;
+
+            if (employeeId == 100)
             {
-                // Todo: This configuration should not be called from the config file
-                GrainClient.Initialize(ClientConfiguration.LoadFromFile(@".\ClientConfiguration.xml"));
-                initialized = GrainClient.IsInitialized;
+                employee.SetLevel(50);
             }
-            catch (Exception ex)
+            else
             {
-                Console.WriteLine(ex.ToString());
-                Thread.Sleep(TimeSpan.FromSeconds(1));
+                employee.SetLevel(100);
             }
+
+            employeeId = employee.ReturnLevel().Result;
+            
+            Console.WriteLine(employeeId);
+            Console.ReadKey();
         }
-
-        // get a reference to the grain from the grain factory
-        var helloWorldGrain = GrainClient.GrainFactory.GetGrain<IHelloWorldGrain>(1);
-
-        // call the grain
-        var response = helloWorldGrain.SayHello("World").Result;
-
-        var reminderGrain = GrainClient.GrainFactory.GetGrain<INewsReminderGrain>(1);
-
-        var a = reminderGrain.StartReminder("TestReminder", TimeSpan.FromMinutes(10)).Result;
-        var b = reminderGrain.RemoveReminder("TestReminder");
-
-        // Test State 
-
-        var employee = GrainClient.GrainFactory.GetGrain<IEmployeeGrain>(1);
-        var employeeId = employee.ReturnLevel().Result;
-
-        if (employeeId == 100)
-        {
-            employee.SetLevel(50);
-        }
-        else
-        {
-            employee.SetLevel(100);
-        }
-
-        employeeId = employee.ReturnLevel().Result;
-
-        //employee = GrainClient.GrainFactory.GetGrain<IEmployeeGrain>(1);
-
-        Console.WriteLine(response);
-        Console.ReadKey();
     }
 }

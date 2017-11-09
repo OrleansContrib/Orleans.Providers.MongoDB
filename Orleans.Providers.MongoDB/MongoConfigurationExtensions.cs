@@ -4,13 +4,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Orleans.Hosting;
 using Orleans.Messaging;
 using Orleans.Providers.MongoDB.Membership;
+using Orleans.Providers.MongoDB.Reminders;
 using Orleans.Providers.MongoDB.Statistics;
 using Orleans.Providers.MongoDB.StorageProviders;
+using Orleans.Runtime.Configuration;
 
 // ReSharper disable AccessToStaticMemberViaDerivedType
 // ReSharper disable CheckNamespace
 
-namespace Orleans.Runtime.Configuration
+namespace Orleans
 {
     /// <summary>
     /// Extension methods for configuration classes specific to OrleansMongoUtils.dll 
@@ -24,6 +26,15 @@ namespace Orleans.Runtime.Configuration
         public static ISiloHostBuilder UseMongoMembershipTable(this ISiloHostBuilder builder)
         {
             return builder.ConfigureServices(services => services.UseMongoMembershipTable());
+        }
+
+        /// <summary>
+        /// Configure ISiloHostBuilder to use MongoMembershipTable
+        /// </summary>
+        /// <param name="builder"></param>
+        public static ISiloHostBuilder UseMongoReminderTable(this ISiloHostBuilder builder)
+        {
+            return builder.ConfigureServices(services => services.UseMongoReminderTable());
         }
 
         /// <summary>
@@ -43,6 +54,17 @@ namespace Orleans.Runtime.Configuration
         public static IServiceCollection UseMongoMembershipTable(this IServiceCollection services)
         {
             services.AddSingleton<IMembershipTable, MongoMembershipTable>();
+
+            return services;
+        }
+
+        /// <summary>
+        /// Configure DI container to use MongoReminderTable
+        /// </summary>
+        /// <param name="services"></param>
+        public static IServiceCollection UseMongoReminderTable(this IServiceCollection services)
+        {
+            services.AddSingleton<IReminderTable, MongoReminderTable>();
 
             return services;
         }

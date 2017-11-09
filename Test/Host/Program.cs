@@ -1,47 +1,35 @@
 using System;
+using Microsoft.Extensions.Logging;
+using Orleans.Hosting;
+using Orleans.Providers.MongoDB.Test.Grains;
 using Orleans.Runtime.Configuration;
-using Orleans.Runtime.Host;
 
-internal class Program
+namespace Orleans.Providers.MongoDB.Test.Host
 {
-    private static void Main(string[] args)
+    public static class Program
     {
-        // Todo: This configuration should not be called from the config file 
-
-        try
+        public static void Main(string[] args)
         {
-            var config = ClusterConfiguration.LocalhostPrimarySilo();
-            config.LoadFromFile(@".\OrleansConfiguration.xml");
+            var config = ClusterConfiguration.LocalhostPrimarySilo(33333);
 
-            using (var silo = new SiloHost("primary", config))
-            {
-                // Init Mongo Membership
-                silo.Config.Globals.LivenessType = GlobalConfiguration.LivenessProviderType.Custom;
-                silo.Config.Globals.MembershipTableAssembly = "Orleans.Providers.MongoDB";
+            config.Globals.DeploymentId = "OrleansWithMongoDB";
+            config.Globals.DataConnectionString = "mongodb://localhost/OrleansTestApp";
+            config.AddMongoDBStorageProvider("MongoDBStore", "mongodb://localhost", "OrleansTestApp");
 
-                //Enable Reminder Service
-                silo.Config.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Custom;
-                silo.Config.Globals.ReminderTableAssembly = "Orleans.Providers.MongoDB";
-                silo.Config.Defaults.StatisticsProviderName = "MongoStatisticsPublisher";
+            var silo = new SiloHostBuilder()
+                .UseConfiguration(config)
+                .AddApplicationPartsFromReferences(typeof(EmployeeGrain).Assembly)
+                .UseMongoMembershipTable()
+                .UseMongoReminderTable()
+                .ConfigureLogging(logging => logging.AddConsole())
+                .Build();
 
-                //silo.Config.Defaults = "Orleans.Providers.MongoDB.Statistics.Repository.MongoStatisticsPublisherRepository";
-                silo.InitializeOrleansSilo();
+            silo.StartAsync().Wait();
 
-                var result = silo.StartOrleansSilo();
-                if (result)
-                {
-                    Console.WriteLine("silo running");
-                    Console.ReadKey();
-                    return;
-                }
+            Console.WriteLine("Silo running. Press key to exit...");
+            Console.ReadKey();
 
-                Console.WriteLine("could not start silo");
-                Console.ReadKey();
-            }
-        }
-        catch (Exception ex)
-        {
-            throw;
+            silo.StopAsync().Wait();
         }
     }
 }

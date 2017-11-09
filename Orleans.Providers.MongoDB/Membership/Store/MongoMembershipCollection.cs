@@ -108,7 +108,9 @@ namespace Orleans.Providers.MongoDB.Membership.Store
 
         private static Uri ReturnGatewayUri(MongoMembershipDocument record)
         {
-            return SiloAddress.FromParsableString(record.SiloAddress).ToGatewayUri();
+            var siloAddress = SiloAddress.FromParsableString(record.SiloAddress);
+
+            return SiloAddress.New(new IPEndPoint(siloAddress.Endpoint.Address, record.ProxyPort), siloAddress.Generation).ToGatewayUri();
         }
 
         private static string ReturnId(string deploymentId, SiloAddress address)
