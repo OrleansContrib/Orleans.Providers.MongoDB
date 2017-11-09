@@ -108,7 +108,7 @@ namespace Orleans
             string connectionString = null,
             string database = MongoStorageProvider.DatabaseDefault,
             string collectionPrefix = null,
-            bool useJsonFormat = false)
+            bool useJsonFormat = true)
         {
             if (string.IsNullOrWhiteSpace(providerName))
             {
