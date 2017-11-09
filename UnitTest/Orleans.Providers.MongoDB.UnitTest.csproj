@@ -11,12 +11,9 @@
     <PackageReference Include="FakeItEasy" Version="4.2.0" />
     <PackageReference Include="FluentAssertions" Version="4.19.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
-    <PackageReference Include="Microsoft.Orleans.OrleansCodeGenerator" Version="2.0.0-preview2-20170724" />
-    <PackageReference Include="Microsoft.Orleans.OrleansProviders" Version="2.0.0-preview2-20170724" />
-    <PackageReference Include="Microsoft.Orleans.TestingHost" Version="2.0.0-preview2-20170724" />
+    <PackageReference Include="Microsoft.Orleans.OrleansCodeGenerator.Build" Version="2.0.0-beta1" />
+    <PackageReference Include="Microsoft.Orleans.TestingHost" Version="2.0.0-beta1" />
     <PackageReference Include="MongoDB.Driver" Version="2.4.4" />
-    <PackageReference Include="MSTest.TestAdapter" Version="1.1.18" />
-    <PackageReference Include="MSTest.TestFramework" Version="1.1.18" />
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="xunit.runner.console" Version="2.3.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />

@@ -30,7 +30,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Statistics
 
         public CounterStorage Storage => CounterStorage.LogAndTable;
 
-        public void TrackMetric(Logger telemetryProducer)
+        public void TrackMetric(ITelemetryProducer telemetryProducer)
         {
         }
     }

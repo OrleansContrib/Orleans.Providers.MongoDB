@@ -8,16 +8,16 @@ namespace Orleans.Providers.MongoDB.StorageProviders
     {
         public override Task Init(string name, IProviderRuntime providerRuntime, IProviderConfiguration config)
         {
-            var connectionString = config.Properties["ConnectionString"];
+            config.Properties.TryGetValue("ConnectionString", out var connectionString);
 
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 throw new ArgumentException("ConnectionString property not set");
             }
 
-            var database = config.Properties["Database"];
+            config.Properties.TryGetValue("Database", out var database);
 
-            if (string.IsNullOrEmpty(config.Properties["Database"]))
+            if (string.IsNullOrEmpty(database))
             {
                 database = MongoUrl.Create(connectionString).DatabaseName;
             }

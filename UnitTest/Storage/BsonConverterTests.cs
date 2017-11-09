@@ -1,12 +1,12 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
 using FluentAssertions;
 using MongoDB.Bson;
+using Newtonsoft.Json.Linq;
+using Orleans.Providers.MongoDB.StorageProviders;
+using Xunit;
 
-namespace Orleans.Providers.MongoDB.StorageProviders
+namespace Orleans.Providers.MongoDB.UnitTest.Storage
 {
-    [TestClass]
     public class BsonConverterTests
     {
         public class TestObject
@@ -73,7 +73,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Should_serialize_and_deserialize_to_bson_with_json()
         {
             var source = TestObject.CreateWithValues();
@@ -82,14 +82,14 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             target.ShouldBeEquivalentTo(source);
         }
 
-        [TestMethod]
+        [Fact]
         public void Should_keep_binary_Data()
         {
             var source = TestObject.CreateWithValues();
             var json = JObject.FromObject(source);
             var bson = json.ToBson();
 
-            Assert.AreEqual(BsonType.Binary, bson["Bytes"].BsonType);
+            Assert.Equal(BsonType.Binary, bson["Bytes"].BsonType);
         }
     }
 }

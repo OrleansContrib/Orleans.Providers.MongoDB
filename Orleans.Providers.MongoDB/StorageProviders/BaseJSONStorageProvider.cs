@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Orleans.Providers.MongoDB.StorageProviders.Serializing;
 using Orleans.Runtime;
 using Orleans.Serialization;
 using Orleans.Storage;
@@ -41,7 +40,6 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             serializerSettings = 
                 OrleansJsonSerializer.UpdateSerializerSettings(
                     OrleansJsonSerializer.GetDefaultSerializerSettings(serializationManager, providerRuntime.GrainFactory), config);
-            serializerSettings.Converters.Add(new GrainReferenceConverter(providerRuntime.GrainFactory));
             serializer = JsonSerializer.Create(serializerSettings);
 
             UseJsonFormat = config.GetBoolProperty("UseJsonFormat", true);;

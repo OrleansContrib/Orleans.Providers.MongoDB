@@ -11,6 +11,8 @@
 
         MembershipTable_Operations = ProvidersBase + 200,
 
-        StatisticsPublisher_Operations = ProvidersBase + 300
+        StatisticsPublisher_Operations = ProvidersBase + 300,
+
+        Reminders_Operations = ProvidersBase + 400
     }
 }

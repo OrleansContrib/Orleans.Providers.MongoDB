@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
-using Orleans.Messaging;
 using Orleans.Providers.MongoDB.Membership.Store;
 using Orleans.Runtime;
 using Orleans.Runtime.Configuration;
@@ -11,59 +10,28 @@ using Orleans.Runtime.Configuration;
 
 namespace Orleans.Providers.MongoDB.Membership
 {
-    public class MongoMembershipTable : IMembershipTable, IGatewayListProvider
+    public class MongoMembershipTable : IMembershipTable
     {
-        private string configurationDeploymentId;
+        private readonly ILogger<MongoMembershipTable> logger;
+        private readonly GlobalConfiguration config;
         private MongoMembershipCollection membershipCollection;
-        private MongoMembershipCollection gatewaysCollection;
-        private Logger logger;
-
-        /// <inheritdoc />
-        public bool IsUpdatable { get; } = true;
-
-        /// <inheritdoc />
-        public TimeSpan MaxStaleness { get; private set; }
-
-        public Task InitializeGatewayListProvider(ClientConfiguration clientConfiguration, Logger traceLogger)
+        
+        public MongoMembershipTable(ILogger<MongoMembershipTable> logger, GlobalConfiguration config)
         {
-            return DoAndLog(nameof(InitializeGatewayListProvider), () =>
-            {
-                logger = traceLogger;
-
-                configurationDeploymentId = clientConfiguration.DeploymentId;
-
-                gatewaysCollection =
-                    new MongoMembershipCollection(clientConfiguration.DataConnectionString,
-                        MongoUrl.Create(clientConfiguration.DataConnectionString).DatabaseName);
-
-                MaxStaleness = clientConfiguration.GatewayListRefreshPeriod;
-
-                return Task.CompletedTask;
-            });
+            this.logger = logger;
+            this.config = config;
         }
 
-        public Task InitializeMembershipTable(GlobalConfiguration globalConfiguration, bool tryInitTableVersion, Logger traceLogger)
+        /// <inheritdoc />
+        public Task InitializeMembershipTable(bool tryInitTableVersion)
         {
             return DoAndLog(nameof(InitializeMembershipTable), () =>
             {
-                logger = traceLogger;
-
-                configurationDeploymentId = globalConfiguration.DeploymentId;
-
                 membershipCollection =
-                    new MongoMembershipCollection(globalConfiguration.DataConnectionString,
-                        MongoUrl.Create(globalConfiguration.DataConnectionString).DatabaseName);
+                    new MongoMembershipCollection(config.DataConnectionString,
+                        MongoUrl.Create(config.DataConnectionString).DatabaseName);
 
                 return Task.CompletedTask;
-            });
-        }
-
-        /// <inheritdoc />
-        public Task<IList<Uri>> GetGateways()
-        {
-            return DoAndLog(nameof(GetGateways), () =>
-            {
-                return gatewaysCollection.GetGateways(configurationDeploymentId);
             });
         }
 
@@ -81,7 +49,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(ReadRow), () =>
             {
-                return membershipCollection.ReadRow(configurationDeploymentId, key);
+                return membershipCollection.ReadRow(config.DeploymentId, key);
             });
         }
 
@@ -90,7 +58,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(ReadAll), () =>
             {
-                return membershipCollection.ReadAll(configurationDeploymentId);
+                return membershipCollection.ReadAll(config.DeploymentId);
             });
         }
 
@@ -99,7 +67,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(InsertRow), () =>
             {
-                return membershipCollection.UpsertRow(configurationDeploymentId, entry, null);
+                return membershipCollection.UpsertRow(config.DeploymentId, entry, null);
             });
         }
 
@@ -108,7 +76,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(UpdateRow), () =>
             {
-                return membershipCollection.UpsertRow(configurationDeploymentId, entry, etag);
+                return membershipCollection.UpsertRow(config.DeploymentId, entry, etag);
             });
         }
 
@@ -117,7 +85,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(UpdateRow), () =>
             {
-                return membershipCollection.UpdateIAmAlive(configurationDeploymentId, entry.SiloAddress, entry.IAmAliveTime);
+                return membershipCollection.UpdateIAmAlive(config.DeploymentId, entry.SiloAddress, entry.IAmAliveTime);
             });
         }
 
@@ -128,10 +96,7 @@ namespace Orleans.Providers.MongoDB.Membership
 
         private async Task<T> DoAndLog<T>(string actionName, Func<Task<T>> action)
         {
-            if (logger.IsVerbose3)
-            {
-                logger.Verbose3($"MongoMembershipTable.{actionName} called.");
-            }
+            logger.LogInformation($"{nameof(MongoMembershipTable)}.{actionName} called.");
 
             try
             {
@@ -139,10 +104,7 @@ namespace Orleans.Providers.MongoDB.Membership
             }
             catch (Exception ex)
             {
-                if (logger.IsVerbose)
-                {
-                    logger.Warn((int) MongoProviderErrorCode.MembershipTable_Operations, $"MongoMembershipTable.{actionName} failed. Exception={ex.Message}", ex);
-                }
+                logger.LogError((int) MongoProviderErrorCode.MembershipTable_Operations, $"{nameof(MongoMembershipTable)}.{actionName} failed. Exception={ex.Message}", ex);
 
                 throw;
             }

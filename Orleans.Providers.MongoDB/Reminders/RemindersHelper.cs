@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using Orleans.Providers.MongoDB.Reminders.Store;
 using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Reminders
 {
     public class RemindersHelper
     {
-        public static ReminderTableData ProcessRemindersList(List<MongoReminderDocument> reminders,
+        public static ReminderTableData ProcessRemindersList(List<MongoReminderDocument> reminders, 
             IGrainReferenceConverter grainReferenceConverter)
         {
             var reminderEntryList = new List<ReminderEntry>();
+
             foreach (var reminder in reminders)
             {
                 reminderEntryList.Add(Parse(reminder, grainReferenceConverter));
@@ -21,21 +23,18 @@ namespace Orleans.Providers.MongoDB.Reminders
         public static ReminderEntry Parse(MongoReminderDocument reminder,
             IGrainReferenceConverter grainReferenceConverter)
         {
-            if (reminder != null)
-            {
-                var grainId = reminder.GrainId;
+            var grainId = reminder?.GrainId;
 
-                if (!string.IsNullOrEmpty(grainId))
+            if (!string.IsNullOrEmpty(grainId))
+            {
+                return new ReminderEntry
                 {
-                    return new ReminderEntry
-                    {
-                        GrainRef = grainReferenceConverter.GetGrainFromKeyString(grainId),
-                        ReminderName = reminder.ReminderName,
-                        StartAt = reminder.StartTime,
-                        Period = TimeSpan.FromMilliseconds(reminder.Period),
-                        ETag = reminder.Version.ToString()
-                    };
-                }
+                    GrainRef = grainReferenceConverter.GetGrainFromKeyString(grainId),
+                    ReminderName = reminder.ReminderName,
+                    StartAt = reminder.StartTime,
+                    Period = TimeSpan.FromMilliseconds(reminder.Period),
+                    ETag = reminder.Version.ToString()
+                };
             }
 
             return null;
