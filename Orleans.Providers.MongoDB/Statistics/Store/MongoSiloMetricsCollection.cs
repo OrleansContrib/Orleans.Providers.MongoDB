@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using MongoDB.Driver;
-using Orleans.Providers.MongoDB.Repository;
+using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Statistics.Store
@@ -10,16 +10,18 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
     {
         private static readonly UpdateOptions UpsertNoValidation = new UpdateOptions { BypassDocumentValidation = true, IsUpsert = true };
         private readonly TimeSpan expireAfter;
+        private readonly string collectionPrefix;
 
-        public MongoSiloMetricsCollection(string connectionString, string databaseName, TimeSpan expireAfter)
+        public MongoSiloMetricsCollection(string connectionString, string databaseName, TimeSpan expireAfter, string collectionPrefix)
             : base(connectionString, databaseName)
         {
             this.expireAfter = expireAfter;
+            this.collectionPrefix = collectionPrefix;
         }
 
         protected override string CollectionName()
         {
-            return "OrleansSiloMetricsTable";
+            return collectionPrefix + "OrleansSiloMetricsTable";
         }
 
         protected override void SetupCollection(IMongoCollection<MongoSiloMetricsDocument> collection)
@@ -33,8 +35,8 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
         public virtual async Task UpsertSiloMetricsAsync(
             string deploymentId,
             string siloId,
-            string siloAddress, int siloPort,
-            string gatewayAddress, int gatewayPort,
+            string siloAddress,
+            string gatewayAddress,
             string hostName,
             int generation,
             ISiloPerformanceMetrics siloPerformanceMetrics)
@@ -46,18 +48,16 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
                 Id = id,
                 TimeStamp = DateTime.UtcNow,
                 ActivationCount = siloPerformanceMetrics.ActivationCount,
-                Address = siloAddress,
+                SiloAddress = siloAddress,
                 AvailablePhysicalMemory = siloPerformanceMetrics.AvailablePhysicalMemory,
                 ClientCount = siloPerformanceMetrics.ClientCount,
                 CpuUsage = siloPerformanceMetrics.CpuUsage,
                 DeploymentId = deploymentId,
                 GatewayAddress = gatewayAddress,
-                GatewayPort = gatewayPort,
                 Generation = generation,
                 HostName = hostName,
                 IsOverloaded = siloPerformanceMetrics.IsOverloaded,
                 MemoryUsage = siloPerformanceMetrics.MemoryUsage,
-                Port = siloPort,
                 ReceivedMessages = siloPerformanceMetrics.ReceivedMessages,
                 ReceiveQueueLength = siloPerformanceMetrics.ReceiveQueueLength,
                 RecentlyUsedActivationCount = siloPerformanceMetrics.RecentlyUsedActivationCount,

@@ -1,4 +1,4 @@
-﻿namespace Orleans.Providers.MongoDB
+﻿namespace Orleans.Providers.MongoDB.Utils
 {
     internal enum MongoProviderErrorCode
     {

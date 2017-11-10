@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace Orleans.Providers.MongoDB
+namespace Orleans.Providers.MongoDB.Utils
 {
     internal static class Guard
     {

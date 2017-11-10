@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
+using Microsoft.Extensions.Options;
 using Orleans.Providers.MongoDB.Membership.Store;
+using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
 using Orleans.Runtime.Configuration;
 
@@ -10,29 +11,33 @@ using Orleans.Runtime.Configuration;
 
 namespace Orleans.Providers.MongoDB.Membership
 {
-    public class MongoMembershipTable : IMembershipTable
+    public sealed class MongoMembershipTable : IMembershipTable
     {
         private readonly ILogger<MongoMembershipTable> logger;
         private readonly GlobalConfiguration config;
-        private MongoMembershipCollection membershipCollection;
+        private readonly MongoMembershipCollection membershipCollection;
         
-        public MongoMembershipTable(ILogger<MongoMembershipTable> logger, GlobalConfiguration config)
+        public MongoMembershipTable(
+            ILogger<MongoMembershipTable> logger,
+            IOptions<MongoDBMembershipTableOptions> options,
+            GlobalConfiguration config)
         {
             this.logger = logger;
             this.config = config;
+
+            options.Value.EnrichAndValidate(config, false);
+
+            membershipCollection =
+                new MongoMembershipCollection(
+                    options.Value.ConnectionString,
+                    options.Value.DatabaseName,
+                    options.Value.CollectionPrefix);
         }
 
         /// <inheritdoc />
         public Task InitializeMembershipTable(bool tryInitTableVersion)
         {
-            return DoAndLog(nameof(InitializeMembershipTable), () =>
-            {
-                membershipCollection =
-                    new MongoMembershipCollection(config.DataConnectionString,
-                        MongoUrl.Create(config.DataConnectionString).DatabaseName);
-
-                return Task.CompletedTask;
-            });
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc />
@@ -85,7 +90,9 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(UpdateRow), () =>
             {
-                return membershipCollection.UpdateIAmAlive(config.DeploymentId, entry.SiloAddress, entry.IAmAliveTime);
+                return membershipCollection.UpdateIAmAlive(config.DeploymentId, 
+                    entry.SiloAddress,
+                    entry.IAmAliveTime);
             });
         }
 

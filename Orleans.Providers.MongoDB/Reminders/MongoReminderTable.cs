@@ -1,40 +1,46 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
+using Microsoft.Extensions.Options;
 using Orleans.Providers.MongoDB.Reminders.Store;
+using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
 using Orleans.Runtime.Configuration;
+
+// ReSharper disable ConvertIfStatementToReturnStatement
+// ReSharper disable RedundantIfElseBlock
 // ReSharper disable ConvertToLambdaExpression
 // ReSharper disable SuggestBaseTypeForParameter
 
 namespace Orleans.Providers.MongoDB.Reminders
 {
-    public class MongoReminderTable : IReminderTable
+    public sealed class MongoReminderTable : IReminderTable
     {
-        private readonly IGrainReferenceConverter grainReferenceConverter;
         private readonly ILogger logger;
-        private MongoReminderCollection repository;
+        private readonly MongoReminderCollection collection;
 
-        public MongoReminderTable(ILogger<MongoReminderTable> logger, IGrainReferenceConverter grainReferenceConverter)
+        public MongoReminderTable(
+            ILogger<MongoReminderTable> logger,
+            IOptions<MongoDBRemindersOptions> options,
+            IGrainReferenceConverter grainReferenceConverter,
+            GlobalConfiguration config)
         {
             this.logger = logger;
-            this.grainReferenceConverter = grainReferenceConverter;
+
+            options.Value.EnrichAndValidate(config, true);
+
+            collection =
+                new MongoReminderCollection(
+                    options.Value.ConnectionString,
+                    options.Value.DatabaseName,
+                    options.Value.CollectionPrefix,
+                    config.ServiceId.ToString(), 
+                    grainReferenceConverter);
         }
 
+        /// <inheritdoc />
         public Task Init(GlobalConfiguration config)
         {
-            var connectionString = config.DataConnectionStringForReminders;
-
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                connectionString = config.DataConnectionString;
-            }
-
-            repository = 
-                new MongoReminderCollection(connectionString,
-                    MongoUrl.Create(connectionString).DatabaseName, config.ServiceId.ToString(), grainReferenceConverter);
-
             return Task.CompletedTask;
         }
 
@@ -43,7 +49,7 @@ namespace Orleans.Providers.MongoDB.Reminders
         {
             return DoAndLog(nameof(ReadRows), () =>
             {
-                return repository.ReadRow(key);
+                return collection.ReadRow(key);
             });
         }
 
@@ -52,7 +58,7 @@ namespace Orleans.Providers.MongoDB.Reminders
         {
             return DoAndLog(nameof(RemoveRow), () =>
             {
-                return repository.RemoveRow(grainRef, reminderName, eTag);
+                return collection.RemoveRow(grainRef, reminderName, eTag);
             });
         }
 
@@ -61,7 +67,7 @@ namespace Orleans.Providers.MongoDB.Reminders
         {
             return DoAndLog(nameof(ReadRow), () =>
             {
-                return repository.ReadRow(grainRef, reminderName);
+                return collection.ReadRow(grainRef, reminderName);
             });
         }
 
@@ -70,7 +76,7 @@ namespace Orleans.Providers.MongoDB.Reminders
         {
             return DoAndLog(nameof(TestOnlyClearTable), () =>
             {
-                return repository.RemoveRows();
+                return collection.RemoveRows();
             });
         }
 
@@ -79,7 +85,7 @@ namespace Orleans.Providers.MongoDB.Reminders
         {
             return DoAndLog(nameof(UpsertRow), () =>
             {
-                return repository.UpsertRow(entry);
+                return collection.UpsertRow(entry);
             });
         }
 
@@ -90,11 +96,11 @@ namespace Orleans.Providers.MongoDB.Reminders
             {
                 if (begin < end)
                 {
-                    return repository.ReadRowsInRange(begin, end);
+                    return collection.ReadRowsInRange(begin, end);
                 }
                 else
                 {
-                    return repository.ReadRowsOutRange(begin, end);
+                    return collection.ReadRowsOutRange(begin, end);
                 }
             });
         }

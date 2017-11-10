@@ -10,7 +10,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Storage
 {
     public class MongoDataManagerTests
     {
-        private readonly MongoDataManager sut = new MongoDataManager("OrleansTest", "mongodb://localhost");
+        private readonly MongoDataManager sut = new MongoDataManager("mongodb://localhost", "OrleansTest");
         private readonly string dataId = Guid.NewGuid().ToString();
         private readonly string dataType = "Test";
 

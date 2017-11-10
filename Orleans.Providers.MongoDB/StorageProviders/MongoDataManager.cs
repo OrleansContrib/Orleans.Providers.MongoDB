@@ -3,7 +3,10 @@ using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json.Linq;
+using Orleans.Providers.MongoDB.Utils;
 using Orleans.Storage;
+
+// ReSharper disable ConvertToAutoPropertyWhenPossible
 
 namespace Orleans.Providers.MongoDB.StorageProviders
 {
@@ -23,7 +26,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             get { return database; }
         }
         
-        public MongoDataManager(string databaseName, string connectionString)
+        public MongoDataManager(string connectionString, string databaseName)
         {
             var client = MongoClientPool.Instance(connectionString);
 
@@ -119,7 +122,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             return newETag;
         }
 
-        private static async Task ThrowForOtherEtag(IMongoCollection<BsonDocument> collection, string key, string etag,  MongoWriteException ex)
+        private static async Task ThrowForOtherEtag(IMongoCollection<BsonDocument> collection, string key, string etag,  Exception ex)
         {
             var existingEtag =
                 await collection.Find(Filter.Eq(FieldId, key))

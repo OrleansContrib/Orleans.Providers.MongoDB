@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
+using Microsoft.Extensions.Options;
 using Orleans.Messaging;
 using Orleans.Providers.MongoDB.Membership.Store;
+using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
 using Orleans.Runtime.Configuration;
 
@@ -16,32 +17,35 @@ namespace Orleans.Providers.MongoDB.Membership
     {
         private readonly ILogger<MongoGatewayListProvider> logger;
         private readonly ClientConfiguration config;
-        private MongoMembershipCollection gatewaysCollection;
+        private readonly MongoMembershipCollection gatewaysCollection;
 
         /// <inheritdoc />
         public bool IsUpdatable { get; } = true;
 
         /// <inheritdoc />
-        public TimeSpan MaxStaleness { get; }
+        public TimeSpan MaxStaleness => config.GatewayListRefreshPeriod;
 
-        public MongoGatewayListProvider(ILogger<MongoGatewayListProvider> logger, ClientConfiguration config)
+        public MongoGatewayListProvider(
+            ILogger<MongoGatewayListProvider> logger,
+            IOptions<MongoDBGatewayListProviderOptions> options,
+            ClientConfiguration config)
         {
             this.logger = logger;
             this.config = config;
 
-            MaxStaleness = config.GatewayListRefreshPeriod;
+            options.Value.EnrichAndValidate(config);
+
+            gatewaysCollection =
+                new MongoMembershipCollection(
+                    options.Value.ConnectionString,
+                    options.Value.DatabaseName,
+                    options.Value.CollectionPrefix);
         }
 
+        /// <inheritdoc />
         public Task InitializeGatewayListProvider()
         {
-            return DoAndLog(nameof(InitializeGatewayListProvider), () =>
-            {
-                gatewaysCollection =
-                    new MongoMembershipCollection(config.DataConnectionString,
-                        MongoUrl.Create(config.DataConnectionString).DatabaseName);
-
-                return Task.CompletedTask;
-            });
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc />
@@ -51,11 +55,6 @@ namespace Orleans.Providers.MongoDB.Membership
             {
                 return gatewaysCollection.GetGateways(config.DeploymentId);
             });
-        }
-
-        private Task DoAndLog(string actionName, Func<Task> action)
-        {
-            return DoAndLog(actionName, async () => { await action(); return true; });
         }
 
         private async Task<T> DoAndLog<T>(string actionName, Func<Task<T>> action)

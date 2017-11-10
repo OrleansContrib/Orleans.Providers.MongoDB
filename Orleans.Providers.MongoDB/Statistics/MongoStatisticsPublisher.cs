@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
-using MongoDB.Driver;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Orleans.Providers.MongoDB.Statistics.Store;
+using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
 using Orleans.Runtime.Configuration;
 
+// ReSharper disable InheritdocInvalidUsage
+// ReSharper disable ArrangeThisQualifier
 // ReSharper disable ConvertToLambdaExpression
-
-// HINT: There is no Client st
 
 namespace Orleans.Providers.MongoDB.Statistics
 {
@@ -19,42 +21,28 @@ namespace Orleans.Providers.MongoDB.Statistics
         IConfigurableClientMetricsDataPublisher,
         IProvider
     {
-        private abstract class Config
-        {
-            public string HostName;
-            public string DeploymentId;
-        }
+        public const string ConnectionStringProperty = "ConnectionString";
+        public const string CollectionPrefixProperty = "CollectionPrefix";
+        public const string DatabaseNameProperty = "DatabaseProperty";
+        public const string ExpireAfterProperty = "ExpireAfter";
 
-        private sealed class ClientStatsConfig : Config
-        {
-            public string ClientId;
-            public string ClientAddress;
-        }
-
-        private sealed class ReportConfig : Config
-        {
-            public string SiloOrClientId;
-            public string SiloOrClientName;
-        }
-
-        private sealed class SiloStatsConfig : Config
-        {
-            public string GatewayAddress;
-            public string SiloName;
-            public string SiloAddress;
-            public int GatewayPort;
-            public int SiloPort;
-            public int Generation;
-        }
-
-        private ClientStatsConfig clientStatsConfig;
-        private SiloStatsConfig siloStatsConfig;
-        private ReportConfig reportConfig;
-        private Logger logger;
+        private TimeSpan mongoExpireAfter;
+        private string mongoConnectionString;
+        private string mongoDatabaseName;
+        private string mongoCollectionPrefix;
+        private string configuredDeploymentId;
+        private string configuredClientAddress;
+        private string configuredSiloAddress;
+        private string configuredClientId;
+        private string configuredSiloName;
+        private string configuredHostName;
+        private string configuredGatewayAddress;
+        private int configuredGeneration;
+        private bool configuredIsSilo;
+        private ILogger logger;
         private MongoClientMetricsCollection clientMetricsCollection;
         private MongoSiloMetricsCollection siloMetricsCollection;
         private MongoStatisticsCounterCollection statisticsCounterCollection;
-        private TimeSpan expireAfter;
 
         /// <inheritdoc />
         public string Name { get; private set; }
@@ -70,120 +58,112 @@ namespace Orleans.Providers.MongoDB.Statistics
         {
             Name = name;
 
-            logger = providerRuntime.GetLogger("MongoStatisticsPublisher");
+            logger = providerRuntime.ServiceProvider.GetRequiredService<ILogger<MongoStatisticsPublisher>>();
 
-            expireAfter = config.GetTimeSpanProperty("ExpireAfter", TimeSpan.Zero);
+            var expireAfter = config.GetProperty(ExpireAfterProperty, string.Empty);
+
+            TimeSpan.TryParse(expireAfter, out mongoExpireAfter);
+
+            mongoConnectionString = config.GetProperty(ConnectionStringProperty, string.Empty);
+            mongoCollectionPrefix = config.GetProperty(CollectionPrefixProperty, string.Empty);
+            mongoDatabaseName = config.GetProperty(DatabaseNameProperty, string.Empty);
 
             return Task.CompletedTask;
         }
 
         /// <inheritdoc />
-        void IConfigurableClientMetricsDataPublisher.AddConfiguration(string deploymentId, string hostName, string clientId, IPAddress address)
+        public void AddConfiguration(string deploymentId, string hostName, string clientId, IPAddress address)
         {
-            clientStatsConfig = new ClientStatsConfig
-            {
-                DeploymentId = deploymentId,
-                ClientId = clientId,
-                ClientAddress = address?.MapToIPv4().ToString(),
-                HostName = hostName
-            };
+            this.configuredIsSilo = false;
+
+            this.configuredDeploymentId = deploymentId;
+            this.configuredHostName = hostName;
+            this.configuredClientId = clientId;
+            this.configuredClientAddress = address.MapToIPv4().ToString();
+            this.configuredGeneration = SiloAddress.AllocateNewGeneration();
         }
 
         /// <inheritdoc />
-        void IConfigurableSiloMetricsDataPublisher.AddConfiguration(string deploymentId, bool isSilo, string siloName, SiloAddress address, IPEndPoint gateway, string hostName)
+        public void AddConfiguration(string deploymentId, bool isSilo, string siloName, SiloAddress address, IPEndPoint gateway, string hostName)
         {
-            siloStatsConfig = new SiloStatsConfig
-            {
-                DeploymentId = deploymentId,
-                GatewayAddress = gateway?.Address.MapToIPv4().ToString(),
-                GatewayPort = gateway?.Port ?? 0,
-                Generation = address?.Generation ?? 0,
-                HostName = hostName,
-                SiloAddress = address?.Endpoint.Address.MapToIPv4().ToString(),
-                SiloName = siloName,
-                SiloPort = address?.Endpoint.Port ?? 0,
-            };
-        }
+            this.configuredIsSilo = isSilo;
 
-        /// <inheritdoc />
-        void IConfigurableStatisticsPublisher.AddConfiguration(string deploymentId, bool isSilo, string siloName, SiloAddress address, IPEndPoint gateway, string hostName)
-        {
-            reportConfig = new ReportConfig
+            this.configuredDeploymentId = deploymentId;
+            this.configuredSiloName = siloName;
+            this.configuredSiloAddress = address.ToLongString();
+            this.configuredGatewayAddress = $"{gateway.Address.MapToIPv4()}:{gateway.Port}";
+            this.configuredHostName = hostName;
+
+            if (!isSilo)
             {
-                DeploymentId = deploymentId,
-                SiloOrClientName = siloName,
-                SiloOrClientId = address.ToLongString(),
-                HostName = hostName
-            };
+                configuredGeneration = SiloAddress.AllocateNewGeneration();
+            }
         }
 
         /// <inheritdoc />
         Task IClientMetricsDataPublisher.Init(ClientConfiguration config, IPAddress address, string clientId)
         {
-            return DoAndLog(nameof(Init), () =>
-            {
-                clientMetricsCollection =
-                    new MongoClientMetricsCollection(config.DataConnectionString,
-                        MongoUrl.Create(config.DataConnectionString).DatabaseName, expireAfter);
-
-                return Task.CompletedTask;
-            });
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc />
         Task ISiloMetricsDataPublisher.Init(string deploymentId, string storageConnectionString, SiloAddress siloAddress, string siloName, IPEndPoint gateway, string hostName)
         {
-            return DoAndLog(nameof(Init), () =>
-            {
-                siloMetricsCollection =
-                    new MongoSiloMetricsCollection(storageConnectionString,
-                        MongoUrl.Create(storageConnectionString).DatabaseName, expireAfter);
-
-                return Task.CompletedTask;
-            });
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc />
         Task IStatisticsPublisher.Init(bool isSilo, string storageConnectionString, string deploymentId, string address, string siloName, string hostName)
         {
-            return DoAndLog(nameof(Init), () =>
-            {
-                statisticsCounterCollection =
-                    new MongoStatisticsCounterCollection(storageConnectionString,
-                        MongoUrl.Create(storageConnectionString).DatabaseName);
-
-                return Task.CompletedTask;
-            });
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc />
-        public Task ReportMetrics(IClientPerformanceMetrics metricsData)
+        public async Task ReportMetrics(IClientPerformanceMetrics metricsData)
         {
-            return DoAndLog(nameof(ReportMetrics), () =>
+            if (clientMetricsCollection == null)
+            {
+                clientMetricsCollection =
+                    new MongoClientMetricsCollection(
+                        mongoConnectionString,
+                        mongoDatabaseName,
+                        mongoExpireAfter,
+                        mongoCollectionPrefix);
+            }
+
+            await DoAndLog(nameof(ReportMetrics), () =>
             {
                 return clientMetricsCollection.UpsertReportClientMetricsAsync(
-                    clientStatsConfig.DeploymentId,
-                    clientStatsConfig.ClientId,
-                    clientStatsConfig.ClientAddress,
-                    clientStatsConfig.HostName,
+                    configuredDeploymentId,
+                    configuredClientId,
+                    configuredClientAddress,
+                    configuredHostName,
                     metricsData);
             });
         }
 
         /// <inheritdoc />
-        public Task ReportMetrics(ISiloPerformanceMetrics metricsData)
+        public async Task ReportMetrics(ISiloPerformanceMetrics metricsData)
         {
-            return DoAndLog(nameof(Init), () =>
+            if (siloMetricsCollection == null)
+            {
+                siloMetricsCollection =
+                    new MongoSiloMetricsCollection(
+                        mongoConnectionString,
+                        mongoDatabaseName,
+                        mongoExpireAfter,
+                        mongoCollectionPrefix);
+            }
+
+            await DoAndLog(nameof(Init), () =>
             {
                 return siloMetricsCollection.UpsertSiloMetricsAsync(
-                    siloStatsConfig.DeploymentId,
-                    siloStatsConfig.SiloName,
-                    siloStatsConfig.SiloAddress,
-                    siloStatsConfig.SiloPort,
-                    siloStatsConfig.GatewayAddress,
-                    siloStatsConfig.GatewayPort,
-                    siloStatsConfig.HostName,
-                    siloStatsConfig.Generation,
+                    configuredDeploymentId,
+                    configuredSiloName,
+                    configuredSiloAddress,
+                    configuredGatewayAddress,
+                    configuredHostName,
+                    configuredGeneration,
                     metricsData);
             });
         }
@@ -191,14 +171,44 @@ namespace Orleans.Providers.MongoDB.Statistics
         /// <inheritdoc />
         public Task ReportStats(List<ICounter> statsCounters)
         {
+             if (statisticsCounterCollection == null)
+            {
+                statisticsCounterCollection =
+                    new MongoStatisticsCounterCollection(
+                        mongoConnectionString,
+                        mongoDatabaseName,
+                        mongoCollectionPrefix);
+            }
+
             return DoAndLog(nameof(ReportStats), () =>
             {
-                return statisticsCounterCollection.InsertStatisticsCountersAsync(
-                    reportConfig.DeploymentId,
-                    reportConfig.HostName,
-                    reportConfig.SiloOrClientName,
-                    reportConfig.SiloOrClientId,
-                    statsCounters);
+                var siloOrClientName =
+                    configuredIsSilo ?
+                        configuredSiloName :
+                        configuredClientId;
+
+                var siloOrClientId =
+                    configuredIsSilo ?
+                        configuredSiloAddress :
+                        string.Format("{0}:{1}", siloOrClientName, configuredGeneration);
+
+                const int maxBatchSizeInclusive = 200;
+
+                var batchedTasks = new List<Task>();
+                var batches = BatchCounters(statsCounters, maxBatchSizeInclusive);
+
+                foreach (var counterBatch in batches)
+                {
+                    batchedTasks.Add(
+                        statisticsCounterCollection.InsertStatisticsCountersAsync(
+                            configuredDeploymentId,
+                            configuredHostName,
+                            siloOrClientName,
+                            siloOrClientId,
+                            counterBatch));
+                }
+
+                return Task.WhenAll(batchedTasks);
             });
         }
 
@@ -215,13 +225,21 @@ namespace Orleans.Providers.MongoDB.Statistics
             }
             catch (Exception ex)
             {
-                if (logger.IsVerbose)
-                {
-                    logger.Warn((int)MongoProviderErrorCode.StatisticsPublisher_Operations, $"MongoStatisticsPublisher.{actionName} failed. Exception={ex.Message}", ex);
-                }
-
+                logger.Warn((int)MongoProviderErrorCode.StatisticsPublisher_Operations, $"{nameof(MongoStatisticsPublisher)}.{actionName} failed. Exception={ex.Message}", ex);
+                
                 throw;
             }
+        }
+        private static IEnumerable<List<ICounter>> BatchCounters(List<ICounter> counters, int maxBatchSizeInclusive)
+        {
+            var batches = new List<List<ICounter>>();
+
+            for (var i = 0; i < counters.Count; i += maxBatchSizeInclusive)
+            {
+                batches.Add(counters.GetRange(i, Math.Min(maxBatchSizeInclusive, counters.Count - i)));
+            }
+
+            return batches;
         }
     }
 }

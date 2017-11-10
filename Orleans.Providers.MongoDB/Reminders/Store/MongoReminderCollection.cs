@@ -2,8 +2,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Driver;
-using Orleans.Providers.MongoDB.Repository;
+using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
+
+// ReSharper disable RedundantIfElseBlock
 
 namespace Orleans.Providers.MongoDB.Reminders.Store
 {
@@ -13,22 +15,24 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
         private static readonly UpdateOptions Upsert = new UpdateOptions { IsUpsert = true };
         private readonly IGrainReferenceConverter grainReferenceConverter;
         private readonly string serviceId;
+        private readonly string collectionPrefix;
 
         public MongoReminderCollection(
             string connectionsString, 
-            string databaseName, 
+            string databaseName,
+            string collectionPrefix,
             string serviceId,
             IGrainReferenceConverter grainReferenceConverter)
             : base(connectionsString, databaseName)
         {
             this.serviceId = serviceId;
-
+            this.collectionPrefix = collectionPrefix;
             this.grainReferenceConverter = grainReferenceConverter;
         }
 
         protected override string CollectionName()
         {
-            return "OrleansReminderV2";
+            return collectionPrefix + "OrleansReminderV2";
         }
 
         protected override void SetupCollection(IMongoCollection<MongoReminderDocument> collection)

@@ -14,13 +14,15 @@ namespace Orleans.Providers.MongoDB.Test.Host
 
             config.Globals.DeploymentId = "OrleansWithMongoDB";
             config.Globals.DataConnectionString = "mongodb://localhost/OrleansTestApp";
-            config.AddMongoDBStorageProvider("MongoDBStore", "mongodb://localhost", "OrleansTestApp");
+
+            config.AddMongoDBStorageProvider("MongoDBStore");
+            config.AddMongoDBStatisticsProvider("MongoDBStatistics");
 
             var silo = new SiloHostBuilder()
                 .UseConfiguration(config)
                 .AddApplicationPartsFromReferences(typeof(EmployeeGrain).Assembly)
-                .UseMongoMembershipTable()
-                .UseMongoReminderTable()
+                .UseMongoDBMembershipTable()
+                .UseMongoDBReminders()
                 .ConfigureLogging(logging => logging.AddConsole())
                 .Build();
 

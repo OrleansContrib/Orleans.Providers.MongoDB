@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using MongoDB.Driver;
-using Orleans.Providers.MongoDB.Repository;
+using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Membership.Store
@@ -14,15 +14,17 @@ namespace Orleans.Providers.MongoDB.Membership.Store
         // MongoDB does not support the extended Membership Protocol and will always return the same table version information
         private static readonly TableVersion tableVersion = new TableVersion(0, "0");
         private static readonly UpdateOptions Upsert = new UpdateOptions { IsUpsert = true };
+        private readonly string collectionPrefix;
 
-        public MongoMembershipCollection(string connectionString, string databaseName)
+        public MongoMembershipCollection(string connectionString, string databaseName, string collectionPrefix)
             : base(connectionString, databaseName)
         {
+            this.collectionPrefix = collectionPrefix;
         }
 
         protected override string CollectionName()
         {
-            return "OrleansMembershipV2";
+            return collectionPrefix + "OrleansMembershipV2";
         }
 
         protected override void SetupCollection(IMongoCollection<MongoMembershipDocument> collection)

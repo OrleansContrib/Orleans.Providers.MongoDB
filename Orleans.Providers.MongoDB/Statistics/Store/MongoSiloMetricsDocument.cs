@@ -16,10 +16,7 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
         public string SiloId { get; set; }
 
         [BsonRequired]
-        public string Address { get; set; }
-
-        [BsonRequired]
-        public int Port { get; set; }
+        public string SiloAddress { get; set; }
 
         [BsonRequired]
         public long Generation { get; set; }
@@ -29,9 +26,6 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
 
         [BsonRequired]
         public string GatewayAddress { get; set; }
-
-        [BsonRequired]
-        public int GatewayPort { get; set; }
 
         [BsonRequired]
         public float CpuUsage { get; set; }

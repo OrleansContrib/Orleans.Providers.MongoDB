@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MongoDB.Driver;
-using Orleans.Providers.MongoDB.Repository;
+using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Statistics.Store
@@ -10,15 +10,17 @@ namespace Orleans.Providers.MongoDB.Statistics.Store
     public class MongoStatisticsCounterCollection : CollectionBase<MongoStatisticsCounterDocument>
     {
         private static readonly InsertManyOptions NoValidation = new InsertManyOptions { BypassDocumentValidation = true };
+        private readonly string collectionPrefix;
 
-        public MongoStatisticsCounterCollection(string connectionString, string databaseName)
+        public MongoStatisticsCounterCollection(string connectionString, string databaseName, string collectionPrefix)
             : base(connectionString, databaseName)
         {
+            this.collectionPrefix = collectionPrefix;
         }
 
         protected override string CollectionName()
         {
-            return "OrleansStatisticsTable";
+            return collectionPrefix + "OrleansStatisticsTable";
         }
 
         public virtual Task InsertStatisticsCountersAsync(

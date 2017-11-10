@@ -2,6 +2,7 @@
 using Orleans.Runtime;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Orleans.Providers.MongoDB.Membership;
 using TestExtensions;
 using UnitTests;
@@ -21,12 +22,32 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
 
         protected override IMembershipTable CreateMembershipTable(Logger logger)
         {
-            return new MongoMembershipTable(loggerFactory.CreateLogger<MongoMembershipTable>(), globalConfiguration);
+            var options = Options.Create(new MongoDBMembershipTableOptions
+            {
+                ConnectionString = "mongodb://localhost/OrleansTest",
+                CollectionPrefix = "Test_",
+                DatabaseName = "OrleansTest"
+            });
+
+            return new MongoMembershipTable(
+                loggerFactory.CreateLogger<MongoMembershipTable>(),
+                options,
+                globalConfiguration);
         }
 
         protected override IGatewayListProvider CreateGatewayListProvider(Logger logger)
         {
-            return new MongoGatewayListProvider(loggerFactory.CreateLogger<MongoGatewayListProvider>(), clientConfiguration);
+            var options = Options.Create(new MongoDBGatewayListProviderOptions
+            {
+                ConnectionString = "mongodb://localhost/OrleansTest",
+                CollectionPrefix = "Test_",
+                DatabaseName = "OrleansTest"
+            });
+
+            return new MongoGatewayListProvider(
+                loggerFactory.CreateLogger<MongoGatewayListProvider>(),
+                options,
+                clientConfiguration);
         }
 
         protected override Task<string> GetConnectionString()

@@ -2,7 +2,10 @@
 using System.Globalization;
 using MongoDB.Driver;
 
-namespace Orleans.Providers.MongoDB.Repository
+// ReSharper disable ConvertToAutoPropertyWhenPossible
+// ReSharper disable ArrangeAccessorOwnerBody
+
+namespace Orleans.Providers.MongoDB.Utils
 {
     public class CollectionBase<TEntity>
     {
@@ -15,7 +18,7 @@ namespace Orleans.Providers.MongoDB.Repository
         protected static readonly ProjectionDefinitionBuilder<TEntity> Project = Builders<TEntity>.Projection;
 
         private readonly IMongoDatabase mongoDatabase;
-        private Lazy<IMongoCollection<TEntity>> mongoCollection;
+        private readonly Lazy<IMongoCollection<TEntity>> mongoCollection;
 
         protected IMongoCollection<TEntity> Collection
         {

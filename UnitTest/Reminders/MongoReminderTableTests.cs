@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Orleans.Providers.MongoDB.Reminders;
 using Orleans.Runtime;
 using TestExtensions;
@@ -22,7 +23,16 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
 
         protected override IReminderTable CreateRemindersTable()
         {
-            return new MongoReminderTable(loggerFactory.CreateLogger<MongoReminderTable>(), ClusterFixture.Client.ServiceProvider.GetRequiredService<IGrainReferenceConverter>());
+            var options = Options.Create(new MongoDBRemindersOptions
+            {
+                ConnectionString = "mongodb://localhost/OrleansTest",
+                CollectionPrefix = "Test_",
+                DatabaseName = "OrleansTest"
+            });
+
+            return new MongoReminderTable(loggerFactory.CreateLogger<MongoReminderTable>(), options, 
+                ClusterFixture.Client.ServiceProvider.GetRequiredService<IGrainReferenceConverter>(),
+                null);
         }
 
         protected override Task<string> GetConnectionString()

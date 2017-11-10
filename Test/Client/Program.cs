@@ -14,10 +14,11 @@ namespace Orleans.Providers.MongoDB.Test.Client
             config.ClientName = "Foo";
             config.DeploymentId = "OrleansWithMongoDB";
             config.DataConnectionString = "mongodb://localhost/OrleansTestApp";
+            config.AddMongoDBStatisticsProvider("MongoDBStatistics");
 
             var client = new ClientBuilder()
                 .UseConfiguration(config)
-                .UseMongoGatewayListProvider()
+                .UseMongoDBGatewayListProvider()
                 .AddApplicationPartsFromReferences(typeof(IHelloWorldGrain).Assembly)
                 .ConfigureLogging(logging => logging.AddConsole())
                 .Build();
