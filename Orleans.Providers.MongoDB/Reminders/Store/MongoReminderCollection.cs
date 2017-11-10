@@ -110,14 +110,14 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
 
             try
             {
-                var result =
+                var existingDocument =
                     await Collection.FindOneAndUpdateAsync<MongoReminderDocument, MongoReminderDocument>(x => x.Id == id && x.Etag == eTag,
                         Update.Set(x => x.IsDeleted, true),
                         UpsertReplace);
 
                 await Collection.DeleteManyAsync(x => x.IsDeleted);
 
-                return string.Equals(result?.ReminderName, reminderName, StringComparison.Ordinal);
+                return string.Equals(existingDocument?.ReminderName, reminderName, StringComparison.Ordinal);
             }
             catch (MongoCommandException ex)
             {
