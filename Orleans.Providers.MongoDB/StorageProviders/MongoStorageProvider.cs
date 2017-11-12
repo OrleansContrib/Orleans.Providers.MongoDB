@@ -27,7 +27,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             return base.Init(name, providerRuntime, config);
         }
 
-        public override string ReturnGrainName(string grainType, GrainReference grainReference)
+        protected override string ReturnGrainName(string grainType, GrainReference grainReference)
         {
             return prefix + base.ReturnGrainName(grainType, grainReference);
         }
