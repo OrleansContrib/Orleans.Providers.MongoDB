@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Hosting;
 using Orleans.Messaging;
-using Orleans.Providers.MongoDB;
+using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Membership;
 using Orleans.Providers.MongoDB.Reminders;
 using Orleans.Providers.MongoDB.Statistics;
@@ -32,7 +32,7 @@ namespace Orleans
         public static ISiloHostBuilder UseMongoDBReminders(this ISiloHostBuilder builder,
             Action<MongoDBRemindersOptions> configurator = null)
         {
-            return builder.ConfigureServices(services => services.UseMongoDBReminders(configurator));
+            return builder.ConfigureServices(services => services.AddMongoDBReminders(configurator));
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace Orleans
         public static ISiloHostBuilder UseMongoDBReminders(this ISiloHostBuilder builder,
             IConfiguration configuration)
         {
-            return builder.ConfigureServices(services => services.UseMongoDBReminders(configuration));
+            return builder.ConfigureServices(services => services.AddMongoDBReminders(configuration));
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace Orleans
         public static ISiloHostBuilder UseMongoDBMembershipTable(this ISiloHostBuilder builder,
             Action<MongoDBMembershipTableOptions> configurator = null)
         {
-            return builder.ConfigureServices(services => services.UseMongoDBMembershipTable(configurator));
+            return builder.ConfigureServices(services => services.AddMongoDBMembershipTable(configurator));
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace Orleans
         public static ISiloHostBuilder UseMongoDBMembershipTable(this ISiloHostBuilder builder,
             IConfiguration configuration)
         {
-            return builder.ConfigureServices(services => services.UseMongoDBReminders(configuration));
+            return builder.ConfigureServices(services => services.AddMongoDBReminders(configuration));
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Orleans
         public static IClientBuilder UseMongoDBGatewayListProvider(this IClientBuilder builder,
             Action<MongoDBGatewayListProviderOptions> configurator = null)
         {
-            return builder.ConfigureServices(services => services.UseMongoDBGatewayListProvider(configurator));
+            return builder.ConfigureServices(services => services.AddMongoDBGatewayListProvider(configurator));
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace Orleans
         public static IClientBuilder UseMongoDBGatewayListProvider(this IClientBuilder builder,
             IConfiguration configuration)
         {
-            return builder.ConfigureServices(services => services.UseMongoDBGatewayListProvider(configuration));
+            return builder.ConfigureServices(services => services.AddMongoDBGatewayListProvider(configuration));
         }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace Orleans
         /// <returns>
         /// The service collection
         /// </returns>
-        public static IServiceCollection UseMongoDBReminders(this IServiceCollection services,
+        public static IServiceCollection AddMongoDBReminders(this IServiceCollection services,
             Action<MongoDBRemindersOptions> configurator = null)
         {
             services.Configure(configurator ?? (x => { }));
@@ -130,7 +130,7 @@ namespace Orleans
         /// <returns>
         /// The service collection
         /// </returns>
-        public static IServiceCollection UseMongoDBReminders(this IServiceCollection services,
+        public static IServiceCollection AddMongoDBReminders(this IServiceCollection services,
             IConfiguration configuration)
         {
             services.Configure<MongoDBRemindersOptions>(configuration);
@@ -147,7 +147,7 @@ namespace Orleans
         /// <returns>
         /// The service collection
         /// </returns>
-        public static IServiceCollection UseMongoDBMembershipTable(this IServiceCollection services,
+        public static IServiceCollection AddMongoDBMembershipTable(this IServiceCollection services,
             Action<MongoDBMembershipTableOptions> configurator = null)
         {
             services.Configure(configurator ?? (x => { }));
@@ -164,7 +164,7 @@ namespace Orleans
         /// <returns>
         /// The service collection
         /// </returns>
-        public static IServiceCollection UseMongoDBMembershipTable(this IServiceCollection services,
+        public static IServiceCollection AddMongoDBMembershipTable(this IServiceCollection services,
             IConfiguration configuration)
         {
             services.Configure<MongoDBMembershipTableOptions>(configuration);
@@ -181,7 +181,7 @@ namespace Orleans
         /// <returns>
         /// The service collection
         /// </returns>
-        public static IServiceCollection UseMongoDBGatewayListProvider(this IServiceCollection services,
+        public static IServiceCollection AddMongoDBGatewayListProvider(this IServiceCollection services,
             Action<MongoDBGatewayListProviderOptions> configurator = null)
         {
             services.Configure(configurator ?? (x => { }));
@@ -198,7 +198,7 @@ namespace Orleans
         /// <returns>
         /// The service collection
         /// </returns>
-        public static IServiceCollection UseMongoDBGatewayListProvider(this IServiceCollection services,
+        public static IServiceCollection AddMongoDBGatewayListProvider(this IServiceCollection services,
             IConfiguration configuration)
         {
             services.Configure<MongoDBGatewayListProviderOptions>(configuration);

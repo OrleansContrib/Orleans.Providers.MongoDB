@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Reminders;
 using Orleans.Runtime;
 using TestExtensions;

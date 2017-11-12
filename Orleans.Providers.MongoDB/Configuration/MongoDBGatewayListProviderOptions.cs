@@ -1,6 +1,6 @@
 ﻿// ReSharper disable InheritdocConsiderUsage
 
-namespace Orleans.Providers.MongoDB
+namespace Orleans.Providers.MongoDB.Configuration
 {
     /// <summary>
     /// Configurs MongoDB Gateway List Provider.

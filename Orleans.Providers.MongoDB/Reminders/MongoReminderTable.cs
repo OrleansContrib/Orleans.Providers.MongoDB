@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Reminders.Store;
 using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;

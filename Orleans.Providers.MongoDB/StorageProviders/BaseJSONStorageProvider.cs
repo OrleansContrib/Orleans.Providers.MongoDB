@@ -14,6 +14,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
     public abstract class BaseJSONStorageProvider : IStorageProvider
     {
         public const string UseJsonFormatProperty = "UseJsonFormat";
+        public const string SerializerSettingsProperty = "SerializerSettings";
 
         private JsonSerializerSettings serializerSettings;
         private JsonSerializer serializer;
@@ -40,9 +41,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             Log = providerRuntime.GetLogger(GetType().FullName);
 
             serializationManager = providerRuntime.ServiceProvider.GetRequiredService<SerializationManager>();
-            serializerSettings = 
-                OrleansJsonSerializer.UpdateSerializerSettings(
-                    OrleansJsonSerializer.GetDefaultSerializerSettings(serializationManager, providerRuntime.GrainFactory), config);
+            serializerSettings = ReturnSerializerSettings(providerRuntime, config);
             serializer = JsonSerializer.Create(serializerSettings);
 
             UseJsonFormat = config.GetBoolProperty(UseJsonFormatProperty, true);
@@ -155,7 +154,12 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             }
         }
 
-        public virtual string ReturnGrainName(string grainType, GrainReference grainReference)
+        protected virtual JsonSerializerSettings ReturnSerializerSettings(IProviderRuntime providerRuntime, IProviderConfiguration config)
+        {
+            return OrleansJsonSerializer.UpdateSerializerSettings(OrleansJsonSerializer.GetDefaultSerializerSettings(serializationManager, providerRuntime.GrainFactory), config);
+        }
+
+        protected virtual string ReturnGrainName(string grainType, GrainReference grainReference)
         {
             return grainType.Split('.', '+').Last();
         }

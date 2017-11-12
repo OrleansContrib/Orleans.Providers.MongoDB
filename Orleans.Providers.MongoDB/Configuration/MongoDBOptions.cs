@@ -1,9 +1,10 @@
 ﻿using System;
 using MongoDB.Driver;
 using Orleans.Runtime.Configuration;
+
 // ReSharper disable InvertIf
 
-namespace Orleans.Providers.MongoDB
+namespace Orleans.Providers.MongoDB.Configuration
 {
     /// <summary>
     /// Options to configure MongoDB for Orleans
