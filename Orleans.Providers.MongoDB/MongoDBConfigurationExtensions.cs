@@ -222,7 +222,7 @@ namespace Orleans
 
             options.EnrichAndValidate(config.Globals, false);
 
-            AddMongoDBStorageProvider(config, providerName, options);
+            AddMongoDBStorageProvider<MongoStorageProvider>(config, providerName, options);
         }
 
         /// <summary>
@@ -238,7 +238,41 @@ namespace Orleans
 
             options.EnrichAndValidate(config.Globals, false);
 
-            AddMongoDBStorageProvider(config, providerName, options);
+            AddMongoDBStorageProvider<MongoStorageProvider>(config, providerName, options);
+        }
+
+        /// <summary>
+        /// Adds a storage provider of type <see cref="MongoStorageProvider"/>.
+        /// </summary>
+        /// <param name="config">The cluster configuration object to add provider to.</param>
+        /// <param name="providerName">The provider name.</param>
+        /// <param name="configurator">The configurator.</param>
+        public static void AddMongoDBStorageProvider<T>(this ClusterConfiguration config, string providerName,
+            Action<MongoDBStorageOptions> configurator = null) where T : MongoStorageProvider
+        {
+            var options = new MongoDBStorageOptions();
+
+            configurator?.Invoke(options);
+
+            options.EnrichAndValidate(config.Globals, false);
+
+            AddMongoDBStorageProvider<T>(config, providerName, options);
+        }
+
+        /// <summary>
+        /// Adds a storage provider of type <see cref="MongoStorageProvider"/>.
+        /// </summary>
+        /// <param name="config">The cluster configuration object to add provider to.</param>
+        /// <param name="providerName">The provider name.</param>
+        /// <param name="configuration">The configuration.</param>
+        public static void AddMongoDBStorageProvider<T>(this ClusterConfiguration config, string providerName,
+            IConfiguration configuration) where T : MongoStorageProvider
+        {
+            var options = configuration.Get<MongoDBStorageOptions>();
+
+            options.EnrichAndValidate(config.Globals, false);
+
+            AddMongoDBStorageProvider<T>(config, providerName, options);
         }
 
         /// <summary>
@@ -309,7 +343,7 @@ namespace Orleans
             AddMongoDBStatisticsProvider(config, providerName, options);
         }
 
-        private static void AddMongoDBStorageProvider(ClusterConfiguration config, string providerName, MongoDBStorageOptions options)
+        private static void AddMongoDBStorageProvider<T>(ClusterConfiguration config, string providerName, MongoDBStorageOptions options) where T : MongoStorageProvider
         {
             var properties = new Dictionary<string, string>
             {
@@ -319,7 +353,7 @@ namespace Orleans
                 { MongoStorageProvider.UseJsonFormatProperty, options.UseJsonFormat.ToString() }
             };
 
-            config.Globals.RegisterStorageProvider<MongoStorageProvider>(providerName, properties);
+            config.Globals.RegisterStorageProvider<T>(providerName, properties);
         }
 
         private static void AddMongoDBStatisticsProvider(ClusterConfiguration config, string providerName, MongoDBStatisticsOptions options)
