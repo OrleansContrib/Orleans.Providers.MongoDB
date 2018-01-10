@@ -49,6 +49,8 @@ namespace Orleans.Providers.MongoDB.StorageProviders.V2
             var mongoCollectionPrefix = config.GetProperty(CollectionPrefixProperty, string.Empty);
             var mongoDatabaseName = config.GetProperty(DatabaseNameProperty, string.Empty);
 
+            BsonJsonConvention.Register(serializer);
+
             prefix = mongoCollectionPrefix;
 
             var client = MongoClientPool.Instance(mongoConnectionString);
