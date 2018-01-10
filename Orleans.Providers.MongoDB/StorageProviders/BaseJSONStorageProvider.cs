@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Orleans.Providers.MongoDB.Utils;
@@ -15,7 +16,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
     {
         public const string UseJsonFormatProperty = "UseJsonFormat";
         public const string SerializerSettingsProperty = "SerializerSettings";
-
+        private readonly ILogger<BaseJSONStorageProvider> logger;
         private JsonSerializerSettings serializerSettings;
         private JsonSerializer serializer;
         private SerializationManager serializationManager;
@@ -32,6 +33,11 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
         /// <inheritdoc />
         public Logger Log { get; private set; }
+
+        protected BaseJSONStorageProvider(ILogger<BaseJSONStorageProvider> logger)
+        {
+            this.logger = logger;
+        }
 
         /// <inheritdoc />
         public virtual Task Init(string name, IProviderRuntime providerRuntime, IProviderConfiguration config)
@@ -68,18 +74,18 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
             try
             {
-                var result = await DataManager.Read(grainTypeName, grainKey);
+                var (Etag, Value) = await DataManager.Read(grainTypeName, grainKey);
 
-                if (result.Value != null)
+                if (Value != null)
                 {
-                    ConvertFromStorageFormat(grainState, result.Value);
+                    ConvertFromStorageFormat(grainState, Value);
 
-                    grainState.ETag = result.Etag;
+                    grainState.ETag = Etag;
                 }
             }
             catch (Exception ex)
             {
-                Log.Error((int) MongoProviderErrorCode.StorageProvider_Reading, $"Error Reading: GrainType={grainType} GrainId={grainKey} ETag={grainState.ETag} from Collection={grainTypeName} Exception={ex.Message}", ex);
+                logger.LogError((int) MongoProviderErrorCode.StorageProvider_Reading, $"Error Reading: GrainType={grainType} GrainId={grainKey} ETag={grainState.ETag} from Collection={grainTypeName} Exception={ex.Message}", ex);
                 throw;
             }
         }
@@ -100,7 +106,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             }
             catch (Exception ex)
             {
-                Log.Error((int)MongoProviderErrorCode.StorageProvider_Writing, $"Error Writing: GrainType={grainType} GrainId={grainKey} ETag={grainState.ETag} to Collection={grainTypeName} Exception={ex.Message}", ex);
+                logger.LogError((int)MongoProviderErrorCode.StorageProvider_Writing, $"Error Writing: GrainType={grainType} GrainId={grainKey} ETag={grainState.ETag} to Collection={grainTypeName} Exception={ex.Message}", ex);
                 throw;
             }
         }
@@ -119,7 +125,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             }
             catch (Exception ex)
             {
-                Log.Error((int)MongoProviderErrorCode.StorageProvider_Deleting, $"Error Deleting: GrainType={grainType} GrainId={grainKey} ETag={grainState.ETag} from Collection={grainTypeName} Exception={ex.Message}", ex);
+                logger.LogError((int)MongoProviderErrorCode.StorageProvider_Deleting, $"Error Deleting: GrainType={grainType} GrainId={grainKey} ETag={grainState.ETag} from Collection={grainTypeName} Exception={ex.Message}", ex);
                 throw;
             }
         }

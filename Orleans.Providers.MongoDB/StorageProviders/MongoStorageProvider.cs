@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
@@ -10,6 +11,11 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         public const string DatabaseNameProperty = "DatabaseProperty";
 
         private string prefix;
+
+        public MongoStorageProvider(ILogger<BaseJSONStorageProvider> logger)
+            : base(logger)
+        {
+        }
 
         public override Task Init(string name, IProviderRuntime providerRuntime, IProviderConfiguration config)
         {

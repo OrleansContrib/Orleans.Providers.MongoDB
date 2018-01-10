@@ -9,6 +9,7 @@ using Orleans.Providers.MongoDB.Membership;
 using Orleans.Providers.MongoDB.Reminders;
 using Orleans.Providers.MongoDB.Statistics;
 using Orleans.Providers.MongoDB.StorageProviders;
+using Orleans.Providers.MongoDB.StorageProviders.V2;
 using Orleans.Runtime.Configuration;
 
 // ReSharper disable AccessToStaticMemberViaDerivedType
@@ -264,15 +265,67 @@ namespace Orleans
         /// </summary>
         /// <param name="config">The cluster configuration object to add provider to.</param>
         /// <param name="providerName">The provider name.</param>
+        /// <param name="configurator">The configurator.</param>
+        public static void AddMongoDBStorageProviderV2(this ClusterConfiguration config, string providerName,
+            Action<MongoDBStorageOptions> configurator = null)
+        {
+            var options = new MongoDBStorageOptions();
+
+            configurator?.Invoke(options);
+
+            options.EnrichAndValidate(config.Globals, false);
+
+            AddMongoDBStorageProviderV2<MongoStorageProviderV2>(config, providerName, options);
+        }
+
+        /// <summary>
+        /// Adds a storage provider of type <see cref="MongoStorageProvider"/>.
+        /// </summary>
+        /// <param name="config">The cluster configuration object to add provider to.</param>
+        /// <param name="providerName">The provider name.</param>
         /// <param name="configuration">The configuration.</param>
-        public static void AddMongoDBStorageProvider<T>(this ClusterConfiguration config, string providerName,
-            IConfiguration configuration) where T : MongoStorageProvider
+        public static void AddMongoDBStorageProviderV2(this ClusterConfiguration config, string providerName,
+            IConfiguration configuration)
         {
             var options = configuration.Get<MongoDBStorageOptions>();
 
             options.EnrichAndValidate(config.Globals, false);
 
-            AddMongoDBStorageProvider<T>(config, providerName, options);
+            AddMongoDBStorageProviderV2<MongoStorageProviderV2>(config, providerName, options);
+        }
+
+        /// <summary>
+        /// Adds a storage provider of type <see cref="MongoStorageProvider"/>.
+        /// </summary>
+        /// <param name="config">The cluster configuration object to add provider to.</param>
+        /// <param name="providerName">The provider name.</param>
+        /// <param name="configurator">The configurator.</param>
+        public static void AddMongoDBStorageProviderV2<T>(this ClusterConfiguration config, string providerName,
+            Action<MongoDBStorageOptions> configurator = null) where T : MongoStorageProviderV2
+        {
+            var options = new MongoDBStorageOptions();
+
+            configurator?.Invoke(options);
+
+            options.EnrichAndValidate(config.Globals, false);
+
+            AddMongoDBStorageProviderV2<T>(config, providerName, options);
+        }
+
+        /// <summary>
+        /// Adds a storage provider of type <see cref="MongoStorageProvider"/>.
+        /// </summary>
+        /// <param name="config">The cluster configuration object to add provider to.</param>
+        /// <param name="providerName">The provider name.</param>
+        /// <param name="configuration">The configuration.</param>
+        public static void AddMongoDBStorageProviderV2<T>(this ClusterConfiguration config, string providerName,
+            IConfiguration configuration) where T : MongoStorageProviderV2
+        {
+            var options = configuration.Get<MongoDBStorageOptions>();
+
+            options.EnrichAndValidate(config.Globals, false);
+
+            AddMongoDBStorageProviderV2<T>(config, providerName, options);
         }
 
         /// <summary>
@@ -351,6 +404,18 @@ namespace Orleans
                 { MongoStorageProvider.CollectionPrefixProperty, options.CollectionPrefix },
                 { MongoStorageProvider.DatabaseNameProperty, options.DatabaseName },
                 { MongoStorageProvider.UseJsonFormatProperty, options.UseJsonFormat.ToString() }
+            };
+
+            config.Globals.RegisterStorageProvider<T>(providerName, properties);
+        }
+
+        private static void AddMongoDBStorageProviderV2<T>(ClusterConfiguration config, string providerName, MongoDBStorageOptions options) where T : MongoStorageProviderV2
+        {
+            var properties = new Dictionary<string, string>
+            {
+                { MongoStorageProviderV2.ConnectionStringProperty, options.ConnectionString },
+                { MongoStorageProviderV2.CollectionPrefixProperty, options.CollectionPrefix },
+                { MongoStorageProviderV2.DatabaseNameProperty, options.DatabaseName }
             };
 
             config.Globals.RegisterStorageProvider<T>(providerName, properties);
