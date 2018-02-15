@@ -1,15 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Orleans.Configuration;
 using Orleans.Hosting;
 using Orleans.Messaging;
+using Orleans.Providers;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Membership;
 using Orleans.Providers.MongoDB.Reminders;
-using Orleans.Providers.MongoDB.Statistics;
 using Orleans.Providers.MongoDB.StorageProviders;
-using Orleans.Runtime.Configuration;
+using Orleans.Providers.MongoDB.StorageProviders.Serializers;
+using Orleans.Runtime;
+using Orleans.Storage;
 
 // ReSharper disable AccessToStaticMemberViaDerivedType
 // ReSharper disable CheckNamespace
@@ -24,11 +27,6 @@ namespace Orleans
         /// <summary>
         /// Configure ISiloHostBuilder to use MongoReminderTable.
         /// </summary>
-        /// <param name="builder">The host builder.</param>
-        /// <param name="configurator">The configurator.</param>
-        /// <returns>
-        /// The silo host builder.
-        /// </returns>
         public static ISiloHostBuilder UseMongoDBReminders(this ISiloHostBuilder builder,
             Action<MongoDBRemindersOptions> configurator = null)
         {
@@ -38,11 +36,6 @@ namespace Orleans
         /// <summary>
         /// Configure ISiloHostBuilder to use MongoReminderTable
         /// </summary>
-        /// <param name="builder">The host builder.</param>
-        /// <param name="configuration">The configuration.</param>
-        /// <returns>
-        /// The silo host builder.
-        /// </returns>
         public static ISiloHostBuilder UseMongoDBReminders(this ISiloHostBuilder builder,
             IConfiguration configuration)
         {
@@ -52,11 +45,6 @@ namespace Orleans
         /// <summary>
         /// Configure ISiloHostBuilder to use MongoBasedMembership
         /// </summary>
-        /// <param name="builder">The host builder.</param>
-        /// <param name="configurator">The configurator.</param>
-        /// <returns>
-        /// The silo host builder.
-        /// </returns>
         public static ISiloHostBuilder UseMongoDBMembershipTable(this ISiloHostBuilder builder,
             Action<MongoDBMembershipTableOptions> configurator = null)
         {
@@ -66,11 +54,6 @@ namespace Orleans
         /// <summary>
         /// Configure ISiloHostBuilder to use MongoMembershipTable
         /// </summary>
-        /// <param name="builder">The host builder.</param>
-        /// <param name="configuration">The configuration.</param>
-        /// <returns>
-        /// The silo host builder.
-        /// </returns>
         public static ISiloHostBuilder UseMongoDBMembershipTable(this ISiloHostBuilder builder,
             IConfiguration configuration)
         {
@@ -80,11 +63,6 @@ namespace Orleans
         /// <summary>
         /// Configure client to use MongoGatewayListProvider
         /// </summary>
-        /// <param name="builder">The client builder.</param>
-        /// <param name="configurator">The configurator.</param>
-        /// <returns>
-        /// The client builder.
-        /// </returns>
         public static IClientBuilder UseMongoDBGatewayListProvider(this IClientBuilder builder,
             Action<MongoDBGatewayListProviderOptions> configurator = null)
         {
@@ -94,11 +72,6 @@ namespace Orleans
         /// <summary>
         /// Configure client to use MongoGatewayListProvider
         /// </summary>
-        /// <param name="builder">The client builder.</param>
-        /// <param name="configuration">The configurator.</param>
-        /// <returns>
-        /// The client builder.
-        /// </returns>
         public static IClientBuilder UseMongoDBGatewayListProvider(this IClientBuilder builder,
             IConfiguration configuration)
         {
@@ -106,13 +79,8 @@ namespace Orleans
         }
 
         /// <summary>
-        /// Configure DI container to use MongoReminderTable.
+        /// Configure silo to use MongoReminderTable.
         /// </summary>
-        /// <param name="services">The services.</param>
-        /// <param name="configurator">The configurator.</param>
-        /// <returns>
-        /// The service collection
-        /// </returns>
         public static IServiceCollection AddMongoDBReminders(this IServiceCollection services,
             Action<MongoDBRemindersOptions> configurator = null)
         {
@@ -123,13 +91,8 @@ namespace Orleans
         }
 
         /// <summary>
-        /// Configure DI container to use MongoReminderTable.
+        /// Configure silo to use MongoReminderTable.
         /// </summary>
-        /// <param name="services">The services.</param>
-        /// <param name="configuration">The configurator.</param>
-        /// <returns>
-        /// The service collection
-        /// </returns>
         public static IServiceCollection AddMongoDBReminders(this IServiceCollection services,
             IConfiguration configuration)
         {
@@ -140,13 +103,8 @@ namespace Orleans
         }
 
         /// <summary>
-        /// Configure DI container to use MongoMembershipTable.
+        /// Configure silo to use MongoMembershipTable.
         /// </summary>
-        /// <param name="services">The services.</param>
-        /// <param name="configurator">The configurator.</param>
-        /// <returns>
-        /// The service collection
-        /// </returns>
         public static IServiceCollection AddMongoDBMembershipTable(this IServiceCollection services,
             Action<MongoDBMembershipTableOptions> configurator = null)
         {
@@ -157,13 +115,8 @@ namespace Orleans
         }
 
         /// <summary>
-        /// Configure DI container to use MongoMembershipTable.
+        /// Configure silo to use MongoMembershipTable.
         /// </summary>
-        /// <param name="services">The services.</param>
-        /// <param name="configuration">The configurator.</param>
-        /// <returns>
-        /// The service collection
-        /// </returns>
         public static IServiceCollection AddMongoDBMembershipTable(this IServiceCollection services,
             IConfiguration configuration)
         {
@@ -174,13 +127,8 @@ namespace Orleans
         }
 
         /// <summary>
-        /// Configure DI container to use MongoGatewayListProvider.
-        /// </summary>
-        /// <param name="services">The services.</param>
-        /// <param name="configurator">The configurator.</param>
-        /// <returns>
-        /// The service collection
-        /// </returns>
+        /// Configure silo to use MongoGatewayListProvider.
+        /// </summary
         public static IServiceCollection AddMongoDBGatewayListProvider(this IServiceCollection services,
             Action<MongoDBGatewayListProviderOptions> configurator = null)
         {
@@ -191,13 +139,8 @@ namespace Orleans
         }
 
         /// <summary>
-        /// Configure DI container to use MongoGatewayListProvider.
+        /// Configure silo to use MongoGatewayListProvider.
         /// </summary>
-        /// <param name="services">The services.</param>
-        /// <param name="configuration">The configuration.</param>
-        /// <returns>
-        /// The service collection
-        /// </returns>
         public static IServiceCollection AddMongoDBGatewayListProvider(this IServiceCollection services,
             IConfiguration configuration)
         {
@@ -206,182 +149,83 @@ namespace Orleans
 
             return services;
         }
-        
         /// <summary>
-        /// Adds a storage provider of type <see cref="MongoStorageProvider"/>.
+        /// Configure silo to use MongoDB as the default grain storage.
         /// </summary>
-        /// <param name="config">The cluster configuration object to add provider to.</param>
-        /// <param name="providerName">The provider name.</param>
-        /// <param name="configurator">The configurator.</param>
-        public static void AddMongoDBStorageProvider(this ClusterConfiguration config, string providerName,
-            Action<MongoDBStorageOptions> configurator = null)
+        public static ISiloHostBuilder AddMongoDBGrainStorageAsDefault(this ISiloHostBuilder builder, 
+            Action<MongoDBGrainStorageOptions> configureOptions)
         {
-            var options = new MongoDBStorageOptions();
-
-            configurator?.Invoke(options);
-
-            options.EnrichAndValidate(config.Globals, false);
-
-            AddMongoDBStorageProvider<MongoStorageProvider>(config, providerName, options);
+            return builder.AddMongoDBGrainStorage(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME, configureOptions);
         }
 
         /// <summary>
-        /// Adds a storage provider of type <see cref="MongoStorageProvider"/>.
+        /// Configure silo to use MongoDB for grain storage.
         /// </summary>
-        /// <param name="config">The cluster configuration object to add provider to.</param>
-        /// <param name="providerName">The provider name.</param>
-        /// <param name="configuration">The configuration.</param>
-        public static void AddMongoDBStorageProvider(this ClusterConfiguration config, string providerName,
-            IConfiguration configuration)
+        public static ISiloHostBuilder AddMongoDBGrainStorage(this ISiloHostBuilder builder, string name, 
+            Action<MongoDBGrainStorageOptions> configureOptions)
         {
-            var options = configuration.Get<MongoDBStorageOptions>();
-
-            options.EnrichAndValidate(config.Globals, false);
-
-            AddMongoDBStorageProvider<MongoStorageProvider>(config, providerName, options);
+            return builder.ConfigureServices(services => services.AddMongoDBGrainStorage(name, configureOptions));
         }
 
         /// <summary>
-        /// Adds a storage provider of type <see cref="MongoStorageProvider"/>.
+        /// Configure silo to use MongoDB as the default grain storage.
         /// </summary>
-        /// <param name="config">The cluster configuration object to add provider to.</param>
-        /// <param name="providerName">The provider name.</param>
-        /// <param name="configurator">The configurator.</param>
-        public static void AddMongoDBStorageProvider<T>(this ClusterConfiguration config, string providerName,
-            Action<MongoDBStorageOptions> configurator = null) where T : MongoStorageProvider
+        public static ISiloHostBuilder AddMongoDBGrainStorageDefault(this ISiloHostBuilder builder, 
+            Action<OptionsBuilder<MongoDBGrainStorageOptions>> configureOptions = null)
         {
-            var options = new MongoDBStorageOptions();
-
-            configurator?.Invoke(options);
-
-            options.EnrichAndValidate(config.Globals, false);
-
-            AddMongoDBStorageProvider<T>(config, providerName, options);
+            return builder.AddMongoDBGrainStorage(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME, configureOptions);
         }
 
         /// <summary>
-        /// Adds a storage provider of type <see cref="MongoStorageProvider"/>.
+        /// Configure silo to use MongoDB for grain storage.
         /// </summary>
-        /// <param name="config">The cluster configuration object to add provider to.</param>
-        /// <param name="providerName">The provider name.</param>
-        /// <param name="configuration">The configuration.</param>
-        public static void AddMongoDBStorageProvider<T>(this ClusterConfiguration config, string providerName,
-            IConfiguration configuration) where T : MongoStorageProvider
+        public static ISiloHostBuilder AddMongoDBGrainStorage(this ISiloHostBuilder builder, string name, 
+            Action<OptionsBuilder<MongoDBGrainStorageOptions>> configureOptions = null)
         {
-            var options = configuration.Get<MongoDBStorageOptions>();
-
-            options.EnrichAndValidate(config.Globals, false);
-
-            AddMongoDBStorageProvider<T>(config, providerName, options);
+            return builder.ConfigureServices(services => services.AddMongoDBGrainStorage(name, configureOptions));
         }
 
         /// <summary>
-        /// Adds a storage provider of type <see cref="MongoStatisticsPublisher"/>.
+        /// Configure silo to use MongoDB as the default grain storage.
         /// </summary>
-        /// <param name="config">The cluster configuration object to add provider to.</param>
-        /// <param name="providerName">The provider name.</param>
-        /// <param name="configurator">The configurator.</param>
-        public static void AddMongoDBStatisticsProvider(this ClusterConfiguration config, string providerName,
-            Action<MongoDBStatisticsOptions> configurator = null)
+        public static IServiceCollection AddMongoDBGrainStorageAsDefault(this IServiceCollection services, 
+            Action<MongoDBGrainStorageOptions> configureOptions)
         {
-            var options = new MongoDBStatisticsOptions();
-
-            configurator?.Invoke(options);
-
-            options.EnrichAndValidate(config.Globals, false);
-
-            AddMongoDBStatisticsProvider(config, providerName, options);
+            return services.AddMongoDBGrainStorage(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME, ob => ob.Configure(configureOptions));
         }
 
         /// <summary>
-        /// Adds a storage provider of type <see cref="MongoStatisticsPublisher"/>.
+        /// Configure silo to use MongoDB for grain storage.
         /// </summary>
-        /// <param name="config">The cluster configuration object to add provider to.</param>
-        /// <param name="providerName">The provider name.</param>
-        /// <param name="configuration">The configuration.</param>
-        public static void AddMongoDBStatisticsProvider(this ClusterConfiguration config, string providerName,
-            IConfiguration configuration)
+        public static IServiceCollection AddMongoDBGrainStorage(this IServiceCollection services, string name, 
+            Action<MongoDBGrainStorageOptions> configureOptions)
         {
-            var options = configuration.Get<MongoDBStatisticsOptions>();
-
-            options.EnrichAndValidate(config.Globals, false);
-
-            AddMongoDBStatisticsProvider(config, providerName, options);
+            return services.AddMongoDBGrainStorage(name, ob => ob.Configure(configureOptions));
         }
 
         /// <summary>
-        /// Adds a storage provider of type <see cref="MongoStatisticsPublisher"/>.
+        /// Configure silo to use MongoDB as the default grain storage.
         /// </summary>
-        /// <param name="config">The cluster configuration object to add provider to.</param>
-        /// <param name="providerName">The provider name.</param>
-        /// <param name="configurator">The configurator.</param>
-        public static void AddMongoDBStatisticsProvider(this ClientConfiguration config, string providerName,
-            Action<MongoDBStatisticsOptions> configurator = null)
+        public static IServiceCollection AddMongoDBGrainStorageAsDefault(this IServiceCollection services, 
+            Action<OptionsBuilder<MongoDBGrainStorageOptions>> configureOptions = null)
         {
-            var options = new MongoDBStatisticsOptions();
-
-            configurator?.Invoke(options);
-
-            options.EnrichAndValidate(config);
-
-            AddMongoDBStatisticsProvider(config, providerName, options);
+            return services.AddMongoDBGrainStorage(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME, configureOptions);
         }
 
         /// <summary>
-        /// Adds a storage provider of type <see cref="MongoStatisticsPublisher"/>.
+        /// Configure silo to use MongoDB for grain storage.
         /// </summary>
-        /// <param name="config">The cluster configuration object to add provider to.</param>
-        /// <param name="providerName">The provider name.</param>
-        /// <param name="configuration">The configuration.</param>
-        public static void AddMongoDBStatisticsProvider(this ClientConfiguration config, string providerName,
-            IConfiguration configuration)
+        public static IServiceCollection AddMongoDBGrainStorage(this IServiceCollection services, string name,
+            Action<OptionsBuilder<MongoDBGrainStorageOptions>> configureOptions = null)
         {
-            var options = configuration.Get<MongoDBStatisticsOptions>();
+            configureOptions?.Invoke(services.AddOptions<MongoDBGrainStorageOptions>(name));
+            
+            services.TryAddSingleton<IGrainStorage>(sp => sp.GetServiceByName<IGrainStorage>(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME));
+            services.TryAddSingleton<IGrainStateSerializer, JsonGrainStateSerializer>();
 
-            options.EnrichAndValidate(config);
-
-            AddMongoDBStatisticsProvider(config, providerName, options);
-        }
-
-        private static void AddMongoDBStorageProvider<T>(ClusterConfiguration config, string providerName, MongoDBStorageOptions options) where T : MongoStorageProvider
-        {
-            var properties = new Dictionary<string, string>
-            {
-                { MongoStorageProvider.ConnectionStringProperty, options.ConnectionString },
-                { MongoStorageProvider.CollectionPrefixProperty, options.CollectionPrefix },
-                { MongoStorageProvider.DatabaseNameProperty, options.DatabaseName },
-                { MongoStorageProvider.UseJsonFormatProperty, options.UseJsonFormat.ToString() }
-            };
-
-            config.Globals.RegisterStorageProvider<T>(providerName, properties);
-        }
-
-        private static void AddMongoDBStatisticsProvider(ClusterConfiguration config, string providerName, MongoDBStatisticsOptions options)
-        {
-            var properties = new Dictionary<string, string>
-            {
-                { MongoStatisticsPublisher.ConnectionStringProperty, options.ConnectionString },
-                { MongoStatisticsPublisher.CollectionPrefixProperty, options.CollectionPrefix },
-                { MongoStatisticsPublisher.DatabaseNameProperty, options.DatabaseName },
-                { MongoStatisticsPublisher.ExpireAfterProperty, options.ExpireAfter.ToString() }
-            };
-
-            config.Globals.RegisterStatisticsProvider<MongoStatisticsPublisher>(providerName, properties);
-            config.Defaults.StatisticsProviderName = providerName;
-        }
-
-        private static void AddMongoDBStatisticsProvider(ClientConfiguration config, string providerName, MongoDBStatisticsOptions options)
-        {
-            var properties = new Dictionary<string, string>
-            {
-                { MongoStatisticsPublisher.ConnectionStringProperty, options.ConnectionString },
-                { MongoStatisticsPublisher.CollectionPrefixProperty, options.CollectionPrefix },
-                { MongoStatisticsPublisher.DatabaseNameProperty, options.DatabaseName },
-                { MongoStatisticsPublisher.ExpireAfterProperty, options.ExpireAfter.ToString() }
-            };
-
-            config.RegisterStatisticsProvider<MongoStatisticsPublisher>(providerName, properties);
-            config.StatisticsProviderName = providerName;
+            return services
+                .AddSingletonNamedService<IGrainStorage, MongoGrainStorage>(name)
+                .AddSingletonNamedService<ILifecycleParticipant<ISiloLifecycle>>(name, (s, n) => (ILifecycleParticipant<ISiloLifecycle>)s.GetRequiredServiceByName<IGrainStorage>(n));
         }
     }
 }

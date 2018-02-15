@@ -3,9 +3,9 @@
 namespace Orleans.Providers.MongoDB.Configuration
 {
     /// <summary>
-    /// Configures MongoDB Gateway List Provider.
+    /// Option to configure MongoDB Storage.
     /// </summary>
-    public sealed class MongoDBGatewayListProviderOptions : MongoDBOptions
+    public class MongoDBGrainStorageOptions : MongoDBOptions
     {
     }
 }

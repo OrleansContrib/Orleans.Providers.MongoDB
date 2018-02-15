@@ -4,10 +4,10 @@
     {
         ProvidersBase = 900000,
         
-        StorageProviderBase = ProvidersBase + 100,
-        StorageProvider_Reading = StorageProviderBase + 4,
-        StorageProvider_Writing = StorageProviderBase + 5,
-        StorageProvider_Deleting = StorageProviderBase + 6,
+        GrainStorageOperations = ProvidersBase + 100,
+        StorageProvider_Reading = GrainStorageOperations + 4,
+        StorageProvider_Writing = GrainStorageOperations + 5,
+        StorageProvider_Deleting = GrainStorageOperations + 6,
 
         MembershipTable_Operations = ProvidersBase + 200,
 
