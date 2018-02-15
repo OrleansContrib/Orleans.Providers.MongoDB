@@ -7,5 +7,9 @@ namespace Orleans.Providers.MongoDB.Configuration
     /// </summary>
     public sealed class MongoDBGatewayListProviderOptions : MongoDBOptions
     {
+        public MongoDBGatewayListProviderOptions()
+        {
+            CollectionPrefix = "Members";
+        }
     }
 }

@@ -2,7 +2,6 @@ using System;
 using Microsoft.Extensions.Logging;
 using Orleans.Hosting;
 using Orleans.Providers.MongoDB.Test.Grains;
-using Orleans.Runtime.Configuration;
 
 namespace Orleans.Providers.MongoDB.Test.Host
 {
@@ -10,19 +9,23 @@ namespace Orleans.Providers.MongoDB.Test.Host
     {
         public static void Main(string[] args)
         {
-            var config = ClusterConfiguration.LocalhostPrimarySilo(33333);
-
-            config.Globals.DeploymentId = "OrleansWithMongoDB";
-            config.Globals.DataConnectionString = "mongodb://localhost/OrleansTestApp";
-
-            config.AddMongoDBStorageProvider("MongoDBStore");
-            config.AddMongoDBStatisticsProvider("MongoDBStatistics");
-
             var silo = new SiloHostBuilder()
-                .UseConfiguration(config)
-                .AddApplicationPartsFromReferences(typeof(EmployeeGrain).Assembly)
-                .UseMongoDBMembershipTable()
-                .UseMongoDBReminders()
+                .ConfigureApplicationParts(options =>
+                {
+                    options.AddApplicationPart(typeof(EmployeeGrain).Assembly);
+                })
+                .UseMongoDBMembershipTable(options =>
+                {
+                    options.ConnectionString = "mongodb://localhost/OrleansTestApp";
+                })
+                .UseMongoDBReminders(options =>
+                {
+                    options.ConnectionString = "mongodb://localhost/OrleansTestApp";
+                })
+                .AddMongoDBGrainStorageAsDefault(options =>
+                {
+                    options.ConnectionString = "mongodb://localhost/OrleansTestApp";
+                })
                 .ConfigureLogging(logging => logging.AddConsole())
                 .Build();
 

@@ -7,5 +7,9 @@ namespace Orleans.Providers.MongoDB.Configuration
     /// </summary>
     public class MongoDBGrainStorageOptions : MongoDBOptions
     {
+        public MongoDBGrainStorageOptions()
+        {
+            CollectionPrefix = "Grains";
+        }
     }
 }
