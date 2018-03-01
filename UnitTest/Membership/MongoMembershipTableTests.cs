@@ -21,7 +21,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
         {
         }
 
-        protected override IMembershipTable CreateMembershipTable(Logger logger)
+        protected override IMembershipTable CreateMembershipTable(ILogger logger)
         {
             var options = Options.Create(new MongoDBMembershipTableOptions
             {
@@ -32,11 +32,11 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
 
             return new MongoMembershipTable(
                 loggerFactory.CreateLogger<MongoMembershipTable>(),
-                options,
-                globalConfiguration);
+                clusterOptions,
+                options);
         }
 
-        protected override IGatewayListProvider CreateGatewayListProvider(Logger logger)
+        protected override IGatewayListProvider CreateGatewayListProvider(ILogger logger)
         {
             var options = Options.Create(new MongoDBGatewayListProviderOptions
             {
@@ -47,8 +47,9 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
 
             return new MongoGatewayListProvider(
                 loggerFactory.CreateLogger<MongoGatewayListProvider>(),
-                options,
-                clientConfiguration);
+                clusterOptions,
+                gatewayOptions,
+                options);
         }
 
         protected override Task<string> GetConnectionString()

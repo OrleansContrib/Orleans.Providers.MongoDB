@@ -12,9 +12,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
             foreach (var property in source)
             {
-                var name = Escape(property.Key);
-
-                result.Add(name, property.Value.ToBson());
+                result.Add(property.Key.EscapeJson(), property.Value.ToBson());
             }
 
             return result;
@@ -26,15 +24,13 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
             foreach (var property in source)
             {
-                var key = Unescape(property.Name);
-
-                result.Add(key, property.Value.ToJToken());
+                result.Add(property.Name.UnescapeBson(), property.Value.ToJToken());
             }
 
             return result;
         }
 
-        public static BsonArray ToBson(this JArray source)
+        public static BsonArray ToJToken(this JArray source)
         {
             var result = new BsonArray();
 
@@ -65,7 +61,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                 case JTokenType.Object:
                     return ((JObject)source).ToBson();
                 case JTokenType.Array:
-                    return ((JArray)source).ToBson();
+                    return ((JArray)source).ToJToken();
                 case JTokenType.Integer:
                     return BsonValue.Create(((JValue)source).Value);
                 case JTokenType.Float:
@@ -78,16 +74,31 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                     return BsonNull.Value;
                 case JTokenType.Undefined:
                     return BsonUndefined.Value;
-                case JTokenType.Date:
-                    return BsonValue.Create(((JValue)source).Value.ToString());
                 case JTokenType.Bytes:
                     return BsonValue.Create(((JValue)source).Value);
                 case JTokenType.Guid:
-                    return BsonValue.Create(((JValue)source).Value.ToString());
+                    return BsonValue.Create(((JValue)source).ToString());
                 case JTokenType.Uri:
-                    return BsonValue.Create(((JValue)source).Value.ToString());
+                    return BsonValue.Create(((JValue)source).ToString());
                 case JTokenType.TimeSpan:
-                    return BsonValue.Create(((JValue)source).Value.ToString());
+                    return BsonValue.Create(((JValue)source).ToString());
+                case JTokenType.Date:
+                    {
+                        var value = ((JValue)source).Value;
+
+                        if (value is DateTime dateTime)
+                        {
+                            return dateTime.ToString("yyyy-MM-ddTHH:mm:ssK");
+                        }
+                        else if (value is DateTimeOffset dateTimeOffset)
+                        {
+                            return dateTimeOffset.UtcDateTime.ToString("yyyy-MM-ddTHH:mm:ssK");
+                        }
+                        else
+                        {
+                            return value.ToString();
+                        }
+                    }
             }
 
             throw new NotSupportedException($"Cannot convert {source.GetType()} to Bson.");
@@ -98,7 +109,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             switch (source.BsonType)
             {
                 case BsonType.Document:
-                    return source.AsBsonDocument.ToJToken();
+                    return source.AsBsonDocument.ToJson();
                 case BsonType.Array:
                     return source.AsBsonArray.ToJToken();
                 case BsonType.Double:
@@ -126,7 +137,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             throw new NotSupportedException($"Cannot convert {source.GetType()} to Json.");
         }
 
-        private static string Escape(string value)
+        private static string EscapeJson(this string value)
         {
             if (value.Length == 0)
             {
@@ -141,7 +152,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             return value;
         }
 
-        private static string Unescape(string value)
+        private static string UnescapeBson(this string value)
         {
             if (value.Length < 2)
             {
