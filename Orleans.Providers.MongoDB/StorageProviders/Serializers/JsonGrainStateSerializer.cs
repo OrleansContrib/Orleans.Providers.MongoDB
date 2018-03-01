@@ -29,7 +29,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders.Serializers
 
         public JObject Serialize(IGrainState grainState)
         {
-            throw new NotImplementedException();
+            return JObject.FromObject(grainState.State, serializer);
         }
     }
 }
