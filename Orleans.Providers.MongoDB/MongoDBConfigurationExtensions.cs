@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using Orleans.Configuration;
 using Orleans.Hosting;
 using Orleans.Messaging;
@@ -17,7 +18,7 @@ using Orleans.Storage;
 // ReSharper disable AccessToStaticMemberViaDerivedType
 // ReSharper disable CheckNamespace
 
-namespace Orleans
+namespace Orleans.Hosting
 {
     /// <summary>
     /// Extension methods for configuration classes specific to OrleansMongoUtils.dll 
@@ -86,6 +87,7 @@ namespace Orleans
         {
             services.Configure(configurator ?? (x => { }));
             services.AddSingleton<IReminderTable, MongoReminderTable>();
+            services.AddSingleton<IConfigurationValidator, MongoDBOptionsValidator<MongoDBRemindersOptions>>();
 
             return services;
         }
@@ -98,6 +100,7 @@ namespace Orleans
         {
             services.Configure<MongoDBRemindersOptions>(configuration);
             services.AddSingleton<IReminderTable, MongoReminderTable>();
+            services.AddSingleton<IConfigurationValidator, MongoDBOptionsValidator<MongoDBRemindersOptions>>();
 
             return services;
         }
@@ -110,6 +113,7 @@ namespace Orleans
         {
             services.Configure(configurator ?? (x => { }));
             services.AddSingleton<IMembershipTable, MongoMembershipTable>();
+            services.AddSingleton<IConfigurationValidator, MongoDBOptionsValidator<MongoDBMembershipTableOptions>>();
 
             return services;
         }
@@ -122,6 +126,7 @@ namespace Orleans
         {
             services.Configure<MongoDBMembershipTableOptions>(configuration);
             services.AddSingleton<IMembershipTable, MongoMembershipTable>();
+            services.AddSingleton<IConfigurationValidator, MongoDBOptionsValidator<MongoDBRemindersOptions>>();
 
             return services;
         }
@@ -134,6 +139,7 @@ namespace Orleans
         {
             services.Configure(configurator ?? (x => { }));
             services.AddSingleton<IGatewayListProvider, MongoGatewayListProvider>();
+            services.AddSingleton<IConfigurationValidator, MongoDBOptionsValidator<MongoDBGatewayListProviderOptions>>();
 
             return services;
         }
@@ -146,6 +152,7 @@ namespace Orleans
         {
             services.Configure<MongoDBGatewayListProviderOptions>(configuration);
             services.AddSingleton<IGatewayListProvider, MongoGatewayListProvider>();
+            services.AddSingleton<IConfigurationValidator, MongoDBOptionsValidator<MongoDBGatewayListProviderOptions>>();
 
             return services;
         }
@@ -222,6 +229,8 @@ namespace Orleans
             
             services.TryAddSingleton<IGrainStorage>(sp => sp.GetServiceByName<IGrainStorage>(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME));
             services.TryAddSingleton<IGrainStateSerializer, JsonGrainStateSerializer>();
+            services.AddTransient<IConfigurationValidator>(sp => new MongoDBGrainStorageOptionsValidator(sp.GetService<IOptionsSnapshot<MongoDBGrainStorageOptions>>().Get(name), name));
+            services.ConfigureNamedOptionForLogging<MongoDBGrainStorageOptions>(name);
 
             return services
                 .AddSingletonNamedService<IGrainStorage, MongoGrainStorage>(name)

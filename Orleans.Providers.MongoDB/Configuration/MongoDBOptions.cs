@@ -1,5 +1,5 @@
-﻿using System;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
+using Orleans.Runtime;
 
 // ReSharper disable InvertIf
 
@@ -25,7 +25,7 @@ namespace Orleans.Providers.MongoDB.Configuration
         /// </summary>
         public string CollectionPrefix { get; set; }
 
-        internal void Validate(string message)
+        internal void Validate(string name = null)
         {
             if (!string.IsNullOrWhiteSpace(ConnectionString))
             {
@@ -57,14 +57,21 @@ namespace Orleans.Providers.MongoDB.Configuration
                 }
             }
 
+            var typeName = GetType().Name;
+
+            if (!string.IsNullOrWhiteSpace(typeName))
+            {
+                typeName = $"{typeName} for {name}";
+            }
+
             if (string.IsNullOrWhiteSpace(ConnectionString))
             {
-                throw new InvalidOperationException($"{message}: Connection string is not defined.");
+                throw new OrleansConfigurationException($"Invalid {typeName} values for {nameof(ConnectionString)}. {nameof(ConnectionString)} is required.");
             }
 
             if (string.IsNullOrWhiteSpace(DatabaseName))
             {
-                throw new InvalidOperationException($"{message}: Database name string is not defined.");
+                throw new OrleansConfigurationException($"Invalid {typeName} values for {nameof(DatabaseName)}. {nameof(DatabaseName)} is required.");
             }
         }
     }

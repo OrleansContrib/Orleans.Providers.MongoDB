@@ -30,21 +30,19 @@ namespace Orleans.Providers.MongoDB.Membership
 
         public MongoGatewayListProvider(
             ILogger<MongoGatewayListProvider> logger,
-            IOptions<ClusterClientOptions> clusterClientOptions,
+            IOptions<ClusterOptions> clusterOptions,
             IOptions<GatewayOptions> gatewayOptions,
             IOptions<MongoDBGatewayListProviderOptions> options)
         {
             this.logger = logger;
             this.options = options.Value;
-            this.clusterId = clusterClientOptions.Value.ClusterId;
+            this.clusterId = clusterOptions.Value.ClusterId;
             this.maxStaleness = gatewayOptions.Value.GatewayListRefreshPeriod;
         }
 
         /// <inheritdoc />
         public Task InitializeGatewayListProvider()
         {
-            options.Validate("Cannot initialize MongoDB gateway list provider");
-
             gatewaysCollection =
                 new MongoMembershipCollection(
                     options.ConnectionString,

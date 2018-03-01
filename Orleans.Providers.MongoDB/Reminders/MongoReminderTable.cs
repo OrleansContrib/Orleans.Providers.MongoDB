@@ -26,20 +26,18 @@ namespace Orleans.Providers.MongoDB.Reminders
         public MongoReminderTable(
             ILogger<MongoReminderTable> logger,
             IOptions<MongoDBRemindersOptions> options,
-            IOptions<SiloOptions> siloOptions,
+            IOptions<ClusterOptions> clusterOptions,
             IGrainReferenceConverter grainReferenceConverter)
         {
             this.logger = logger;
             this.options = options.Value;
-            this.serviceId = siloOptions.Value.ServiceId.ToString();
+            this.serviceId = clusterOptions.Value.ServiceId.ToString();
             this.grainReferenceConverter = grainReferenceConverter;
         }
 
         /// <inheritdoc />
         public Task Init()
         {
-            options.Validate("Cannot initialize MongoDB reminder table");
-
             collection =
                 new MongoReminderCollection(
                     options.ConnectionString,

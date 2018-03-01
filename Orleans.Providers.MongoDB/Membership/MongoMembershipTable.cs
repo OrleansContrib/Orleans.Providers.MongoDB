@@ -21,19 +21,17 @@ namespace Orleans.Providers.MongoDB.Membership
         
         public MongoMembershipTable(
             ILogger<MongoMembershipTable> logger,
-            IOptions<SiloOptions> siloOptions,
+            IOptions<ClusterOptions> clusterOptions,
             IOptions<MongoDBMembershipTableOptions> options)
         {
             this.logger = logger;
             this.options = options.Value;
-            this.clusterId = siloOptions.Value.ClusterId;
+            this.clusterId = clusterOptions.Value.ClusterId;
         }
 
         /// <inheritdoc />
         public Task InitializeMembershipTable(bool tryInitTableVersion)
         {
-            options.Validate("Cannot initialize MongoDB membership table");
-
             membershipCollection =
                 new MongoMembershipCollection(
                     options.ConnectionString,

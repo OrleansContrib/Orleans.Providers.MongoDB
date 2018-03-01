@@ -51,15 +51,13 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
         public void Participate(ISiloLifecycle lifecycle)
         {
-            lifecycle.Subscribe(SiloLifecycleStage.RuntimeInitialize, Init);
+            lifecycle.Subscribe(ServiceLifecycleStage.ApplicationServices, Init);
         }
 
         private Task Init(CancellationToken ct)
         {
             return DoAndLog(nameof(Init), () =>
             {
-                options.Validate("Cannot initialize MongoDB grain storage");
-
                 var client = MongoClientPool.Instance(options.ConnectionString);
 
                 database = client.GetDatabase(options.DatabaseName);
