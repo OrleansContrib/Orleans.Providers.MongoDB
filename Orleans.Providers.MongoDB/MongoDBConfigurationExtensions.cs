@@ -18,7 +18,7 @@ using Orleans.Storage;
 // ReSharper disable AccessToStaticMemberViaDerivedType
 // ReSharper disable CheckNamespace
 
-namespace Orleans.Hosting
+namespace Orleans
 {
     /// <summary>
     /// Extension methods for configuration classes specific to OrleansMongoUtils.dll 
