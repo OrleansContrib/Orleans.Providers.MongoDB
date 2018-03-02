@@ -11,12 +11,13 @@ namespace Orleans.Providers.MongoDB.Test.Client
             var client = new ClientBuilder()
                 .ConfigureApplicationParts(options =>
                 {
-                    options.AddApplicationPart(typeof(IHelloWorldGrain).Assembly);
+                    options.AddApplicationPart(typeof(IHelloWorldGrain).Assembly).WithReferences();
                 })
                 .UseMongoDBGatewayListProvider(options =>
                 {
                     options.ConnectionString = "mongodb://localhost/OrleansTestApp";
                 })
+                .ConfigureCluster(options => options.ClusterId = "helloworldcluster")
                 .ConfigureLogging(logging => logging.AddConsole())
                 .Build();
 

@@ -226,15 +226,17 @@ namespace Orleans
             Action<OptionsBuilder<MongoDBGrainStorageOptions>> configureOptions = null)
         {
             configureOptions?.Invoke(services.AddOptions<MongoDBGrainStorageOptions>(name));
-            
-            services.TryAddSingleton<IGrainStorage>(sp => sp.GetServiceByName<IGrainStorage>(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME));
+
+            services.TryAddSingleton(sp => sp.GetServiceByName<IGrainStorage>(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME));
             services.TryAddSingleton<IGrainStateSerializer, JsonGrainStateSerializer>();
-            services.AddTransient<IConfigurationValidator>(sp => new MongoDBGrainStorageOptionsValidator(sp.GetService<IOptionsSnapshot<MongoDBGrainStorageOptions>>().Get(name), name));
+
             services.ConfigureNamedOptionForLogging<MongoDBGrainStorageOptions>(name);
 
-            return services
-                .AddSingletonNamedService<IGrainStorage, MongoGrainStorage>(name)
-                .AddSingletonNamedService<ILifecycleParticipant<ISiloLifecycle>>(name, (s, n) => (ILifecycleParticipant<ISiloLifecycle>)s.GetRequiredServiceByName<IGrainStorage>(n));
+            services.AddTransient<IConfigurationValidator>(sp => new MongoDBGrainStorageOptionsValidator(sp.GetService<IOptionsSnapshot<MongoDBGrainStorageOptions>>().Get(name), name));
+            services.AddSingletonNamedService(name, MongoGrainStorageFactory.Create);
+            services.AddSingletonNamedService(name, (s, n) => (ILifecycleParticipant<ISiloLifecycle>)s.GetRequiredServiceByName<IGrainStorage>(n));
+
+            return services;
         }
     }
 }

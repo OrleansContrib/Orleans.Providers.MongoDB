@@ -26,6 +26,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 {
                     options.ConnectionString = "mongodb://localhost/OrleansTestApp";
                 })
+                .Configure(options => options.ClusterId = "helloworldcluster")
                 .ConfigureLogging(logging => logging.AddConsole())
                 .Build();
 

@@ -31,11 +31,11 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
         public MongoGrainStorage(
             ILogger<MongoGrainStorage> logger,
-            IOptions<MongoDBGrainStorageOptions> options,
-            IGrainStateSerializer serializer)
+            IGrainStateSerializer serializer,
+            MongoDBGrainStorageOptions options)
         {
             this.logger = logger;
-            this.options = options.Value;
+            this.options = options;
             this.serializer = serializer;
         }
 
