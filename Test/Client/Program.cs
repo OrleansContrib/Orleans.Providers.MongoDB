@@ -13,7 +13,7 @@ namespace Orleans.Providers.MongoDB.Test.Client
                 {
                     options.AddApplicationPart(typeof(IHelloWorldGrain).Assembly).WithReferences();
                 })
-                .UseMongoDBGatewayListProvider(options =>
+                .UseMongoDBClustering(options =>
                 {
                     options.ConnectionString = "mongodb://localhost/OrleansTestApp";
                 })

@@ -14,7 +14,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 {
                     options.AddApplicationPart(typeof(EmployeeGrain).Assembly);
                 })
-                .UseMongoDBMembershipTable(options =>
+                .UseMongoDBClustering(options =>
                 {
                     options.ConnectionString = "mongodb://localhost/OrleansTestApp";
                 })
