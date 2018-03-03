@@ -30,7 +30,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             return result;
         }
 
-        public static BsonArray ToJToken(this JArray source)
+        public static BsonArray ToBson(this JArray source)
         {
             var result = new BsonArray();
 
@@ -61,7 +61,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                 case JTokenType.Object:
                     return ((JObject)source).ToBson();
                 case JTokenType.Array:
-                    return ((JArray)source).ToJToken();
+                    return ((JArray)source).ToBson();
                 case JTokenType.Integer:
                     return BsonValue.Create(((JValue)source).Value);
                 case JTokenType.Float:
@@ -109,7 +109,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             switch (source.BsonType)
             {
                 case BsonType.Document:
-                    return source.AsBsonDocument.ToJson();
+                    return source.AsBsonDocument.ToJToken();
                 case BsonType.Array:
                     return source.AsBsonArray.ToJToken();
                 case BsonType.Double:

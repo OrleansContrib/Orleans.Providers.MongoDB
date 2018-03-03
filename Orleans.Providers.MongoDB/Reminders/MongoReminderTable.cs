@@ -125,7 +125,7 @@ namespace Orleans.Providers.MongoDB.Reminders
             }
             catch (Exception ex)
             {
-                logger.Error((int)MongoProviderErrorCode.Reminders_Operations, $"ReminderTable.{actionName} failed. Exception={ex.Message}", ex);
+                logger.LogError((int)MongoProviderErrorCode.Reminders_Operations, ex, $"ReminderTable.{actionName} failed. Exception={ex.Message}");
 
                 throw;
             }

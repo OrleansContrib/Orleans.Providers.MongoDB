@@ -71,7 +71,7 @@ namespace Orleans.Providers.MongoDB.Membership
             }
             catch (Exception ex)
             {
-                logger.Warn((int)MongoProviderErrorCode.MembershipTable_Operations, $"{nameof(MongoGatewayListProvider)}.{actionName} failed. Exception={ex.Message}", ex);
+                logger.LogWarning((int)MongoProviderErrorCode.MembershipTable_Operations, ex, $"{nameof(MongoGatewayListProvider)}.{actionName} failed. Exception={ex.Message}");
 
                 throw;
             }

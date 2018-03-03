@@ -114,7 +114,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                     await grainCollection.UpdateOneAsync(
                         Filter.And(
                             Filter.Eq(FieldId, grainKey),
-                            Filter.Eq(FieldEtag, grainKey)
+                            Filter.Eq(FieldEtag, grainState.ETag)
                         ),
                         Update
                             .Set(FieldEtag, newETag)
@@ -205,7 +205,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             }
             catch (Exception ex)
             {
-                logger.LogError((int)MongoProviderErrorCode.GrainStorageOperations, $"{nameof(MongoGrainStorage)}.{actionName} failed. Exception={ex.Message}", ex);
+                logger.LogError((int)MongoProviderErrorCode.GrainStorageOperations, ex, $"{nameof(MongoGrainStorage)}.{actionName} failed. Exception={ex.Message}");
 
                 throw;
             }

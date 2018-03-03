@@ -11,7 +11,7 @@ namespace Orleans.Providers.MongoDB.Test.Client
             var client = new ClientBuilder()
                 .ConfigureApplicationParts(options =>
                 {
-                    options.AddApplicationPart(typeof(IHelloWorldGrain).Assembly).WithReferences();
+                    options.AddApplicationPart(typeof(IHelloWorldGrain).Assembly);
                 })
                 .UseMongoDBClustering(options =>
                 {

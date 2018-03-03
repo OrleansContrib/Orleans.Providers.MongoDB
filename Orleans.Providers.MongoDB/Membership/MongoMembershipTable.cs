@@ -112,7 +112,7 @@ namespace Orleans.Providers.MongoDB.Membership
             }
             catch (Exception ex)
             {
-                logger.LogError((int) MongoProviderErrorCode.MembershipTable_Operations, $"{nameof(MongoMembershipTable)}.{actionName} failed. Exception={ex.Message}", ex);
+                logger.LogError((int) MongoProviderErrorCode.MembershipTable_Operations, ex, $"{nameof(MongoMembershipTable)}.{actionName} failed. Exception={ex.Message}");
 
                 throw;
             }

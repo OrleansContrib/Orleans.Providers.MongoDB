@@ -12,7 +12,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
             var silo = new SiloHostBuilder()
                 .ConfigureApplicationParts(options =>
                 {
-                    options.AddApplicationPart(typeof(EmployeeGrain).Assembly);
+                    options.AddApplicationPart(typeof(EmployeeGrain).Assembly).WithReferences();
                 })
                 .UseMongoDBClustering(options =>
                 {
@@ -22,7 +22,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 {
                     options.ConnectionString = "mongodb://localhost/OrleansTestApp";
                 })
-                .AddMongoDBGrainStorageAsDefault(options =>
+                .AddMongoDBGrainStorage("MongoDBStore", options =>
                 {
                     options.ConnectionString = "mongodb://localhost/OrleansTestApp";
                 })
