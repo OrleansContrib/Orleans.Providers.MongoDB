@@ -1,7 +1,9 @@
 # Orleans.Providers.MongoDB
 > Feedback would be appreciated.
 
-A MongoDb implementation of the Orleans Providers. This includes the Membership (IMembershipTable & IGatewayListProvider), Reminder (IReminderTable), MongoStatisticsPublisher and IStorageProvider providers
+A MongoDb implementation of the Orleans Providers. This includes the Membership (IMembershipTable & IGatewayListProvider), Reminder (IReminderTable), MongoStatisticsPublisher and IStorageProvider providers.
+
+Please see the rc1 branch for the new Orleans 2 rc1 implementation (https://github.com/OrleansContrib/Orleans.Providers.MongoDB/tree/rc1) 
 
 ## Usage
 ### Host Configuration
