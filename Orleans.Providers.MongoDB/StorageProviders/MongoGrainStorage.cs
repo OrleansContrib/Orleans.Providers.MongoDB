@@ -197,7 +197,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
         private async Task<T> DoAndLog<T>(string actionName, Func<Task<T>> action)
         {
-            logger.LogInformation($"{nameof(MongoGrainStorage)}.{actionName} called.");
+            logger.LogDebug($"{nameof(MongoGrainStorage)}.{actionName} called.");
 
             try
             {

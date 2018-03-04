@@ -104,7 +104,7 @@ namespace Orleans.Providers.MongoDB.Membership
 
         private async Task<T> DoAndLog<T>(string actionName, Func<Task<T>> action)
         {
-            logger.LogInformation($"{nameof(MongoMembershipTable)}.{actionName} called.");
+            logger.LogDebug($"{nameof(MongoMembershipTable)}.{actionName} called.");
 
             try
             {

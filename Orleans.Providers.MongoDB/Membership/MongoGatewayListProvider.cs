@@ -63,7 +63,7 @@ namespace Orleans.Providers.MongoDB.Membership
 
         private async Task<T> DoAndLog<T>(string actionName, Func<Task<T>> action)
         {
-            logger.LogInformation($"{nameof(MongoGatewayListProvider)}.{actionName} called.");
+            logger.LogDebug($"{nameof(MongoGatewayListProvider)}.{actionName} called.");
 
             try
             {
