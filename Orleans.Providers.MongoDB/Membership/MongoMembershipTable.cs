@@ -6,7 +6,7 @@ using Orleans.Providers.MongoDB.Membership.Store;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
-using Orleans.Runtime.Configuration;
+using Orleans.Configuration;
 
 // ReSharper disable ConvertToLambdaExpression
 
@@ -15,29 +15,29 @@ namespace Orleans.Providers.MongoDB.Membership
     public sealed class MongoMembershipTable : IMembershipTable
     {
         private readonly ILogger<MongoMembershipTable> logger;
-        private readonly GlobalConfiguration config;
-        private readonly MongoMembershipCollection membershipCollection;
+        private readonly MongoDBMembershipTableOptions options;
+        private readonly string clusterId;
+        private MongoMembershipCollection membershipCollection;
         
         public MongoMembershipTable(
             ILogger<MongoMembershipTable> logger,
-            IOptions<MongoDBMembershipTableOptions> options,
-            GlobalConfiguration config)
+            IOptions<ClusterOptions> clusterOptions,
+            IOptions<MongoDBMembershipTableOptions> options)
         {
             this.logger = logger;
-            this.config = config;
-
-            options.Value.EnrichAndValidate(config, false);
-
-            membershipCollection =
-                new MongoMembershipCollection(
-                    options.Value.ConnectionString,
-                    options.Value.DatabaseName,
-                    options.Value.CollectionPrefix);
+            this.options = options.Value;
+            this.clusterId = clusterOptions.Value.ClusterId;
         }
 
         /// <inheritdoc />
         public Task InitializeMembershipTable(bool tryInitTableVersion)
         {
+            membershipCollection =
+                new MongoMembershipCollection(
+                    options.ConnectionString,
+                    options.DatabaseName,
+                    options.CollectionPrefix);
+
             return Task.CompletedTask;
         }
 
@@ -55,7 +55,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(ReadRow), () =>
             {
-                return membershipCollection.ReadRow(config.DeploymentId, key);
+                return membershipCollection.ReadRow(clusterId, key);
             });
         }
 
@@ -64,7 +64,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(ReadAll), () =>
             {
-                return membershipCollection.ReadAll(config.DeploymentId);
+                return membershipCollection.ReadAll(clusterId);
             });
         }
 
@@ -73,7 +73,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(InsertRow), () =>
             {
-                return membershipCollection.UpsertRow(config.DeploymentId, entry, null);
+                return membershipCollection.UpsertRow(clusterId, entry, null);
             });
         }
 
@@ -82,7 +82,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(UpdateRow), () =>
             {
-                return membershipCollection.UpsertRow(config.DeploymentId, entry, etag);
+                return membershipCollection.UpsertRow(clusterId, entry, etag);
             });
         }
 
@@ -91,7 +91,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(UpdateRow), () =>
             {
-                return membershipCollection.UpdateIAmAlive(config.DeploymentId, 
+                return membershipCollection.UpdateIAmAlive(clusterId, 
                     entry.SiloAddress,
                     entry.IAmAliveTime);
             });
@@ -104,7 +104,7 @@ namespace Orleans.Providers.MongoDB.Membership
 
         private async Task<T> DoAndLog<T>(string actionName, Func<Task<T>> action)
         {
-            logger.LogInformation($"{nameof(MongoMembershipTable)}.{actionName} called.");
+            logger.LogDebug($"{nameof(MongoMembershipTable)}.{actionName} called.");
 
             try
             {
@@ -112,7 +112,7 @@ namespace Orleans.Providers.MongoDB.Membership
             }
             catch (Exception ex)
             {
-                logger.LogError((int) MongoProviderErrorCode.MembershipTable_Operations, $"{nameof(MongoMembershipTable)}.{actionName} failed. Exception={ex.Message}", ex);
+                logger.LogError((int) MongoProviderErrorCode.MembershipTable_Operations, ex, $"{nameof(MongoMembershipTable)}.{actionName} failed. Exception={ex.Message}");
 
                 throw;
             }

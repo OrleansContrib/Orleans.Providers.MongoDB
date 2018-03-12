@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
 using Orleans.Providers.MongoDB.Test.GrainInterfaces;
-using Orleans.Runtime.Configuration;
 
 namespace Orleans.Providers.MongoDB.Test.Client
 {
@@ -9,17 +8,16 @@ namespace Orleans.Providers.MongoDB.Test.Client
     {
         public static void Main(string[] args)
         {
-            var config = ClientConfiguration.LocalhostSilo();
-
-            config.ClientName = "Foo";
-            config.DeploymentId = "OrleansWithMongoDB";
-            config.DataConnectionString = "mongodb://localhost/OrleansTestApp";
-            config.AddMongoDBStatisticsProvider("MongoDBStatistics");
-
             var client = new ClientBuilder()
-                .UseConfiguration(config)
-                .UseMongoDBGatewayListProvider()
-                .AddApplicationPartsFromReferences(typeof(IHelloWorldGrain).Assembly)
+                .ConfigureApplicationParts(options =>
+                {
+                    options.AddApplicationPart(typeof(IHelloWorldGrain).Assembly);
+                })
+                .UseMongoDBClustering(options =>
+                {
+                    options.ConnectionString = "mongodb://localhost/OrleansTestApp";
+                })
+                .ConfigureCluster(options => options.ClusterId = "helloworldcluster")
                 .ConfigureLogging(logging => logging.AddConsole())
                 .Build();
 

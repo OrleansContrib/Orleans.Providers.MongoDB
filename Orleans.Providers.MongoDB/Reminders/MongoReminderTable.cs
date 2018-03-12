@@ -2,11 +2,11 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Orleans.Configuration;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Reminders.Store;
 using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
-using Orleans.Runtime.Configuration;
 
 // ReSharper disable ConvertIfStatementToReturnStatement
 // ReSharper disable RedundantIfElseBlock
@@ -18,30 +18,34 @@ namespace Orleans.Providers.MongoDB.Reminders
     public sealed class MongoReminderTable : IReminderTable
     {
         private readonly ILogger logger;
-        private readonly MongoReminderCollection collection;
+        private readonly IGrainReferenceConverter grainReferenceConverter;
+        private readonly MongoDBRemindersOptions options;
+        private readonly string serviceId;
+        private MongoReminderCollection collection;
 
         public MongoReminderTable(
             ILogger<MongoReminderTable> logger,
             IOptions<MongoDBRemindersOptions> options,
-            IGrainReferenceConverter grainReferenceConverter,
-            GlobalConfiguration config)
+            IOptions<ClusterOptions> clusterOptions,
+            IGrainReferenceConverter grainReferenceConverter)
         {
             this.logger = logger;
-
-            options.Value.EnrichAndValidate(config, true);
-
-            collection =
-                new MongoReminderCollection(
-                    options.Value.ConnectionString,
-                    options.Value.DatabaseName,
-                    options.Value.CollectionPrefix,
-                    config.ServiceId.ToString(), 
-                    grainReferenceConverter);
+            this.options = options.Value;
+            this.serviceId = clusterOptions.Value.ServiceId.ToString();
+            this.grainReferenceConverter = grainReferenceConverter;
         }
 
         /// <inheritdoc />
-        public Task Init(GlobalConfiguration config)
+        public Task Init()
         {
+            collection =
+                new MongoReminderCollection(
+                    options.ConnectionString,
+                    options.DatabaseName,
+                    options.CollectionPrefix,
+                    serviceId,
+                    grainReferenceConverter);
+
             return Task.CompletedTask;
         }
 
@@ -121,7 +125,7 @@ namespace Orleans.Providers.MongoDB.Reminders
             }
             catch (Exception ex)
             {
-                logger.Error((int)MongoProviderErrorCode.Reminders_Operations, $"ReminderTable.{actionName} failed. Exception={ex.Message}", ex);
+                logger.LogError((int)MongoProviderErrorCode.Reminders_Operations, ex, $"ReminderTable.{actionName} failed. Exception={ex.Message}");
 
                 throw;
             }

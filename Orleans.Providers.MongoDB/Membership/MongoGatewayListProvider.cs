@@ -8,7 +8,7 @@ using Orleans.Providers.MongoDB.Membership.Store;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
-using Orleans.Runtime.Configuration;
+using Orleans.Configuration;
 
 // ReSharper disable ConvertToLambdaExpression
 
@@ -17,35 +17,38 @@ namespace Orleans.Providers.MongoDB.Membership
     public sealed class MongoGatewayListProvider : IGatewayListProvider
     {
         private readonly ILogger<MongoGatewayListProvider> logger;
-        private readonly ClientConfiguration config;
-        private readonly MongoMembershipCollection gatewaysCollection;
+        private readonly MongoDBGatewayListProviderOptions options;
+        private readonly TimeSpan maxStaleness;
+        private readonly string clusterId;
+        private MongoMembershipCollection gatewaysCollection;
 
         /// <inheritdoc />
         public bool IsUpdatable { get; } = true;
 
         /// <inheritdoc />
-        public TimeSpan MaxStaleness => config.GatewayListRefreshPeriod;
+        public TimeSpan MaxStaleness => maxStaleness;
 
         public MongoGatewayListProvider(
             ILogger<MongoGatewayListProvider> logger,
-            IOptions<MongoDBGatewayListProviderOptions> options,
-            ClientConfiguration config)
+            IOptions<ClusterOptions> clusterOptions,
+            IOptions<GatewayOptions> gatewayOptions,
+            IOptions<MongoDBGatewayListProviderOptions> options)
         {
             this.logger = logger;
-            this.config = config;
-
-            options.Value.EnrichAndValidate(config);
-
-            gatewaysCollection =
-                new MongoMembershipCollection(
-                    options.Value.ConnectionString,
-                    options.Value.DatabaseName,
-                    options.Value.CollectionPrefix);
+            this.options = options.Value;
+            this.clusterId = clusterOptions.Value.ClusterId;
+            this.maxStaleness = gatewayOptions.Value.GatewayListRefreshPeriod;
         }
 
         /// <inheritdoc />
         public Task InitializeGatewayListProvider()
         {
+            gatewaysCollection =
+                new MongoMembershipCollection(
+                    options.ConnectionString,
+                    options.DatabaseName,
+                    options.CollectionPrefix);
+
             return Task.CompletedTask;
         }
 
@@ -54,13 +57,13 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(GetGateways), () =>
             {
-                return gatewaysCollection.GetGateways(config.DeploymentId);
+                return gatewaysCollection.GetGateways(clusterId);
             });
         }
 
         private async Task<T> DoAndLog<T>(string actionName, Func<Task<T>> action)
         {
-            logger.LogInformation($"{nameof(MongoGatewayListProvider)}.{actionName} called.");
+            logger.LogDebug($"{nameof(MongoGatewayListProvider)}.{actionName} called.");
 
             try
             {
@@ -68,7 +71,7 @@ namespace Orleans.Providers.MongoDB.Membership
             }
             catch (Exception ex)
             {
-                logger.Warn((int)MongoProviderErrorCode.MembershipTable_Operations, $"{nameof(MongoGatewayListProvider)}.{actionName} failed. Exception={ex.Message}", ex);
+                logger.LogWarning((int)MongoProviderErrorCode.MembershipTable_Operations, ex, $"{nameof(MongoGatewayListProvider)}.{actionName} failed. Exception={ex.Message}");
 
                 throw;
             }

@@ -31,19 +31,15 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
                 DatabaseName = "OrleansTest"
             });
 
-            return new MongoReminderTable(loggerFactory.CreateLogger<MongoReminderTable>(), options, 
-                ClusterFixture.Client.ServiceProvider.GetRequiredService<IGrainReferenceConverter>(),
+            return new MongoReminderTable(loggerFactory.CreateLogger<MongoReminderTable>(), 
+                options, 
+                clusterOptions,
                 null);
         }
 
         protected override Task<string> GetConnectionString()
         {
             return Task.FromResult("mongodb://localhost/OrleansTest");
-        }
-
-        [Fact]
-        public void RemindersTable_MongoDB_Init()
-        {
         }
 
         [Fact]
