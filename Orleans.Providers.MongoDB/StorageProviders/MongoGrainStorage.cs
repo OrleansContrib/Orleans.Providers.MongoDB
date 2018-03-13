@@ -51,7 +51,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
         public void Participate(ISiloLifecycle lifecycle)
         {
-            lifecycle.Subscribe(ServiceLifecycleStage.ApplicationServices, Init);
+            lifecycle.Subscribe<MongoGrainStorage>(ServiceLifecycleStage.ApplicationServices, Init);
         }
 
         private Task Init(CancellationToken ct)

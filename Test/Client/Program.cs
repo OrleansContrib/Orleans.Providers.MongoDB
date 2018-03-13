@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
+using Orleans.Configuration;
 using Orleans.Providers.MongoDB.Test.GrainInterfaces;
 
 namespace Orleans.Providers.MongoDB.Test.Client
@@ -17,7 +18,7 @@ namespace Orleans.Providers.MongoDB.Test.Client
                 {
                     options.ConnectionString = "mongodb://localhost/OrleansTestApp";
                 })
-                .ConfigureCluster(options => options.ClusterId = "helloworldcluster")
+                .Configure<ClusterOptions>(options => options.ClusterId = "helloworldcluster")
                 .ConfigureLogging(logging => logging.AddConsole())
                 .Build();
 
