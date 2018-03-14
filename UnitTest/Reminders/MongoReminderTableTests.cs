@@ -34,7 +34,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
             return new MongoReminderTable(loggerFactory.CreateLogger<MongoReminderTable>(), 
                 options, 
                 clusterOptions,
-                null);
+                ClusterFixture.Client.ServiceProvider.GetRequiredService<IGrainReferenceConverter>());
         }
 
         protected override Task<string> GetConnectionString()

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Orleans.Providers.MongoDB.Configuration
+﻿namespace Orleans.Providers.MongoDB.Configuration
 {
     public sealed class MongoDBGrainStorageOptionsValidator : IConfigurationValidator
     {

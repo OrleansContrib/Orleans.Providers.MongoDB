@@ -7,7 +7,6 @@ using Orleans.Messaging;
 using Orleans.Providers.MongoDB.Membership.Store;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Utils;
-using Orleans.Runtime;
 using Orleans.Configuration;
 
 // ReSharper disable ConvertToLambdaExpression

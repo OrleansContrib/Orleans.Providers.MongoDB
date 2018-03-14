@@ -57,13 +57,10 @@ namespace Orleans.Providers.MongoDB.Membership.Store
         public async Task<IList<Uri>> GetGateways(string deploymentId)
         {
             var entries =
-                await Collection.Find(x => x.DeploymentId == deploymentId)
+                await Collection.Find(x => x.DeploymentId == deploymentId && x.Status == (int)SiloStatus.Active && x.ProxyPort > 0)
                     .ToListAsync();
 
-            return entries
-                .Where(x => x.Status == (int)SiloStatus.Active)
-                .Where(x => x.ProxyPort > 0)
-                .Select(ReturnGatewayUri).ToList();
+            return entries.Select(ReturnGatewayUri).ToList();
         }
 
         public async Task<MembershipTableData> ReadAll(string deploymentId)
