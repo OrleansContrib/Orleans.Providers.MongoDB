@@ -151,7 +151,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
 
             try
             {
-                await Collection.ReplaceOneAsync(x => x.Id == id && x.Etag == entry.ETag,
+                await Collection.ReplaceOneAsync(x => x.Id == id,
                     updateDocument,
                     Upsert);
             }
