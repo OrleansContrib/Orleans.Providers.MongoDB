@@ -146,8 +146,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
             var id = ReturnId(serviceId, entry.GrainRef, entry.ReminderName);
 
             var updatedEtag = Guid.NewGuid().ToString();
-            var updateDocument = MongoReminderDocument.Create(id, serviceId, entry, updatedEtag);
-
+            var updateDocument = MongoReminderDocument.Create(id, serviceId, entry, updatedEtag)
 
             try
             {
