@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.12
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orleans.Providers.MongoDB", "Orleans.Providers.MongoDB\Orleans.Providers.MongoDB.csproj", "{E49725D0-D9E8-4F68-8FE3-919F062D3041}"
 EndProject
@@ -21,12 +21,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orleans.Providers.MongoDB.UnitTest", "UnitTest\Orleans.Providers.MongoDB.UnitTest.csproj", "{BFDB3AA7-0778-4D84-BF58-537460AD9869}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{F78B46D7-E647-42FB-BE00-DCF5AA6402E9}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{A29BB09A-B983-4BEC-80F0-FE28DE6B6CE9}"
 	ProjectSection(SolutionItems) = preProject

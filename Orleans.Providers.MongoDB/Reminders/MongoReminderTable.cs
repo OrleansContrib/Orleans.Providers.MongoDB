@@ -1,175 +1,131 @@
 ﻿using System;
 using System.Threading.Tasks;
-using MongoDB.Driver;
-using Orleans.Providers.MongoDB.Reminders.Repository;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Orleans.Configuration;
+using Orleans.Providers.MongoDB.Configuration;
+using Orleans.Providers.MongoDB.Reminders.Store;
+using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
-using Orleans.Runtime.Configuration;
+
+// ReSharper disable ConvertIfStatementToReturnStatement
+// ReSharper disable RedundantIfElseBlock
+// ReSharper disable ConvertToLambdaExpression
+// ReSharper disable SuggestBaseTypeForParameter
 
 namespace Orleans.Providers.MongoDB.Reminders
 {
-    public class MongoReminderTable : IReminderTable
+    public sealed class MongoReminderTable : IReminderTable
     {
+        private readonly ILogger logger;
         private readonly IGrainReferenceConverter grainReferenceConverter;
+        private readonly MongoDBRemindersOptions options;
+        private readonly string serviceId;
+        private MongoReminderCollection collection;
 
-        private Logger logger;
-
-        private IMongoReminderTableRepository repository;
-        private string serviceId;
-
-        public MongoReminderTable(IGrainReferenceConverter grainReferenceConverter)
+        public MongoReminderTable(
+            ILogger<MongoReminderTable> logger,
+            IOptions<MongoDBRemindersOptions> options,
+            IOptions<ClusterOptions> clusterOptions,
+            IGrainReferenceConverter grainReferenceConverter)
         {
+            this.logger = logger;
+            this.options = options.Value;
+            this.serviceId = clusterOptions.Value.ServiceId.ToString();
             this.grainReferenceConverter = grainReferenceConverter;
         }
 
-        public async Task Init(GlobalConfiguration config, Logger traceLogger)
+        /// <inheritdoc />
+        public Task Init()
         {
-            serviceId = config.ServiceId.ToString();
-            logger = traceLogger;
+            collection =
+                new MongoReminderCollection(
+                    options.ConnectionString,
+                    options.DatabaseName,
+                    options.CollectionPrefix,
+                    serviceId,
+                    grainReferenceConverter);
 
-            var connectionString = config.DataConnectionStringForReminders;
-
-            if (string.IsNullOrEmpty(connectionString))
-                connectionString = config.DataConnectionString;
-
-            repository = new MongoReminderTableRepository(connectionString,
-                MongoUrl.Create(connectionString).DatabaseName, grainReferenceConverter);
-            await repository.InitTables();
+            return Task.CompletedTask;
         }
 
-        public async Task<ReminderTableData> ReadRows(GrainReference key)
+        /// <inheritdoc />
+        public Task<ReminderTableData> ReadRows(GrainReference key)
         {
-            try
+            return DoAndLog(nameof(ReadRows), () =>
             {
-                if (logger.IsVerbose3)
-                    logger.Verbose3(
-                        string.Format(
-                            "ReminderTable.ReadRows called with serviceId {0}.",
-                            serviceId));
-
-                return await repository.ReadReminderRowAsync(serviceId, key);
-            }
-            catch (Exception ex)
-            {
-                if (logger.IsVerbose)
-                    logger.Verbose("ReminderTable.ReadRows failed: {0}", ex);
-
-                throw;
-            }
+                return collection.ReadRow(key);
+            });
         }
 
-        /// <summary>
-        ///     Return all rows that have their GrainReference's.GetUniformHashCode() in the range (start, end]
-        /// </summary>
-        /// <param name="begin"></param>
-        /// <param name="end"></param>
-        /// <returns></returns>
-        public async Task<ReminderTableData> ReadRows(uint begin, uint end)
+        /// <inheritdoc />
+        public Task<bool> RemoveRow(GrainReference grainRef, string reminderName, string eTag)
         {
-            if (logger.IsVerbose3)
-                logger.Verbose3(
-                    $"ReminderTable.ReadRows called with serviceId {serviceId}.");
-
-            try
+            return DoAndLog(nameof(RemoveRow), () =>
             {
-                if ((int) begin < (int) end)
-                    return await repository.ReadRangeRowsKey1Async(serviceId, begin, end);
-
-                // ReadRangeRowsKey2Async
-                return await repository.ReadRangeRowsKey2Async(serviceId, begin, end);
-            }
-            catch (Exception ex)
-            {
-                if (logger.IsVerbose)
-                    logger.Verbose("ReminderTable.ReadRows failed: {0}", ex);
-
-                throw;
-            }
+                return collection.RemoveRow(grainRef, reminderName, eTag);
+            });
         }
 
-        public async Task<ReminderEntry> ReadRow(GrainReference grainRef, string reminderName)
+        /// <inheritdoc />
+        public Task<ReminderEntry> ReadRow(GrainReference grainRef, string reminderName)
         {
-            if (logger.IsVerbose3)
-                logger.Verbose3(
-                    $"ReminderTable.ReadRow called with serviceId {serviceId}.");
-
-            try
+            return DoAndLog(nameof(ReadRow), () =>
             {
-                return await repository.ReadReminderRowAsync(serviceId, grainRef, reminderName);
-            }
-            catch (Exception ex)
-            {
-                if (logger.IsVerbose)
-                    logger.Verbose("ReminderTable.ReadRow failed: {0}", ex);
-
-                throw;
-            }
+                return collection.ReadRow(grainRef, reminderName);
+            });
         }
 
-        public async Task<string> UpsertRow(ReminderEntry entry)
+        /// <inheritdoc />
+        public Task TestOnlyClearTable()
         {
-            if (logger.IsVerbose3)
-                logger.Verbose3(
-                    $"ReminderTable.UpsertRow called with serviceId {serviceId}.");
+            return DoAndLog(nameof(TestOnlyClearTable), () =>
+            {
+                return collection.RemoveRows();
+            });
+        }
+
+        /// <inheritdoc />
+        public Task<string> UpsertRow(ReminderEntry entry)
+        {
+            return DoAndLog(nameof(UpsertRow), () =>
+            {
+                return collection.UpsertRow(entry);
+            });
+        }
+
+        /// <inheritdoc />
+        public Task<ReminderTableData> ReadRows(uint begin, uint end)
+        {
+            return DoAndLog(nameof(ReadRows), () =>
+            {
+                if (begin < end)
+                {
+                    return collection.ReadRowsInRange(begin, end);
+                }
+                else
+                {
+                    return collection.ReadRowsOutRange(begin, end);
+                }
+            });
+        }
+
+        private Task DoAndLog(string actionName, Func<Task> action)
+        {
+            return DoAndLog(actionName, async () => { await action(); return true; });
+        }
+
+        private async Task<T> DoAndLog<T>(string actionName, Func<Task<T>> action)
+        {
+            logger.LogDebug($"ReminderTable.{actionName} called.");
 
             try
             {
-                return await repository.UpsertReminderRowAsync(serviceId,
-                    entry.GrainRef,
-                    entry.ReminderName,
-                    entry.StartAt,
-                    entry.Period);
+                return await action();
             }
             catch (Exception ex)
             {
-                if (logger.IsVerbose)
-                    logger.Verbose("ReminderTable.UpsertRow failed: {0}", ex);
-
-                throw;
-            }
-        }
-
-        /// <summary>Remove a row from the table.</summary>
-        /// <param name="grainRef"></param>
-        /// <param name="reminderName"></param>
-        /// ///
-        /// <param name="eTag"></param>
-        /// <returns>
-        ///     true if a row with <paramref name="grainRef" /> and <paramref name="reminderName" /> existed and was removed
-        ///     successfully, false otherwise
-        /// </returns>
-        public async Task<bool> RemoveRow(GrainReference grainRef, string reminderName, string eTag)
-        {
-            if (logger.IsVerbose3)
-                logger.Verbose3(
-                    $"ReminderTable.RemoveRow called with serviceId {serviceId}.");
-
-            try
-            {
-                return await repository.RemoveRowAsync(serviceId, grainRef, reminderName, eTag);
-            }
-            catch (Exception ex)
-            {
-                if (logger.IsVerbose)
-                    logger.Verbose("ReminderTable.RemoveRow failed: {0}", ex);
-
-                throw;
-            }
-        }
-
-        public async Task TestOnlyClearTable()
-        {
-            if (logger.IsVerbose3)
-                logger.Verbose3(
-                    $"ReminderTable.TestOnlyClearTable called with serviceId {serviceId}.");
-
-            try
-            {
-                await repository.RemoveReminderRowsAsync(serviceId);
-            }
-            catch (Exception ex)
-            {
-                if (logger.IsVerbose)
-                    logger.Verbose("ReminderTable.TestOnlyClearTable failed: {0}", ex);
+                logger.LogError((int)MongoProviderErrorCode.Reminders_Operations, ex, $"ReminderTable.{actionName} failed. Exception={ex.Message}");
 
                 throw;
             }

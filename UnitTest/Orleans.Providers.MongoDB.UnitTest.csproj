@@ -8,14 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="4.19.4" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
-    <PackageReference Include="Microsoft.Orleans.OrleansCodeGenerator" Version="2.0.0-preview2-20170724" />
-    <PackageReference Include="Microsoft.Orleans.OrleansProviders" Version="2.0.0-preview2-20170724" />
-    <PackageReference Include="Microsoft.Orleans.TestingHost" Version="2.0.0-preview2-20170724" />
-    <PackageReference Include="MongoDB.Driver" Version="2.4.4" />
-    <PackageReference Include="MSTest.TestAdapter" Version="1.1.18" />
-    <PackageReference Include="MSTest.TestFramework" Version="1.1.18" />
+    <PackageReference Include="FakeItEasy" Version="4.5.1" />
+    <PackageReference Include="FluentAssertions" Version="5.1.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.6.1" />
+    <PackageReference Include="Microsoft.Orleans.OrleansCodeGenerator.Build" Version="2.0.0-rc2" />
+    <PackageReference Include="Microsoft.Orleans.TestingHost" Version="2.0.0-rc2" />
+    <PackageReference Include="MongoDB.Driver" Version="2.5.0" />
+    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.console" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,12 +25,33 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="ClientConfiguration.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="OrleansConfiguration.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Reference Include="Tester">
+      <HintPath>..\libs\Tester.dll</HintPath>
+    </Reference>
+    <Reference Include="TesterInternal">
+      <HintPath>..\libs\TesterInternal.dll</HintPath>
+    </Reference>
+    <Reference Include="TestExtensions">
+      <HintPath>..\libs\TestExtensions.dll</HintPath>
+    </Reference>
+    <Reference Include="TestGrainInterfaces">
+      <HintPath>..\libs\TestGrainInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="TestGrains">
+      <HintPath>..\libs\TestGrains.dll</HintPath>
+    </Reference>
+    <Reference Include="TestInterfaces">
+      <HintPath>..\libs\TestInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="TestInternalGrainInterfaces">
+      <HintPath>..\libs\TestInternalGrainInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="TestInternalGrains">
+      <HintPath>..\libs\TestInternalGrains.dll</HintPath>
+    </Reference>
+    <Reference Include="TestVersionGrains">
+      <HintPath>..\libs\TestVersionGrains.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
