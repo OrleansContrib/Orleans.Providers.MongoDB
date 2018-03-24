@@ -67,7 +67,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
         public Task ReadStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
         {
-            return DoAndLog(nameof(ClearStateAsync), async () =>
+            return DoAndLog(nameof(ReadStateAsync), async () =>
             {
                 var grainCollection = GetCollection(grainType);
                 var grainKey = grainReference.ToKeyString();
