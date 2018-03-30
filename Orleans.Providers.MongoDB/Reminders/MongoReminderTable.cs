@@ -31,7 +31,7 @@ namespace Orleans.Providers.MongoDB.Reminders
         {
             this.logger = logger;
             this.options = options.Value;
-            this.serviceId = clusterOptions.Value.ServiceId.ToString();
+            this.serviceId = clusterOptions.Value.ServiceId ?? string.Empty;
             this.grainReferenceConverter = grainReferenceConverter;
         }
 

@@ -1,4 +1,6 @@
 using System;
+using System.Net;
+
 using Microsoft.Extensions.Logging;
 using Orleans.Configuration;
 using Orleans.Hosting;
@@ -28,6 +30,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
                     options.ConnectionString = "mongodb://localhost/OrleansTestApp";
                 })
                 .Configure<ClusterOptions>(options => options.ClusterId = "helloworldcluster")
+                .ConfigureEndpoints(IPAddress.Loopback, 11111, 30000)
                 .ConfigureLogging(logging => logging.AddConsole())
                 .Build();
 
