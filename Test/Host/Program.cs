@@ -1,9 +1,10 @@
 using System;
 using System.Net;
-
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Orleans.Configuration;
 using Orleans.Hosting;
+using Orleans.Providers.MongoDB.Test.GrainInterfaces;
 using Orleans.Providers.MongoDB.Test.Grains;
 
 namespace Orleans.Providers.MongoDB.Test.Host
@@ -20,6 +21,12 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 .UseMongoDBClustering(options =>
                 {
                     options.ConnectionString = "mongodb://localhost/OrleansTestApp";
+                })
+                .AddStartupTask(async (s, ct) =>
+                {
+                    var grainFactory = s.GetRequiredService<IGrainFactory>();
+
+                    await grainFactory.GetGrain<IHelloWorldGrain>((int)DateTime.UtcNow.TimeOfDay.Ticks).SayHello("HI");
                 })
                 .UseMongoDBReminders(options =>
                 {
