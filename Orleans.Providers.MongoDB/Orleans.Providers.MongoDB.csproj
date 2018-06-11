@@ -2,17 +2,13 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <Version>2.0.0-rc6</Version>
+    <Version>2.0.0</Version>
     <Authors>laredoza,sebastianstehle</Authors>
     <Company>Orleans.Providers.MongoDB</Company>
-    <Description>A MongoDb implementation of the Orleans Providers. This includes the Membership (IMembershipTable and IGatewayListProvider), Reminder (IReminderTable), MongoStatisticsPublisher and IStorageProvider providers.</Description>
+    <Description>A MongoDb implementation of the Orleans Providers. This includes custering (IMembershipTable and IGatewayListProvider), reminders (IReminderTable) and storage providers (IGrainStorage).</Description>
     <Copyright>MIT</Copyright>
     <PackageTags>Orleans OrleansProviders MongoDB</PackageTags>
-    <PackageReleaseNotes>Binary serialization added to the Storage Provider by https://github.com/orthrus. The UseJsonFormat="true" parameter controls this. 
-
-Switching between formats while there is data in the storage tables will end in tears (data will be lost). So don't do it.
- 
-Feedback would be appreciated.</PackageReleaseNotes>
+    <PackageReleaseNotes>Migration to Orleans 2.0 completed.</PackageReleaseNotes>
     <PackageIconUrl>http://dotnet.github.io/orleans/assets/logo.png</PackageIconUrl>
     <PackageLicenseUrl>https://github.com/dotnet/Orleans#license</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/OrleansContrib/Orleans.Providers.MongoDB</PackageProjectUrl>

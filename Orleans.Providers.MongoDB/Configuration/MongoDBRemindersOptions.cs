@@ -9,7 +9,6 @@ namespace Orleans.Providers.MongoDB.Configuration
     {
         public MongoDBRemindersOptions()
         {
-            DatabaseName = "Reminders";
         }
     }
 }
