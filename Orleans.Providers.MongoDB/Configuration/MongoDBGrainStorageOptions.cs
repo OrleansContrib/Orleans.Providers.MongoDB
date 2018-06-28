@@ -7,6 +7,8 @@ namespace Orleans.Providers.MongoDB.Configuration
     /// </summary>
     public class MongoDBGrainStorageOptions : MongoDBOptions
     {
+        public bool DateTimeStoredAsString { get; set; } = true;
+
         public MongoDBGrainStorageOptions()
         {
             CollectionPrefix = "Grains";

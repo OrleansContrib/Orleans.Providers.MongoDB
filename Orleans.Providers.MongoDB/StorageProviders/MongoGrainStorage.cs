@@ -104,8 +104,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                 var grainData = serializer.Serialize(grainState);
 
                 var etag = grainState.ETag;
-
-                var newData = grainData.ToBson();
+                var newData = grainData.ToBson(this.options.DateTimeStoredAsString);
                 var newETag = Guid.NewGuid().ToString();
 
                 try

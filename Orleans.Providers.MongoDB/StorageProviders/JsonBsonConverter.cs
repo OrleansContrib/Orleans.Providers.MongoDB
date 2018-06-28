@@ -6,13 +6,13 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 {
     public static class JsonBsonConverter
     {
-        public static BsonDocument ToBson(this JObject source)
+        public static BsonDocument ToBson(this JObject source,bool dateTimeAsString = true)
         {
             var result = new BsonDocument();
 
             foreach (var property in source)
             {
-                result.Add(property.Key.EscapeJson(), property.Value.ToBson());
+                result.Add(property.Key.EscapeJson(), property.Value.ToBson(dateTimeAsString));
             }
 
             return result;
@@ -30,13 +30,13 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             return result;
         }
 
-        public static BsonArray ToBson(this JArray source)
+        public static BsonArray ToBson(this JArray source, bool dateTimeAsString = true)
         {
             var result = new BsonArray();
 
             foreach (var item in source)
             {
-                result.Add(item.ToBson());
+                result.Add(item.ToBson(dateTimeAsString));
             }
 
             return result;
@@ -54,14 +54,14 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             return result;
         }
 
-        public static BsonValue ToBson(this JToken source)
+        public static BsonValue ToBson(this JToken source, bool dateTimeAsString = true)
         {
             switch (source.Type)
             {
                 case JTokenType.Object:
-                    return ((JObject)source).ToBson();
+                    return ((JObject)source).ToBson(dateTimeAsString);
                 case JTokenType.Array:
-                    return ((JArray)source).ToBson();
+                    return ((JArray)source).ToBson(dateTimeAsString);
                 case JTokenType.Integer:
                     return BsonValue.Create(((JValue)source).Value);
                 case JTokenType.Float:
@@ -88,7 +88,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
                         if (value is DateTime dateTime)
                         {
-                            return dateTime.ToString("yyyy-MM-ddTHH:mm:ssK");
+                            return dateTimeAsString ? dateTime.ToString("yyyy-MM-ddTHH:mm:ssK") : BsonValue.Create(dateTime);
                         }
                         else if (value is DateTimeOffset dateTimeOffset)
                         {
@@ -119,7 +119,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                 case BsonType.Boolean:
                     return new JValue(source.AsBoolean);
                 case BsonType.DateTime:
-                    return new JValue(source.ToUniversalTime());
+                    return new JValue(source.ToLocalTime());
                 case BsonType.Int32:
                     return new JValue(source.AsInt32);
                 case BsonType.Int64:
