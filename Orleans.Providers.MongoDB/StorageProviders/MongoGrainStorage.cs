@@ -82,13 +82,13 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                     {
                         grainState.ETag = existing[FieldEtag].AsString;
 
-                        serializer.Deserialize(grainState, existing[FieldDoc].AsBsonDocument.ToJToken());
+                        serializer.Deserialize(grainState, existing[FieldDoc].AsBsonDocument.ToJToken(this.options.DateTimeDeserializedAsLocal));
                     }
                     else
                     {
                         existing.Remove(FieldId);
 
-                        serializer.Deserialize(grainState, existing.ToJToken());
+                        serializer.Deserialize(grainState, existing.ToJToken(this.options.DateTimeDeserializedAsLocal));
                     }
                 }
             });

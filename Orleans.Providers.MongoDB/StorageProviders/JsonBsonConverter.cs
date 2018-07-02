@@ -18,13 +18,13 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             return result;
         }
 
-        public static JObject ToJToken(this BsonDocument source)
+        public static JObject ToJToken(this BsonDocument source, bool dateTimeAsLocal = false)
         {
             var result = new JObject();
 
             foreach (var property in source)
             {
-                result.Add(property.Name.UnescapeBson(), property.Value.ToJToken());
+                result.Add(property.Name.UnescapeBson(), property.Value.ToJToken(dateTimeAsLocal));
             }
 
             return result;
@@ -42,13 +42,13 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             return result;
         }
 
-        public static JArray ToJToken(this BsonArray source)
+        public static JArray ToJToken(this BsonArray source, bool dateTimeAsLocal = false)
         {
             var result = new JArray();
 
             foreach (var item in source)
             {
-                result.Add(item.ToJToken());
+                result.Add(item.ToJToken(dateTimeAsLocal));
             }
 
             return result;
@@ -104,14 +104,14 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             throw new NotSupportedException($"Cannot convert {source.GetType()} to Bson.");
         }
 
-        public static JToken ToJToken(this BsonValue source)
+        public static JToken ToJToken(this BsonValue source,bool dateTimeAsLocal = false)
         {
             switch (source.BsonType)
             {
                 case BsonType.Document:
-                    return source.AsBsonDocument.ToJToken();
+                    return source.AsBsonDocument.ToJToken(dateTimeAsLocal);
                 case BsonType.Array:
-                    return source.AsBsonArray.ToJToken();
+                    return source.AsBsonArray.ToJToken(dateTimeAsLocal);
                 case BsonType.Double:
                     return new JValue(source.AsDouble);
                 case BsonType.String:
@@ -119,7 +119,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                 case BsonType.Boolean:
                     return new JValue(source.AsBoolean);
                 case BsonType.DateTime:
-                    return new JValue(source.ToUniversalTime());
+                    return new JValue(dateTimeAsLocal ? source.ToLocalTime() : source.ToUniversalTime());
                 case BsonType.Int32:
                     return new JValue(source.AsInt32);
                 case BsonType.Int64:

@@ -8,6 +8,7 @@ namespace Orleans.Providers.MongoDB.Configuration
     public class MongoDBGrainStorageOptions : MongoDBOptions
     {
         public bool DateTimeStoredAsString { get; set; } = true;
+        public bool DateTimeDeserializedAsLocal { get; set; } = false;
 
         public MongoDBGrainStorageOptions()
         {
