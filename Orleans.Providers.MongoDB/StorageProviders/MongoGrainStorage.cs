@@ -82,13 +82,13 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                     {
                         grainState.ETag = existing[FieldEtag].AsString;
 
-                        serializer.Deserialize(grainState, existing[FieldDoc].AsBsonDocument.ToJToken());
+                        serializer.Deserialize(grainState, existing[FieldDoc].AsBsonDocument.ToJToken(this.options.DateTimeDeserializedAsLocal));
                     }
                     else
                     {
                         existing.Remove(FieldId);
 
-                        serializer.Deserialize(grainState, existing.ToJToken());
+                        serializer.Deserialize(grainState, existing.ToJToken(this.options.DateTimeDeserializedAsLocal));
                     }
                 }
             });
@@ -104,8 +104,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                 var grainData = serializer.Serialize(grainState);
 
                 var etag = grainState.ETag;
-
-                var newData = grainData.ToBson();
+                var newData = grainData.ToBson(this.options.DateTimeStoredAsString);
                 var newETag = Guid.NewGuid().ToString();
 
                 try
