@@ -119,7 +119,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                 case BsonType.Boolean:
                     return new JValue(source.AsBoolean);
                 case BsonType.DateTime:
-                    return new JValue(source.ToLocalTime());
+                    return new JValue(source.ToUniversalTime());
                 case BsonType.Int32:
                     return new JValue(source.AsInt32);
                 case BsonType.Int64:
