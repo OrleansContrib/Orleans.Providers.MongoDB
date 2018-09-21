@@ -26,16 +26,19 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         private readonly MongoDBGrainStorageOptions options;
         private readonly ILogger<MongoGrainStorage> logger;
         private readonly IGrainStateSerializer serializer;
+        private readonly IJsonBsonConverterFactory jsonBsonConverterFactory;
         private IMongoDatabase database;
 
         public MongoGrainStorage(
             ILogger<MongoGrainStorage> logger,
             IGrainStateSerializer serializer,
+            IJsonBsonConverterFactory jsonBsonConverterFactory,
             MongoDBGrainStorageOptions options)
         {
             this.logger = logger;
             this.options = options;
             this.serializer = serializer;
+            this.jsonBsonConverterFactory = jsonBsonConverterFactory;
         }
 
         protected virtual JsonSerializerSettings ReturnSerializerSettings(ITypeResolver typeResolver, IProviderRuntime providerRuntime, IProviderConfiguration config)
@@ -81,14 +84,14 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                     if (existing.Contains(FieldDoc))
                     {
                         grainState.ETag = existing[FieldEtag].AsString;
-
-                        serializer.Deserialize(grainState, existing[FieldDoc].AsBsonDocument.ToJToken());
+                        var json = jsonBsonConverterFactory.Create(grainType, grainReference).ToJToken(existing[FieldDoc].AsBsonDocument);
+                        serializer.Deserialize(grainState, json);
                     }
                     else
                     {
                         existing.Remove(FieldId);
-
-                        serializer.Deserialize(grainState, existing.ToJToken());
+                        var json = jsonBsonConverterFactory.Create(grainType, grainReference).ToJToken(existing);
+                        serializer.Deserialize(grainState, json);
                     }
                 }
             });
@@ -105,7 +108,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
                 var etag = grainState.ETag;
 
-                var newData = grainData.ToBson();
+                var newData = jsonBsonConverterFactory.Create(grainType, grainReference).ToBson(grainData);
                 var newETag = Guid.NewGuid().ToString();
 
                 try

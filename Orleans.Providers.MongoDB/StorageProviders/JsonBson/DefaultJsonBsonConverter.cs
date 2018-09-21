@@ -1,36 +1,34 @@
 ﻿using System;
 using MongoDB.Bson;
 using Newtonsoft.Json.Linq;
+using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
 {
-    public static class JsonBsonConverter
+
+    /// <summary>
+    /// The default implementation of IJsonBsonConverter. You can inherit this class as a quick way to provide 
+    /// custom converters for specific grain types.
+    /// </summary>
+    public class DefaultJsonBsonConverter : IJsonBsonConverter
     {
-        public static BsonDocument ToBson(this JObject source)
+
+        /// ============== To BSON =====================
+
+        /// <inheritdoc />
+        public BsonDocument ToBson(JObject source)
         {
             var result = new BsonDocument();
 
             foreach (var property in source)
             {
-                result.Add(property.Key.EscapeJson(), property.Value.ToBson());
+                result.Add(EscapeJson(property.Key), property.Value.ToBson());
             }
 
             return result;
         }
 
-        public static JObject ToJToken(this BsonDocument source)
-        {
-            var result = new JObject();
-
-            foreach (var property in source)
-            {
-                result.Add(property.Name.UnescapeBson(), property.Value.ToJToken());
-            }
-
-            return result;
-        }
-
-        public static BsonArray ToBson(this JArray source)
+        protected virtual BsonArray ToBson(JArray source)
         {
             var result = new BsonArray();
 
@@ -42,19 +40,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             return result;
         }
 
-        public static JArray ToJToken(this BsonArray source)
-        {
-            var result = new JArray();
-
-            foreach (var item in source)
-            {
-                result.Add(item.ToJToken());
-            }
-
-            return result;
-        }
-
-        public static BsonValue ToBson(this JToken source)
+        protected virtual BsonValue ToBson(JToken source)
         {
             switch (source.Type)
             {
@@ -83,35 +69,78 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                 case JTokenType.TimeSpan:
                     return BsonValue.Create(((JValue)source).ToString());
                 case JTokenType.Date:
-                    {
-                        var value = ((JValue)source).Value;
+                {
+                    var value = ((JValue)source).Value;
 
-                        if (value is DateTime dateTime)
-                        {
-                            return dateTime.ToString("yyyy-MM-ddTHH:mm:ssK");
-                        }
-                        else if (value is DateTimeOffset dateTimeOffset)
-                        {
-                            return dateTimeOffset.UtcDateTime.ToString("yyyy-MM-ddTHH:mm:ssK");
-                        }
-                        else
-                        {
-                            return value.ToString();
-                        }
+                    if (value is DateTime dateTime)
+                    {
+                        return dateTime.ToString("yyyy-MM-ddTHH:mm:ssK");
                     }
+                    else if (value is DateTimeOffset dateTimeOffset)
+                    {
+                        return dateTimeOffset.UtcDateTime.ToString("yyyy-MM-ddTHH:mm:ssK");
+                    }
+                    else
+                    {
+                        return value.ToString();
+                    }
+                }
             }
 
             throw new NotSupportedException($"Cannot convert {source.GetType()} to Bson.");
         }
 
-        public static JToken ToJToken(this BsonValue source)
+        protected virtual string EscapeJson(string value)
+        {
+            if (value.Length == 0)
+            {
+                return value;
+            }
+
+            if (value[0] == '$')
+            {
+                return "__" + value.Substring(1);
+            }
+
+            return value;
+        }
+
+
+
+        /// ============== To JSON =====================
+
+        /// <inheritdoc />
+        public JObject ToJToken(BsonDocument source)
+        {
+            var result = new JObject();
+
+            foreach (var property in source)
+            {
+                result.Add(UnescapeBson(property.Name), ToJToken(property.Value));
+            }
+
+            return result;
+        }
+
+        protected virtual JArray ToJToken(BsonArray source)
+        {
+            var result = new JArray();
+
+            foreach (var item in source)
+            {
+                result.Add(ToJToken(item));
+            }
+
+            return result;
+        }
+        protected virtual JToken ToJToken(BsonValue source)
         {
             switch (source.BsonType)
             {
                 case BsonType.Document:
-                    return source.AsBsonDocument.ToJToken();
+                    return ToJToken(source.AsBsonDocument);
                 case BsonType.Array:
-                    return source.AsBsonArray.ToJToken();
+                    return ToJToken(source.AsBsonArray);
                 case BsonType.Double:
                     return new JValue(source.AsDouble);
                 case BsonType.String:
@@ -136,23 +165,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
             throw new NotSupportedException($"Cannot convert {source.GetType()} to Json.");
         }
-
-        private static string EscapeJson(this string value)
-        {
-            if (value.Length == 0)
-            {
-                return value;
-            }
-
-            if (value[0] == '$')
-            {
-                return "__" + value.Substring(1);
-            }
-
-            return value;
-        }
-
-        private static string UnescapeBson(this string value)
+        protected virtual string UnescapeBson(string value)
         {
             if (value.Length < 2)
             {

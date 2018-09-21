@@ -194,5 +194,37 @@ namespace Orleans.Hosting
 
             return services;
         }
+
+        // ========== IJsonBsonConverterFactory ============
+
+        public static ISiloHostBuilder UseMongoDBDefaultJsonBsonConverterFactory(this ISiloHostBuilder builder)
+        {
+            return builder.ConfigureServices(services => services.AddMongoDBDefaultJsonBsonConverterFactory());
+        }
+
+        public static ISiloHostBuilder UseMongoDBJsonBsonConverterFactory(this ISiloHostBuilder builder, IJsonBsonConverterFactory converterFactory)
+        {
+            return builder.ConfigureServices(services => services.AddMongoDBJsonBsonConverter(converterFactory));
+        }
+
+        public static ISiloHostBuilder UseMongoDBJsonBsonConverterFactory(this ISiloHostBuilder builder, Func<IServiceProvider, string, IJsonBsonConverter> create)
+        {
+            return builder.ConfigureServices(services => services.AddMongoDBJsonBsonConverter(create));
+        }
+
+        public static IServiceCollection AddMongoDBDefaultJsonBsonConverterFactory(this IServiceCollection services)
+        {
+            return services.AddSingleton<IJsonBsonConverterFactory>(new DefaultJsonBsonConverterFactory());
+        }
+
+        public static IServiceCollection AddMongoDBJsonBsonConverter(this IServiceCollection services, IJsonBsonConverterFactory converterFactory)
+        {
+            return services.AddSingleton<IJsonBsonConverterFactory>(converterFactory);
+        }
+
+        public static IServiceCollection AddMongoDBJsonBsonConverter(this IServiceCollection services, Func<IServiceProvider, string, IJsonBsonConverter> create)
+        {
+            return services.AddSingleton<IJsonBsonConverterFactory>(new CustomJsonBsonConverterFactory(create));
+        }
     }
 }
