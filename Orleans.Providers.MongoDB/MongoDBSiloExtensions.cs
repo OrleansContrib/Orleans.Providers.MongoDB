@@ -224,7 +224,7 @@ namespace Orleans.Hosting
 
         public static IServiceCollection AddMongoDBJsonBsonConverter(this IServiceCollection services, Func<IServiceProvider, string, IJsonBsonConverter> create)
         {
-            return services.AddSingleton<IJsonBsonConverterFactory>(new CustomJsonBsonConverterFactory(create));
+            return services.AddSingleton<IJsonBsonConverterFactory>(new JsonBsonConverterFactoryMethodWrapper(create));
         }
     }
 }
