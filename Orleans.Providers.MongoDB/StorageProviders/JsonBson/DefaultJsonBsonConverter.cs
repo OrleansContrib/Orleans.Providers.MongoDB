@@ -16,7 +16,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// ============== To BSON =====================
 
         /// <inheritdoc />
-        public BsonDocument ToBson(JObject source)
+        public virtual BsonDocument ToBson(JObject source)
         {
             var result = new BsonDocument();
 
@@ -110,7 +110,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// ============== To JSON =====================
 
         /// <inheritdoc />
-        public JObject ToJToken(BsonDocument source)
+        public virtual JObject ToJToken(BsonDocument source)
         {
             var result = new JObject();
 
