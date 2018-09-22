@@ -185,6 +185,7 @@ namespace Orleans.Hosting
 
             services.TryAddSingleton(sp => sp.GetServiceByName<IGrainStorage>(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME));
             services.TryAddSingleton<IGrainStateSerializer, JsonGrainStateSerializer>();
+            services.TryAddSingleton<IJsonBsonConverterFactory>(new DefaultJsonBsonConverterFactory());
 
             services.ConfigureNamedOptionForLogging<MongoDBGrainStorageOptions>(name);
 
