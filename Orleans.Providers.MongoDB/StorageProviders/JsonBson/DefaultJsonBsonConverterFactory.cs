@@ -9,7 +9,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
     {
         static readonly IJsonBsonConverter _instance = new DefaultJsonBsonConverter();
 
-        public IJsonBsonConverter Create(IServiceProvider services, string grainType)
+        public IJsonBsonConverter Create(string grainType)
             => _instance;
     }
 }

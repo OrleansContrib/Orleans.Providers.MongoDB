@@ -208,7 +208,7 @@ namespace Orleans.Hosting
             return builder.ConfigureServices(services => services.AddMongoDBJsonBsonConverter(converterFactory));
         }
 
-        public static ISiloHostBuilder UseMongoDBJsonBsonConverterFactory(this ISiloHostBuilder builder, Func<IServiceProvider, string, IJsonBsonConverter> create)
+        public static ISiloHostBuilder UseMongoDBJsonBsonConverterFactory(this ISiloHostBuilder builder, Func<string, IJsonBsonConverter> create)
         {
             return builder.ConfigureServices(services => services.AddMongoDBJsonBsonConverter(create));
         }
@@ -223,7 +223,7 @@ namespace Orleans.Hosting
             return services.AddSingleton<IJsonBsonConverterFactory>(converterFactory);
         }
 
-        public static IServiceCollection AddMongoDBJsonBsonConverter(this IServiceCollection services, Func<IServiceProvider, string, IJsonBsonConverter> create)
+        public static IServiceCollection AddMongoDBJsonBsonConverter(this IServiceCollection services, Func<string, IJsonBsonConverter> create)
         {
             return services.AddSingleton<IJsonBsonConverterFactory>(new JsonBsonConverterFactoryMethodWrapper(create));
         }

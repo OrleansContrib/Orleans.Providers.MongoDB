@@ -12,6 +12,6 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         /// Creates an IJsonBsonConverter object, allowing you to use different converter implementations for different grain types.
         /// </summary>
         /// <param name="grainType">The grain type that this IJsonBsonConverter will be converting grain state for.</param>
-        IJsonBsonConverter Create(IServiceProvider services, string grainType);
+        IJsonBsonConverter Create(string grainType);
     }
 }

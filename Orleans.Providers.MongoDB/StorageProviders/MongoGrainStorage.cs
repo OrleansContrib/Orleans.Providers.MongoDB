@@ -84,13 +84,13 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                     if (existing.Contains(FieldDoc))
                     {
                         grainState.ETag = existing[FieldEtag].AsString;
-                        var json = jsonBsonConverterFactory.Create(grainType, grainReference).ToJToken(existing[FieldDoc].AsBsonDocument);
+                        var json = jsonBsonConverterFactory.Create(grainType).ToJToken(existing[FieldDoc].AsBsonDocument);
                         serializer.Deserialize(grainState, json);
                     }
                     else
                     {
                         existing.Remove(FieldId);
-                        var json = jsonBsonConverterFactory.Create(grainType, grainReference).ToJToken(existing);
+                        var json = jsonBsonConverterFactory.Create(grainType).ToJToken(existing);
                         serializer.Deserialize(grainState, json);
                     }
                 }
@@ -108,7 +108,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
                 var etag = grainState.ETag;
 
-                var newData = jsonBsonConverterFactory.Create(grainType, grainReference).ToBson(grainData);
+                var newData = jsonBsonConverterFactory.Create(grainType).ToBson(grainData);
                 var newETag = Guid.NewGuid().ToString();
 
                 try

@@ -8,12 +8,12 @@ namespace Orleans.Providers.MongoDB.StorageProviders
     internal class JsonBsonConverterFactoryMethodWrapper : IJsonBsonConverterFactory
     {
 
-        readonly Func<IServiceProvider, string, IJsonBsonConverter> _create;
+        readonly Func<string, IJsonBsonConverter> _create;
 
-        public JsonBsonConverterFactoryMethodWrapper(Func<IServiceProvider, string, IJsonBsonConverter> create)
+        public JsonBsonConverterFactoryMethodWrapper(Func<string, IJsonBsonConverter> create)
             => _create = create;
 
-        public IJsonBsonConverter Create(IServiceProvider services, string grainType)
-            => _create(services, grainType);
+        public IJsonBsonConverter Create(string grainType)
+            => _create(grainType);
     }
 }
