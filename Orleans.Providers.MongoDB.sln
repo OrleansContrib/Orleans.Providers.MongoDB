@@ -16,6 +16,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{95360976-D8C6-406C-9992-D0EF6D1E0AD3}"
 	ProjectSection(SolutionItems) = preProject
 		Orleans.Providers.MongoDB.sln.DotSettings = Orleans.Providers.MongoDB.sln.DotSettings
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orleans.Providers.MongoDB.UnitTest", "UnitTest\Orleans.Providers.MongoDB.UnitTest.csproj", "{BFDB3AA7-0778-4D84-BF58-537460AD9869}"
