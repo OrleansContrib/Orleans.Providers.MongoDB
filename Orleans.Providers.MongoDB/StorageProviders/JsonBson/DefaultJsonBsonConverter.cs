@@ -34,7 +34,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
             foreach (var item in source)
             {
-                result.Add(item.ToBson());
+                result.Add(ToBson(item));
             }
 
             return result;
@@ -45,9 +45,9 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             switch (source.Type)
             {
                 case JTokenType.Object:
-                    return ((JObject)source).ToBson();
+                    return ToBson((JObject)source);
                 case JTokenType.Array:
-                    return ((JArray)source).ToBson();
+                    return ToBson((JArray)source);
                 case JTokenType.Integer:
                     return BsonValue.Create(((JValue)source).Value);
                 case JTokenType.Float:
