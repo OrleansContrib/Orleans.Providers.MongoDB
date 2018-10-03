@@ -9,7 +9,6 @@ namespace Orleans.Providers.MongoDB.Configuration
     {
         public MongoDBGatewayListProviderOptions()
         {
-            CollectionPrefix = "Members";
         }
     }
 }
