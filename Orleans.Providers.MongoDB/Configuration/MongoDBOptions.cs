@@ -49,7 +49,7 @@ namespace Orleans.Providers.MongoDB.Configuration
                 {
                     var mongoUrl = new MongoUrlBuilder(originalConnectionString) { DatabaseName = null };
 
-                    ConnectionString = mongoUrl.ToString();
+                    ConnectionString = mongoUrl.ToMongoUrl().ToString();
                 }
                 catch
                 {
