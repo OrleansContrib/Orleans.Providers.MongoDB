@@ -117,5 +117,10 @@ namespace Orleans.Providers.MongoDB.Membership
                 throw;
             }
         }
+
+        public Task CleanupDefunctSiloEntries(DateTimeOffset beforeDate)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
