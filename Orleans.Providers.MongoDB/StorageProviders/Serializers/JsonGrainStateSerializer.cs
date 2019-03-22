@@ -19,7 +19,10 @@ namespace Orleans.Providers.MongoDB.StorageProviders.Serializers
             this.serializer = serializer;
 
             // https://github.com/OrleansContrib/Orleans.Providers.MongoDB/issues/44
+            // Always include the default value, so that the deserialization process can overwrite default 
+            // values that are not equal to the system defaults.
             this.serializer.NullValueHandling = NullValueHandling.Include;
+
             this.serializer.DefaultValueHandling = DefaultValueHandling.Populate;
         }
 
