@@ -34,7 +34,7 @@ namespace Orleans.Hosting
         }
 
         /// <summary>
-        /// Configure ISiloHostBuilder to use MongoReminderTable.
+        /// Configure ISiloBuilder to use MongoReminderTable.
         /// </summary>
         public static ISiloBuilder UseMongoDBReminders(this ISiloBuilder builder,
             Action<MongoDBRemindersOptions> configurator = null)
@@ -52,7 +52,7 @@ namespace Orleans.Hosting
         }
 
         /// <summary>
-        /// Configure ISiloHostBuilder to use MongoReminderTable
+        /// Configure ISiloBuilder to use MongoReminderTable
         /// </summary>
         public static ISiloBuilder UseMongoDBReminders(this ISiloBuilder builder,
             IConfiguration configuration)
@@ -70,7 +70,7 @@ namespace Orleans.Hosting
         }
 
         /// <summary>
-        /// Configure ISiloHostBuilder to use MongoBasedMembership
+        /// Configure ISiloBuilder to use MongoBasedMembership
         /// </summary>
         public static ISiloBuilder UseMongoDBClustering(this ISiloBuilder builder,
             Action<MongoDBMembershipTableOptions> configurator = null)
@@ -88,7 +88,7 @@ namespace Orleans.Hosting
         }
 
         /// <summary>
-        /// Configure ISiloHostBuilder to use MongoMembershipTable
+        /// Configure ISiloBuilder to use MongoMembershipTable
         /// </summary>
         public static ISiloBuilder UseMongoDBMembershipTable(this ISiloBuilder builder,
             IConfiguration configuration)
