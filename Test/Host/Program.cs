@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -72,9 +73,12 @@ namespace Orleans.Providers.MongoDB.Test.Host
             // call the grain
             helloWorldGrain.SayHello("World").Wait();
 
-            var reminderGrain = client.GetGrain<INewsReminderGrain>(1);
+            if (!args.Contains("--ship-reminders"))
+            {
+                var reminderGrain = client.GetGrain<INewsReminderGrain>(1);
 
-            reminderGrain.StartReminder("TestReminder", TimeSpan.FromMinutes(10)).Wait();
+                reminderGrain.StartReminder("TestReminder", TimeSpan.FromMinutes(1)).Wait();
+            }
 
             // Test State 
             var employee = client.GetGrain<IEmployeeGrain>(1);

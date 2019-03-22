@@ -89,7 +89,12 @@ namespace Orleans.Providers.MongoDB.Membership.Store
 
             return Collection.UpdateOneAsync(x => x.Id == id, Update.Set(x => x.IAmAliveTime, LogFormatter.PrintDate(iAmAliveTime)));
         }
-        
+
+        public Task CleanupDefunctSiloEntries(string deploymentId, DateTimeOffset beforeDate)
+        {
+            return Collection.DeleteManyAsync(x => x.DeploymentId == deploymentId && x.Status == (int)SiloStatus.Dead && x.Timestamp < beforeDate);
+        }
+
         public Task DeleteMembershipTableEntries(string deploymentId)
         {
             return Collection.DeleteManyAsync(x => x.DeploymentId == deploymentId);

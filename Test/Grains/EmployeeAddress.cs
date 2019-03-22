@@ -1,20 +1,11 @@
 ﻿namespace Orleans.Providers.MongoDB.Test.Grains
 {
-    public class EmployeeAddress
+    public sealed class EmployeeAddress
     {
-        public EmployeeAddress()
-        {
-            Code = "0190";
-            StreetName = "My Street";
-            Secret = new EmployeeAddressSecret
-            {
-                No = 1,
-                Password = "My Secret"
-            };
-        }
+        public string Code { get; set; } = "0190";
 
-        public string Code { get; set; }
-        public string StreetName { get; set; }
-        public EmployeeAddressSecret Secret { get; set; }
+        public string StreetName { get; set; } = "My Street";
+
+        public EmployeeAddressSecret Secret { get; set; } = new EmployeeAddressSecret { No = 1, Password = "Password" };
     }
 }

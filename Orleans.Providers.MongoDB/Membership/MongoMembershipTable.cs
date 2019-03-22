@@ -87,6 +87,15 @@ namespace Orleans.Providers.MongoDB.Membership
         }
 
         /// <inheritdoc />
+        public Task CleanupDefunctSiloEntries(DateTimeOffset beforeDate)
+        {
+            return DoAndLog(nameof(CleanupDefunctSiloEntries), () =>
+            {
+                return membershipCollection.CleanupDefunctSiloEntries(clusterId, beforeDate);
+            });
+        }
+
+        /// <inheritdoc />
         public Task UpdateIAmAlive(MembershipEntry entry)
         {
             return DoAndLog(nameof(UpdateRow), () =>
@@ -116,11 +125,6 @@ namespace Orleans.Providers.MongoDB.Membership
 
                 throw;
             }
-        }
-
-        public Task CleanupDefunctSiloEntries(DateTimeOffset beforeDate)
-        {
-            throw new NotImplementedException();
         }
     }
 }

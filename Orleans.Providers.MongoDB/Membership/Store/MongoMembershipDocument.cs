@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -30,6 +31,15 @@ namespace Orleans.Providers.MongoDB.Membership.Store
         [BsonRequired]
         public string RoleName { get; set; }
 
+        [BsonIgnoreIfNull]
+        public string StatusText { get; set; }
+
+        [BsonRequired]
+        public string IAmAliveTime { get; set; }
+
+        [BsonRequired]
+        public string StartTime { get; set; }
+
         [BsonRequired]
         public int ProxyPort { get; set; }
 
@@ -45,11 +55,8 @@ namespace Orleans.Providers.MongoDB.Membership.Store
         [BsonRequired]
         public List<MongoSuspectTime> SuspectTimes { get; set; }
 
-        [BsonRequired]
-        public string IAmAliveTime { get; set; }
-
-        [BsonRequired]
-        public string StartTime { get; set; }
+        [BsonIgnoreIfDefault]
+        public DateTime Timestamp { get; set; }
 
         public static MongoMembershipDocument Create(MembershipEntry entry, string deploymentId, string etag, string id)
         {
@@ -69,8 +76,10 @@ namespace Orleans.Providers.MongoDB.Membership.Store
                 SiloAddress = entry.SiloAddress.ToParsableString(),
                 SiloName = entry.SiloName,
                 Status = (int)entry.Status,
+                StatusText = entry.Status.ToString(),
                 StartTime = LogFormatter.PrintDate(entry.StartTime),
                 SuspectTimes = suspectTimes,
+                Timestamp = entry.IAmAliveTime,
                 UpdateZone = entry.UpdateZone
             };
         }
