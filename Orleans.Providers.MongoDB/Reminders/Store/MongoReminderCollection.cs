@@ -37,8 +37,28 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
 
         protected override void SetupCollection(IMongoCollection<MongoReminderDocument> collection)
         {
-            collection.Indexes.CreateOne(Index.Ascending(x => x.IsDeleted).Ascending(x => x.ServiceId).Ascending(x => x.GrainHash));
-            collection.Indexes.CreateOne(Index.Ascending(x => x.IsDeleted).Ascending(x => x.ServiceId).Ascending(x => x.GrainId).Ascending(x => x.ReminderName));
+            collection.Indexes.CreateOne(
+                new CreateIndexModel<MongoReminderDocument>(
+                    Index
+                        .Ascending(x => x.IsDeleted)
+                        .Ascending(x => x.ServiceId)
+                        .Ascending(x => x.GrainHash),
+                    new CreateIndexOptions
+                    {
+                        Name = "ByHash"
+                    }));
+
+            collection.Indexes.CreateOne(
+               new CreateIndexModel<MongoReminderDocument>(
+                   Index
+                        .Ascending(x => x.IsDeleted)
+                        .Ascending(x => x.ServiceId)
+                        .Ascending(x => x.GrainId)
+                        .Ascending(x => x.ReminderName),
+                    new CreateIndexOptions
+                    {
+                        Name = "ByName"
+                    }));
         }
 
         public virtual async Task<ReminderTableData> ReadRowsInRange(uint beginHash, uint endHash)
