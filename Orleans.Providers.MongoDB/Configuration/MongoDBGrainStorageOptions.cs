@@ -1,5 +1,8 @@
 ﻿// ReSharper disable InheritdocConsiderUsage
 
+using Newtonsoft.Json;
+using System;
+
 namespace Orleans.Providers.MongoDB.Configuration
 {
     /// <summary>
@@ -11,5 +14,7 @@ namespace Orleans.Providers.MongoDB.Configuration
         {
             CollectionPrefix = "Grains";
         }
+
+        public Action<JsonSerializerSettings> ConfigureJsonSerializerSettings { get; set; }
     }
 }

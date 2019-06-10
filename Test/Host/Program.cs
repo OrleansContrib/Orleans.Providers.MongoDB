@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Orleans.Configuration;
 using Orleans.Hosting;
 using Orleans.Providers.MongoDB.Test.GrainInterfaces;
@@ -37,6 +38,12 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 .AddMongoDBGrainStorage("MongoDBStore", options =>
                 {
                     options.ConnectionString = connectionString;
+                    options.ConfigureJsonSerializerSettings = settings => {                      
+                        settings.NullValueHandling = NullValueHandling.Include;
+                        settings.ObjectCreationHandling = ObjectCreationHandling.Replace;
+                        settings.DefaultValueHandling = DefaultValueHandling.Populate;
+                    };
+                    
                 })
                 .Configure<ClusterOptions>(options =>
                 {
