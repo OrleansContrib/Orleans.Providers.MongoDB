@@ -23,6 +23,8 @@ namespace Orleans.Providers.MongoDB.StorageProviders.Serializers
             // values that are not equal to the system defaults.
             this.serializer.NullValueHandling = NullValueHandling.Include;
 
+            this.serializer.ObjectCreationHandling = ObjectCreationHandling.Replace;
+
             this.serializer.DefaultValueHandling = DefaultValueHandling.Populate;
         }
 

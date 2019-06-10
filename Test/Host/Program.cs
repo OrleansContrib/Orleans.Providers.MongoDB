@@ -14,6 +14,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
     {
         public static void Main(string[] args)
         {
+            string connectionString = "mongodb://localhost/OrleansTestApp";
             var silo = new SiloHostBuilder()
                 .ConfigureApplicationParts(options =>
                 {
@@ -21,7 +22,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 })
                 .UseMongoDBClustering(options =>
                 {
-                    options.ConnectionString = "mongodb://localhost/OrleansTestApp";
+                    options.ConnectionString = connectionString;
                 })
                 .AddStartupTask(async (s, ct) =>
                 {
@@ -31,11 +32,11 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 })
                 .UseMongoDBReminders(options =>
                 {
-                    options.ConnectionString = "mongodb://localhost/OrleansTestApp";
+                    options.ConnectionString = connectionString;
                 })
                 .AddMongoDBGrainStorage("MongoDBStore", options =>
                 {
-                    options.ConnectionString = "mongodb://localhost/OrleansTestApp";
+                    options.ConnectionString = connectionString;
                 })
                 .Configure<ClusterOptions>(options =>
                 {
@@ -55,7 +56,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 })
                 .UseMongoDBClustering(options =>
                 {
-                    options.ConnectionString = "mongodb://localhost/OrleansTestApp";
+                    options.ConnectionString = connectionString;
                 })
                 .Configure<ClusterOptions>(options =>
                 {
