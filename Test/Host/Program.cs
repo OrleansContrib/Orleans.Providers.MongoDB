@@ -97,7 +97,33 @@ namespace Orleans.Providers.MongoDB.Test.Host
 
             Console.WriteLine(employeeId);
             Console.ReadKey();
-            
+
+            // Test collections
+            var vacationEmployee = client.GetGrain<IEmployeeGrain>(2);
+            var vacationEmployeeId = vacationEmployee.ReturnLevelWithoutReadState().Result;
+
+            if (vacationEmployeeId == 0)
+            {                
+                for (int i = 0; i < 2; i++)
+                {
+                    vacationEmployee.AddVacationLeave();
+                }
+
+                for (int i = 0; i < 2; i++)
+                {
+                    vacationEmployee.AddSickLeave();
+                }
+
+                vacationEmployee.SetLevel(101);
+            }
+
+            var countWithoutReadStateAsync = vacationEmployee.ReturnLeaveCountWithoutReadStateAsync().Result;
+            var countUsingReadStateAsync = vacationEmployee.ReturnLeaveCountUsingReadState().Result;
+
+            Console.WriteLine($"{nameof(countWithoutReadStateAsync)}: {countWithoutReadStateAsync}");
+            Console.WriteLine($"{nameof(countUsingReadStateAsync)}: {countUsingReadStateAsync}");
+
+            Console.ReadKey();
             silo.StopAsync().Wait();
         }
     }

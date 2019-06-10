@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Orleans.Providers.MongoDB.Test.GrainInterfaces
 {
@@ -7,5 +8,15 @@ namespace Orleans.Providers.MongoDB.Test.GrainInterfaces
         Task SetLevel(int level);
 
         Task<int> ReturnLevel();
+
+        Task AddVacationLeave();
+
+        Task AddSickLeave();
+
+        Task<int> ReturnLevelWithoutReadState();
+
+        Task<int> ReturnLeaveCountWithoutReadStateAsync();
+
+        Task<int> ReturnLeaveCountUsingReadState();
     }
 }
