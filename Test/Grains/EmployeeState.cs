@@ -23,5 +23,7 @@ namespace Orleans.Providers.MongoDB.Test.Grains
             };
 
         public EmployeeStatus Status { get; set; }
+
+        public IList<IEmployeeLeave> EmployeeLeave { get; set; } = new List<IEmployeeLeave>();
     }
 }

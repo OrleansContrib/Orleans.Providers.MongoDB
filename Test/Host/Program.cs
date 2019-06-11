@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Orleans.Configuration;
 using Orleans.Hosting;
 using Orleans.Providers.MongoDB.Test.GrainInterfaces;
@@ -14,6 +15,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
     {
         public static void Main(string[] args)
         {
+            string connectionString = "mongodb://localhost/OrleansTestApp";
             var silo = new SiloHostBuilder()
                 .ConfigureApplicationParts(options =>
                 {
@@ -21,7 +23,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 })
                 .UseMongoDBClustering(options =>
                 {
-                    options.ConnectionString = "mongodb://localhost/OrleansTestApp";
+                    options.ConnectionString = connectionString;
                 })
                 .AddStartupTask(async (s, ct) =>
                 {
@@ -31,11 +33,17 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 })
                 .UseMongoDBReminders(options =>
                 {
-                    options.ConnectionString = "mongodb://localhost/OrleansTestApp";
+                    options.ConnectionString = connectionString;
                 })
                 .AddMongoDBGrainStorage("MongoDBStore", options =>
                 {
-                    options.ConnectionString = "mongodb://localhost/OrleansTestApp";
+                    options.ConnectionString = connectionString;
+                    options.ConfigureJsonSerializerSettings = settings => {                      
+                        settings.NullValueHandling = NullValueHandling.Include;
+                        settings.ObjectCreationHandling = ObjectCreationHandling.Replace;
+                        settings.DefaultValueHandling = DefaultValueHandling.Populate;
+                    };
+                    
                 })
                 .Configure<ClusterOptions>(options =>
                 {
@@ -55,7 +63,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 })
                 .UseMongoDBClustering(options =>
                 {
-                    options.ConnectionString = "mongodb://localhost/OrleansTestApp";
+                    options.ConnectionString = connectionString;
                 })
                 .Configure<ClusterOptions>(options =>
                 {
@@ -97,7 +105,33 @@ namespace Orleans.Providers.MongoDB.Test.Host
 
             Console.WriteLine(employeeId);
             Console.ReadKey();
-            
+
+            // Test collections
+            var vacationEmployee = client.GetGrain<IEmployeeGrain>(2);
+            var vacationEmployeeId = vacationEmployee.ReturnLevelWithoutReadState().Result;
+
+            if (vacationEmployeeId == 0)
+            {                
+                for (int i = 0; i < 2; i++)
+                {
+                    vacationEmployee.AddVacationLeave();
+                }
+
+                for (int i = 0; i < 2; i++)
+                {
+                    vacationEmployee.AddSickLeave();
+                }
+
+                vacationEmployee.SetLevel(101);
+            }
+
+            var countWithoutReadStateAsync = vacationEmployee.ReturnLeaveCountWithoutReadStateAsync().Result;
+            var countUsingReadStateAsync = vacationEmployee.ReturnLeaveCountUsingReadState().Result;
+
+            Console.WriteLine($"{nameof(countWithoutReadStateAsync)}: {countWithoutReadStateAsync}");
+            Console.WriteLine($"{nameof(countUsingReadStateAsync)}: {countUsingReadStateAsync}");
+
+            Console.ReadKey();
             silo.StopAsync().Wait();
         }
     }

@@ -247,7 +247,7 @@ namespace Orleans.Hosting
             configureOptions?.Invoke(services.AddOptions<MongoDBGrainStorageOptions>(name));
 
             services.TryAddSingleton(sp => sp.GetServiceByName<IGrainStorage>(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME));
-            services.TryAddSingleton<IGrainStateSerializer, JsonGrainStateSerializer>();
+            services.TryAddSingleton<IGrainStateSerializer>(sp => new JsonGrainStateSerializer(sp.GetService<ITypeResolver>(), sp.GetService<IGrainFactory>(), sp.GetService<IOptionsSnapshot<MongoDBGrainStorageOptions>>().Get(name)));
 
             services.ConfigureNamedOptionForLogging<MongoDBGrainStorageOptions>(name);
 

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Orleans.Providers.MongoDB.Test.GrainInterfaces;
 
 namespace Orleans.Providers.MongoDB.Test.Grains
@@ -26,6 +27,36 @@ namespace Orleans.Providers.MongoDB.Test.Grains
         {
             await ReadStateAsync();
             return State.Level;
+        }
+
+        public Task AddVacationLeave()
+        {
+            var identifier = State.EmployeeLeave.Count + 1;
+            State.EmployeeLeave.Add(new VacationLeave(identifier));
+            return WriteStateAsync();
+        }
+
+        public Task AddSickLeave()
+        {
+            var idenitifier = State.EmployeeLeave.Count + 1;
+            State.EmployeeLeave.Add(new SickLeave(idenitifier));
+            return WriteStateAsync();
+        }
+
+        public Task<int> ReturnLevelWithoutReadState()
+        {
+            return Task.FromResult(State.Level);
+        }
+
+        public Task<int> ReturnLeaveCountWithoutReadStateAsync()
+        {
+            return Task.FromResult(State.EmployeeLeave.Count);
+        }
+
+        public async Task<int> ReturnLeaveCountUsingReadState()
+        {
+            await ReadStateAsync();
+            return State.EmployeeLeave.Count;
         }
     }
 }
