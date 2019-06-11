@@ -13,10 +13,6 @@ namespace Orleans.Providers.MongoDB.Test.GrainInterfaces
 
         Task AddSickLeave();
 
-        Task<int> ReturnLevelWithoutReadState();
-
-        Task<int> ReturnLeaveCountWithoutReadStateAsync();
-
-        Task<int> ReturnLeaveCountUsingReadState();
+        Task<int> ReturnLeaveCount();
     }
 }

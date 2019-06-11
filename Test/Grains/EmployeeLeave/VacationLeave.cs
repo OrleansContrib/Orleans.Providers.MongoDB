@@ -4,14 +4,8 @@ namespace Orleans.Providers.MongoDB.Test.Grains
 {
     public class VacationLeave : IEmployeeLeave
     {
-        public VacationLeave(int identifier)
-        {
-            Identifier = identifier;
-        }
-
         public int Identifier { get; set; }
-        public DateTime StartDate { get; set; } = DateTime.Now.Date;
-        public DateTime EndDate { get; set; } = DateTime.Now.Date;
-        public int AmountInHours { get; set; } = 8;
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
     }
 }
