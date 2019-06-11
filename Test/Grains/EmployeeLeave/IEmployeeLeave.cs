@@ -9,7 +9,5 @@ namespace Orleans.Providers.MongoDB.Test.Grains
         DateTime StartDate { get; set; }
 
         DateTime EndDate { get; set; }
-
-        int AmountInHours { get; set; }
     }
 }

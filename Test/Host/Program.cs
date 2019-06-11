@@ -38,12 +38,13 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 .AddMongoDBGrainStorage("MongoDBStore", options =>
                 {
                     options.ConnectionString = connectionString;
-                    options.ConfigureJsonSerializerSettings = settings => {                      
+                    options.ConfigureJsonSerializerSettings = settings =>
+                    {
                         settings.NullValueHandling = NullValueHandling.Include;
                         settings.ObjectCreationHandling = ObjectCreationHandling.Replace;
                         settings.DefaultValueHandling = DefaultValueHandling.Populate;
                     };
-                    
+
                 })
                 .Configure<ClusterOptions>(options =>
                 {
@@ -104,11 +105,10 @@ namespace Orleans.Providers.MongoDB.Test.Host
             employeeId = employee.ReturnLevel().Result;
 
             Console.WriteLine(employeeId);
-            Console.ReadKey();
 
             // Test collections
             var vacationEmployee = client.GetGrain<IEmployeeGrain>(2);
-            var vacationEmployeeId = vacationEmployee.ReturnLevelWithoutReadState().Result;
+            var vacationEmployeeId = vacationEmployee.ReturnLevel().Result;
 
             if (vacationEmployeeId == 0)
             {                
@@ -125,11 +125,10 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 vacationEmployee.SetLevel(101);
             }
 
-            var countWithoutReadStateAsync = vacationEmployee.ReturnLeaveCountWithoutReadStateAsync().Result;
-            var countUsingReadStateAsync = vacationEmployee.ReturnLeaveCountUsingReadState().Result;
+            // Use ObjectCreationHandling.Replace in JsonSerializerSettings to replace the result during deserialization.
+            var leaveCount = vacationEmployee.ReturnLeaveCount().Result;
 
-            Console.WriteLine($"{nameof(countWithoutReadStateAsync)}: {countWithoutReadStateAsync}");
-            Console.WriteLine($"{nameof(countUsingReadStateAsync)}: {countUsingReadStateAsync}");
+            Console.WriteLine($"Total leave count: {leaveCount}");
 
             Console.ReadKey();
             silo.StopAsync().Wait();
