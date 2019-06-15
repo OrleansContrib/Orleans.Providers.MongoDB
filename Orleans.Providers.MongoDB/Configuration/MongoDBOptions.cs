@@ -47,7 +47,7 @@ namespace Orleans.Providers.MongoDB.Configuration
 
                 try
                 {
-                    var mongoUrl = new MongoUrlBuilder(originalConnectionString) { DatabaseName = null };
+                    var mongoUrl = new MongoUrlBuilder(originalConnectionString);
 
                     ConnectionString = mongoUrl.ToMongoUrl().ToString();
                 }
