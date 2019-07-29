@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
@@ -19,6 +20,7 @@ namespace Orleans.Providers.MongoDB.Utils
 
         private readonly IMongoDatabase mongoDatabase;
         private readonly Lazy<IMongoCollection<TEntity>> mongoCollection;
+        private readonly bool createSharedKey;
 
         protected IMongoCollection<TEntity> Collection
         {
@@ -30,12 +32,14 @@ namespace Orleans.Providers.MongoDB.Utils
             get { return mongoDatabase; }
         }
 
-        protected CollectionBase(string connectionString, string databaseName)
+        protected CollectionBase(string connectionString, string databaseName, bool createSharedKey)
         {
             var client = MongoClientPool.Instance(connectionString);
 
             mongoDatabase = client.GetDatabase(databaseName);
             mongoCollection = CreateCollection();
+
+            this.createSharedKey = createSharedKey;
         }
 
         protected virtual MongoCollectionSettings CollectionSettings()
@@ -59,6 +63,25 @@ namespace Orleans.Providers.MongoDB.Utils
                 var databaseCollection = mongoDatabase.GetCollection<TEntity>(
                     CollectionName(),
                     CollectionSettings() ?? new MongoCollectionSettings());
+
+                if (this.createSharedKey)
+                {
+                    try
+                    {
+                        Database.RunCommand<BsonDocument>(new BsonDocument
+                        {
+                            ["key"] = new BsonDocument
+                            {
+                                ["_id"] = "hashed"
+                            },
+                            ["shardCollection"] = $"{mongoDatabase.DatabaseNamespace.DatabaseName}.{CollectionName()}"
+                        });
+                    }
+                    catch (MongoException)
+                    {
+                        // Shared key probably created already.
+                    }
+                }
 
                 SetupCollection(databaseCollection);
 

@@ -21,9 +21,10 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
             string connectionsString, 
             string databaseName,
             string collectionPrefix,
+            bool createShardKey,
             string serviceId,
             IGrainReferenceConverter grainReferenceConverter)
-            : base(connectionsString, databaseName)
+            : base(connectionsString, databaseName, createShardKey)
         {
             this.serviceId = serviceId;
             this.collectionPrefix = collectionPrefix;

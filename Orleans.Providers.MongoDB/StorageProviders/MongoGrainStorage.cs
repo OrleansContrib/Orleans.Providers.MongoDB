@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +24,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         private const string FieldId = "_id";
         private const string FieldDoc = "_doc";
         private const string FieldEtag = "_etag";
+        private readonly ConcurrentDictionary<string, bool> configuredCollections = new ConcurrentDictionary<string, bool>();
         private readonly MongoDBGrainStorageOptions options;
         private readonly ILogger<MongoGrainStorage> logger;
         private readonly IGrainStateSerializer serializer;
@@ -173,6 +175,28 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         private IMongoCollection<BsonDocument> GetCollection(string grainType)
         {
             var collectionName = options.CollectionPrefix + grainType.Split('.', '+').Last();
+
+            if (configuredCollections.TryAdd(collectionName, true))
+            {
+                if (options.CreateShardKeyForCosmos)
+                {
+                    try
+                    {
+                        database.RunCommand<BsonDocument>(new BsonDocument
+                        {
+                            ["key"] = new BsonDocument
+                            {
+                                ["_id"] = "hashed"
+                            },
+                            ["shardCollection"] = $"{database.DatabaseNamespace.DatabaseName}.{collectionName}"
+                        });
+                    }
+                    catch (MongoException)
+                    {
+                        // Shared key probably created already.
+                    }
+                }
+            }
 
             return database.GetCollection<BsonDocument>(collectionName);
         }

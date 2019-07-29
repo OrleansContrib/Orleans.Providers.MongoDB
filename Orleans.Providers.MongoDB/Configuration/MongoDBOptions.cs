@@ -25,6 +25,8 @@ namespace Orleans.Providers.MongoDB.Configuration
         /// </summary>
         public string CollectionPrefix { get; set; }
 
+        public bool CreateShardKeyForCosmos { get; set; }
+
         internal void Validate(string name = null)
         {
             if (!string.IsNullOrWhiteSpace(ConnectionString))

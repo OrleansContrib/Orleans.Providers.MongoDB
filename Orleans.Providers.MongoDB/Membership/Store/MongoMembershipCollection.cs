@@ -16,8 +16,8 @@ namespace Orleans.Providers.MongoDB.Membership.Store
         private static readonly UpdateOptions Upsert = new UpdateOptions { IsUpsert = true };
         private readonly string collectionPrefix;
 
-        public MongoMembershipCollection(string connectionString, string databaseName, string collectionPrefix)
-            : base(connectionString, databaseName)
+        public MongoMembershipCollection(string connectionString, string databaseName, string collectionPrefix, bool createShardKey)
+            : base(connectionString, databaseName, createShardKey)
         {
             this.collectionPrefix = collectionPrefix;
         }

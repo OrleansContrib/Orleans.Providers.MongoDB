@@ -36,7 +36,8 @@ namespace Orleans.Providers.MongoDB.Membership
                 new MongoMembershipCollection(
                     options.ConnectionString,
                     options.DatabaseName,
-                    options.CollectionPrefix);
+                    options.CollectionPrefix,
+                    options.CreateShardKeyForCosmos);
 
             return Task.CompletedTask;
         }

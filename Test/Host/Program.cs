@@ -15,7 +15,9 @@ namespace Orleans.Providers.MongoDB.Test.Host
     {
         public static void Main(string[] args)
         {
-            string connectionString = "mongodb://localhost/OrleansTestApp";
+            var connectionString = "mongodb://squidex2:SATLMQL0G0EVIA0I2ugMuzvxvcdOFwe0kIyQhxShQeqJfQypEZVim9v2CI27FUVOgrFWy42oZLHbRcKbFyVu5w==@squidex2.documents.azure.com:10255/OrleansTestApp?ssl=true&replicaSet=globaldb";
+            var createShardKey = true;
+
             var silo = new SiloHostBuilder()
                 .ConfigureApplicationParts(options =>
                 {
@@ -24,6 +26,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 .UseMongoDBClustering(options =>
                 {
                     options.ConnectionString = connectionString;
+                    options.CreateShardKeyForCosmos = createShardKey;
                 })
                 .AddStartupTask(async (s, ct) =>
                 {
@@ -34,10 +37,13 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 .UseMongoDBReminders(options =>
                 {
                     options.ConnectionString = connectionString;
+                    options.CreateShardKeyForCosmos = createShardKey;
                 })
                 .AddMongoDBGrainStorage("MongoDBStore", options =>
                 {
                     options.ConnectionString = connectionString;
+                    options.CreateShardKeyForCosmos = createShardKey;
+
                     options.ConfigureJsonSerializerSettings = settings =>
                     {
                         settings.NullValueHandling = NullValueHandling.Include;
