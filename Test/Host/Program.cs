@@ -15,8 +15,8 @@ namespace Orleans.Providers.MongoDB.Test.Host
     {
         public static void Main(string[] args)
         {
-            var connectionString = "mongodb://squidex2:SATLMQL0G0EVIA0I2ugMuzvxvcdOFwe0kIyQhxShQeqJfQypEZVim9v2CI27FUVOgrFWy42oZLHbRcKbFyVu5w==@squidex2.documents.azure.com:10255/OrleansTestApp?ssl=true&replicaSet=globaldb";
-            var createShardKey = true;
+            var connectionString = "mongodb://localhost/OrleansTestApp";
+            var createShardKey = false;
 
             var silo = new SiloHostBuilder()
                 .ConfigureApplicationParts(options =>
