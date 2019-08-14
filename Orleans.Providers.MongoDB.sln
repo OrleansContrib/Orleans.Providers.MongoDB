@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29123.88
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orleans.Providers.MongoDB", "Orleans.Providers.MongoDB\Orleans.Providers.MongoDB.csproj", "{E49725D0-D9E8-4F68-8FE3-919F062D3041}"
 EndProject
@@ -17,8 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		Orleans.Providers.MongoDB.sln.DotSettings = Orleans.Providers.MongoDB.sln.DotSettings
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orleans.Providers.MongoDB.UnitTest", "UnitTest\Orleans.Providers.MongoDB.UnitTest.csproj", "{BFDB3AA7-0778-4D84-BF58-537460AD9869}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{A29BB09A-B983-4BEC-80F0-FE28DE6B6CE9}"
 	ProjectSection(SolutionItems) = preProject
@@ -101,22 +99,6 @@ Global
 		{FF122DE7-FAB0-4605-B5AA-D8716CBCB6E9}.Release|x64.Build.0 = Release|Any CPU
 		{FF122DE7-FAB0-4605-B5AA-D8716CBCB6E9}.Release|x86.ActiveCfg = Release|Any CPU
 		{FF122DE7-FAB0-4605-B5AA-D8716CBCB6E9}.Release|x86.Build.0 = Release|Any CPU
-		{BFDB3AA7-0778-4D84-BF58-537460AD9869}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BFDB3AA7-0778-4D84-BF58-537460AD9869}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BFDB3AA7-0778-4D84-BF58-537460AD9869}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{BFDB3AA7-0778-4D84-BF58-537460AD9869}.Debug|ARM.Build.0 = Debug|Any CPU
-		{BFDB3AA7-0778-4D84-BF58-537460AD9869}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{BFDB3AA7-0778-4D84-BF58-537460AD9869}.Debug|x64.Build.0 = Debug|Any CPU
-		{BFDB3AA7-0778-4D84-BF58-537460AD9869}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{BFDB3AA7-0778-4D84-BF58-537460AD9869}.Debug|x86.Build.0 = Debug|Any CPU
-		{BFDB3AA7-0778-4D84-BF58-537460AD9869}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BFDB3AA7-0778-4D84-BF58-537460AD9869}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BFDB3AA7-0778-4D84-BF58-537460AD9869}.Release|ARM.ActiveCfg = Release|Any CPU
-		{BFDB3AA7-0778-4D84-BF58-537460AD9869}.Release|ARM.Build.0 = Release|Any CPU
-		{BFDB3AA7-0778-4D84-BF58-537460AD9869}.Release|x64.ActiveCfg = Release|Any CPU
-		{BFDB3AA7-0778-4D84-BF58-537460AD9869}.Release|x64.Build.0 = Release|Any CPU
-		{BFDB3AA7-0778-4D84-BF58-537460AD9869}.Release|x86.ActiveCfg = Release|Any CPU
-		{BFDB3AA7-0778-4D84-BF58-537460AD9869}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

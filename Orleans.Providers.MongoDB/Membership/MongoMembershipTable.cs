@@ -109,7 +109,12 @@ namespace Orleans.Providers.MongoDB.Membership
 
         private Task DoAndLog(string actionName, Func<Task> action)
         {
-            return DoAndLog(actionName, async () => { await action(); return true; });
+            return DoAndLog(actionName, async () =>
+            {
+                await action();
+
+                return true;
+            });
         }
 
         private async Task<T> DoAndLog<T>(string actionName, Func<Task<T>> action)
