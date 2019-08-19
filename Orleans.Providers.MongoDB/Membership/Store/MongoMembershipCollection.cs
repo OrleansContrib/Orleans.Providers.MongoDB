@@ -29,7 +29,23 @@ namespace Orleans.Providers.MongoDB.Membership.Store
 
         protected override void SetupCollection(IMongoCollection<MongoMembershipDocument> collection)
         {
-            collection.Indexes.CreateOne(new CreateIndexModel<MongoMembershipDocument>(Index.Ascending(x => x.DeploymentId)));
+            var byDeploymentIdDefinition = Index.Ascending(x => x.DeploymentId);
+            try
+            {
+                collection.Indexes.CreateOne(
+                    new CreateIndexModel<MongoMembershipDocument>(byDeploymentIdDefinition,
+                        new CreateIndexOptions
+                        {
+                            Name = "ByDeploymentId"
+                        }));
+            }
+            catch (MongoCommandException ex)
+            {
+                if (ex.CodeName == "IndexOptionsConflict")
+                {
+                    collection.Indexes.CreateOne(new CreateIndexModel<MongoMembershipDocument>(byDeploymentIdDefinition));
+                }
+            }
         }
 
         public async Task<bool> UpsertRow(string deploymentId, MembershipEntry entry, string etag)

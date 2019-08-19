@@ -38,28 +38,50 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
 
         protected override void SetupCollection(IMongoCollection<MongoReminderDocument> collection)
         {
-            collection.Indexes.CreateOne(
-                new CreateIndexModel<MongoReminderDocument>(
-                    Index
-                        .Ascending(x => x.IsDeleted)
-                        .Ascending(x => x.ServiceId)
-                        .Ascending(x => x.GrainHash),
-                    new CreateIndexOptions
-                    {
-                        Name = "ByHash"
-                    }));
+            var byHashDefinition =
+                Index
+                    .Ascending(x => x.IsDeleted)
+                    .Ascending(x => x.ServiceId)
+                    .Ascending(x => x.GrainHash);
+            try
+            {
+                collection.Indexes.CreateOne(
+                    new CreateIndexModel<MongoReminderDocument>(byHashDefinition,
+                        new CreateIndexOptions
+                        {
+                            Name = "ByHash"
+                        }));
+            }
+            catch (MongoCommandException ex)
+            {
+                if (ex.CodeName == "IndexOptionsConflict")
+                {
+                    collection.Indexes.CreateOne(new CreateIndexModel<MongoReminderDocument>(byHashDefinition));
+                }
+            }
 
-            collection.Indexes.CreateOne(
-               new CreateIndexModel<MongoReminderDocument>(
-                   Index
-                        .Ascending(x => x.IsDeleted)
-                        .Ascending(x => x.ServiceId)
-                        .Ascending(x => x.GrainId)
-                        .Ascending(x => x.ReminderName),
-                    new CreateIndexOptions
-                    {
-                        Name = "ByName"
-                    }));
+            var byNameDefinition =
+                Index
+                    .Ascending(x => x.IsDeleted)
+                    .Ascending(x => x.ServiceId)
+                    .Ascending(x => x.GrainId)
+                    .Ascending(x => x.ReminderName);
+            try
+            {
+                collection.Indexes.CreateOne(
+                   new CreateIndexModel<MongoReminderDocument>(byNameDefinition,
+                        new CreateIndexOptions
+                        {
+                            Name = "ByName"
+                        }));
+            }
+            catch (MongoCommandException ex)
+            {
+                if (ex.CodeName == "IndexOptionsConflict")
+                {
+                    collection.Indexes.CreateOne(new CreateIndexModel<MongoReminderDocument>(byNameDefinition));
+                }
+            }
         }
 
         public virtual async Task<ReminderTableData> ReadRowsInRange(uint beginHash, uint endHash)
