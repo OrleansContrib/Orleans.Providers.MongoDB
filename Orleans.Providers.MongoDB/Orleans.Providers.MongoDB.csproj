@@ -2,24 +2,26 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <Version>2.7.0</Version>
+    <Version>3.0.0</Version>
     <Authors>laredoza,sebastianstehle</Authors>
     <Company>Orleans.Providers.MongoDB</Company>
     <Description>A MongoDb implementation of the Orleans Providers. This includes custering (IMembershipTable and IGatewayListProvider), reminders (IReminderTable) and storage providers (IGrainStorage).</Description>
     <Copyright>MIT</Copyright>
     <PackageTags>Orleans OrleansProviders MongoDB</PackageTags>
-    <PackageReleaseNotes>Migration to Orleans 2.0 completed.</PackageReleaseNotes>
-    <PackageIconUrl>http://dotnet.github.io/orleans/assets/logo.png</PackageIconUrl>
-    <PackageLicenseUrl>https://github.com/dotnet/Orleans#license</PackageLicenseUrl>
+    <PackageReleaseNotes>Migration to Orleans 3.0 completed.</PackageReleaseNotes>
+    <PackageIcon>OrleansLogo.png</PackageIcon>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/OrleansContrib/Orleans.Providers.MongoDB</PackageProjectUrl>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Orleans.OrleansProviders" Version="2.3.2" />
-    <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="2.3.2" />
-    <PackageReference Include="MongoDB.Driver" Version="2.8.1" />
-    <PackageReference Include="System.Reflection.Metadata" Version="1.6.0" />
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="Microsoft.Orleans.OrleansProviders" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="3.0.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.9.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="OrleansLogo.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
 </Project>
