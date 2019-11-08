@@ -8,9 +8,6 @@ using Orleans.Providers.MongoDB.Membership.Store;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Utils;
 using Orleans.Configuration;
-using Orleans.Providers.MongoDB.Membership.Store.Single;
-using Orleans.Providers.MongoDB.Membership.Store.MultipleDeprecated;
-using Orleans.Providers.MongoDB.Membership.Store.Multiple;
 
 // ReSharper disable ConvertToLambdaExpression
 
@@ -44,35 +41,14 @@ namespace Orleans.Providers.MongoDB.Membership
         /// <inheritdoc />
         public Task InitializeGatewayListProvider()
         {
-            switch (options.Strategy)
-            {
-                case MongoDBMembershipStrategy.SingleDocument:
-                    gatewaysCollection =
-                        new SingleMembershipCollection(
-                            options.ConnectionString,
-                            options.DatabaseName,
-                            options.CollectionPrefix,
-                            options.CreateShardKeyForCosmos);
-                    break;
-                case MongoDBMembershipStrategy.Muiltiple:
-                    gatewaysCollection =
-                        new MultipleMembershipCollection(
-                            options.ConnectionString,
-                            options.DatabaseName,
-                            options.CollectionPrefix,
-                            options.CreateShardKeyForCosmos);
-                    break;
-                case MongoDBMembershipStrategy.MultipleDeprecated:
-                    gatewaysCollection =
-                        new MultipleDeprecatedMembershipCollection(
-                            options.ConnectionString,
-                            options.DatabaseName,
-                            options.CollectionPrefix,
-                            options.CreateShardKeyForCosmos);
-                    break;
-            }
+            CreateCollection();
 
             return Task.CompletedTask;
+        }
+
+        private void CreateCollection()
+        {
+            gatewaysCollection = Factory.CreateCollection(options, options.Strategy);
         }
 
         /// <inheritdoc />

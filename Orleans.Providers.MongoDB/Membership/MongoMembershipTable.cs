@@ -7,9 +7,6 @@ using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
 using Orleans.Configuration;
-using Orleans.Providers.MongoDB.Membership.Store.Single;
-using Orleans.Providers.MongoDB.Membership.Store.MultipleDeprecated;
-using Orleans.Providers.MongoDB.Membership.Store.Multiple;
 
 // ReSharper disable ConvertToLambdaExpression
 
@@ -35,33 +32,7 @@ namespace Orleans.Providers.MongoDB.Membership
         /// <inheritdoc />
         public Task InitializeMembershipTable(bool tryInitTableVersion)
         {
-            switch (options.Strategy)
-            {
-                case MongoDBMembershipStrategy.SingleDocument:
-                    membershipCollection =
-                        new SingleMembershipCollection(
-                            options.ConnectionString,
-                            options.DatabaseName,
-                            options.CollectionPrefix,
-                            options.CreateShardKeyForCosmos);
-                    break;
-                case MongoDBMembershipStrategy.Muiltiple:
-                    membershipCollection =
-                        new MultipleMembershipCollection(
-                            options.ConnectionString,
-                            options.DatabaseName,
-                            options.CollectionPrefix,
-                            options.CreateShardKeyForCosmos);
-                    break;
-                case MongoDBMembershipStrategy.MultipleDeprecated:
-                    membershipCollection =
-                        new MultipleDeprecatedMembershipCollection(
-                            options.ConnectionString,
-                            options.DatabaseName,
-                            options.CollectionPrefix,
-                            options.CreateShardKeyForCosmos);
-                    break;
-            }
+            membershipCollection = Factory.CreateCollection(options, options.Strategy);
 
             return Task.CompletedTask;
         }
