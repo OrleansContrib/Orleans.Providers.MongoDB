@@ -166,16 +166,13 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
 
                 return string.Equals(existingDocument?.ReminderName, reminderName, StringComparison.Ordinal);
             }
-            catch (MongoCommandException ex)
+            catch (MongoException ex)
             {
-                if (ex.Message.IndexOf("duplicate", StringComparison.OrdinalIgnoreCase) >= 0)
+                if (ex.IsDuplicateKey())
                 {
                     return false;
                 }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
         }
 
@@ -197,9 +194,9 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
                     updateDocument,
                     Upsert);
             }
-            catch (MongoWriteException ex)
+            catch (MongoException ex)
             {
-                if (ex.WriteError.Category != ServerErrorCategory.DuplicateKey)
+                if (!ex.IsDuplicateKey())
                 {
                     throw;
                 }

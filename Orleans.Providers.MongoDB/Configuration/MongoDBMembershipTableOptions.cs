@@ -7,6 +7,8 @@ namespace Orleans.Providers.MongoDB.Configuration
     /// </summary>
     public sealed class MongoDBMembershipTableOptions : MongoDBOptions
     {
+        public MongoDBMembershipStrategy Strategy { get; set; }
+
         public MongoDBMembershipTableOptions()
         {
         }

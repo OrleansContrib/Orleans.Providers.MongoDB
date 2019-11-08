@@ -17,15 +17,14 @@ namespace Orleans.Providers.MongoDB.Membership
     {
         private readonly ILogger<MongoGatewayListProvider> logger;
         private readonly MongoDBGatewayListProviderOptions options;
-        private readonly TimeSpan maxStaleness;
         private readonly string clusterId;
-        private MongoMembershipCollection gatewaysCollection;
+        private IMongoMembershipCollection gatewaysCollection;
 
         /// <inheritdoc />
         public bool IsUpdatable { get; } = true;
 
         /// <inheritdoc />
-        public TimeSpan MaxStaleness => maxStaleness;
+        public TimeSpan MaxStaleness { get; }
 
         public MongoGatewayListProvider(
             ILogger<MongoGatewayListProvider> logger,
@@ -36,20 +35,20 @@ namespace Orleans.Providers.MongoDB.Membership
             this.logger = logger;
             this.options = options.Value;
             this.clusterId = clusterOptions.Value.ClusterId;
-            this.maxStaleness = gatewayOptions.Value.GatewayListRefreshPeriod;
+            this.MaxStaleness = gatewayOptions.Value.GatewayListRefreshPeriod;
         }
 
         /// <inheritdoc />
         public Task InitializeGatewayListProvider()
         {
-            gatewaysCollection =
-                new MongoMembershipCollection(
-                    options.ConnectionString,
-                    options.DatabaseName,
-                    options.CollectionPrefix,
-                    options.CreateShardKeyForCosmos);
+            CreateCollection();
 
             return Task.CompletedTask;
+        }
+
+        private void CreateCollection()
+        {
+            gatewaysCollection = Factory.CreateCollection(options, options.Strategy);
         }
 
         /// <inheritdoc />

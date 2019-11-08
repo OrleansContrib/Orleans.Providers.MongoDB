@@ -1,0 +1,409 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Orleans.Clustering.AzureStorage</name>
+    </assembly>
+    <members>
+        <member name="T:Orleans.Runtime.MultiClusterNetwork.AzureTableBasedGossipChannel">
+            <summary>
+            An implementation of a gossip channel based on a standard Orleans Azure table.
+            Multiple gossip networks can use the same table, and are separated by partition key = GlobalServiceId
+            </summary>
+        </member>
+        <member name="T:Orleans.Runtime.MultiClusterNetwork.GossipTableEntry">
+            <summary>
+            Low level representation details and functionality for Azure-Table-Based Gossip Channels
+            </summary>
+        </member>
+        <member name="M:Orleans.Runtime.MultiClusterNetwork.GossipTableInstanceManager.TryUpdateTableEntryAsync(Orleans.Runtime.MultiClusterNetwork.GossipTableEntry,System.String,System.String)">
+            <summary>
+            Try once to conditionally update a data entry in the Azure table. Returns false if etag does not match.
+            </summary>
+        </member>
+        <member name="M:Orleans.Runtime.MultiClusterNetwork.GossipTableInstanceManager.TryCreateTableEntryAsync(Orleans.Runtime.MultiClusterNetwork.GossipTableEntry,System.String)">
+            <summary>
+            Try once to insert a new data entry in the Azure table. Returns false if there is a conflict.
+            </summary>
+        </member>
+        <member name="M:Orleans.Runtime.MultiClusterNetwork.GossipTableInstanceManager.TryDeleteTableEntryAsync(Orleans.Runtime.MultiClusterNetwork.GossipTableEntry,System.String,System.String)">
+            <summary>
+            Try once to delete a data entry in the Azure table. Returns false if there is a conflict.
+            </summary>
+        </member>
+        <member name="M:Orleans.AzureUtils.OrleansSiloInstanceManager.ConvertToGatewayUri(Orleans.AzureUtils.SiloInstanceTableEntry)">
+            <summary>
+            Represent a silo instance entry in the gateway URI format.
+            </summary>
+            <param name="gateway">The input silo instance</param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.AzureUtils.OrleansSiloInstanceManager.TryCreateTableVersionEntryAsync">
+            <summary>
+            Insert (create new) row entry
+            </summary>
+        </member>
+        <member name="M:Orleans.AzureUtils.OrleansSiloInstanceManager.InsertSiloEntryConditionally(Orleans.AzureUtils.SiloInstanceTableEntry,Orleans.AzureUtils.SiloInstanceTableEntry,System.String)">
+            <summary>
+            Insert (create new) row entry
+            </summary>
+            <param name="siloEntry">Silo Entry to be written</param>
+            <param name="tableVersionEntry">Version row to update</param>
+            <param name="tableVersionEtag">Version row eTag</param>
+        </member>
+        <member name="M:Orleans.AzureUtils.OrleansSiloInstanceManager.UpdateSiloEntryConditionally(Orleans.AzureUtils.SiloInstanceTableEntry,System.String,Orleans.AzureUtils.SiloInstanceTableEntry,System.String)">
+            <summary>
+            Conditionally update the row for this entry, but only if the eTag matches with the current record in data store
+            </summary>
+            <param name="siloEntry">Silo Entry to be written</param>
+            <param name="entryEtag">ETag value for the entry being updated</param>
+            <param name="tableVersionEntry">Version row to update</param>
+            <param name="versionEtag">ETag value for the version row</param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Hosting.AzureTableClusteringExtensions.UseAzureStorageClustering(Orleans.Hosting.ISiloHostBuilder,System.Action{Orleans.Configuration.AzureStorageClusteringOptions})">
+            <summary>
+            Configures the silo to use Azure Storage for clustering.
+            </summary>
+            <param name="builder">
+            The silo builder.
+            </param>
+            <param name="configureOptions">
+            The configuration delegate.
+            </param>
+            <returns>
+            The provided <see cref="T:Orleans.Hosting.ISiloHostBuilder"/>.
+            </returns>
+        </member>
+        <member name="M:Orleans.Hosting.AzureTableClusteringExtensions.UseAzureStorageClustering(Orleans.Hosting.ISiloHostBuilder,System.Action{Microsoft.Extensions.Options.OptionsBuilder{Orleans.Configuration.AzureStorageClusteringOptions}})">
+            <summary>
+            Configures the silo to use Azure Storage for clustering.
+            </summary>
+            <param name="builder">
+            The silo builder.
+            </param>
+            <param name="configureOptions">
+            The configuration delegate.
+            </param>
+            <returns>
+            The provided <see cref="T:Orleans.Hosting.ISiloHostBuilder"/>.
+            </returns>
+        </member>
+        <member name="M:Orleans.Hosting.AzureTableClusteringExtensions.UseAzureStorageClustering(Orleans.Hosting.ISiloBuilder,System.Action{Orleans.Configuration.AzureStorageClusteringOptions})">
+            <summary>
+            Configures the silo to use Azure Storage for clustering.
+            </summary>
+            <param name="builder">
+            The silo builder.
+            </param>
+            <param name="configureOptions">
+            The configuration delegate.
+            </param>
+            <returns>
+            The provided <see cref="T:Orleans.Hosting.ISiloBuilder"/>.
+            </returns>
+        </member>
+        <member name="M:Orleans.Hosting.AzureTableClusteringExtensions.UseAzureStorageClustering(Orleans.Hosting.ISiloBuilder,System.Action{Microsoft.Extensions.Options.OptionsBuilder{Orleans.Configuration.AzureStorageClusteringOptions}})">
+            <summary>
+            Configures the silo to use Azure Storage for clustering.
+            </summary>
+            <param name="builder">
+            The silo builder.
+            </param>
+            <param name="configureOptions">
+            The configuration delegate.
+            </param>
+            <returns>
+            The provided <see cref="T:Orleans.Hosting.ISiloBuilder"/>.
+            </returns>
+        </member>
+        <member name="M:Orleans.Hosting.AzureTableClusteringExtensions.UseAzureStorageClustering(Orleans.IClientBuilder,System.Action{Orleans.Configuration.AzureStorageGatewayOptions})">
+            <summary>
+            Configures the client to use Azure Storage for clustering.
+            </summary>
+            <param name="builder">
+            The client builder.
+            </param>
+            <param name="configureOptions">
+            The configuration delegate.
+            </param>
+            <returns>
+            The provided <see cref="T:Orleans.IClientBuilder"/>.
+            </returns>
+        </member>
+        <member name="M:Orleans.Hosting.AzureTableClusteringExtensions.UseAzureStorageClustering(Orleans.IClientBuilder,System.Action{Microsoft.Extensions.Options.OptionsBuilder{Orleans.Configuration.AzureStorageGatewayOptions}})">
+            <summary>
+            Configures the client to use Azure Storage for clustering.
+            </summary>
+            <param name="builder">
+            The client builder.
+            </param>
+            <param name="configureOptions">
+            The configuration delegate.
+            </param>
+            <returns>
+            The provided <see cref="T:Orleans.IClientBuilder"/>.
+            </returns>
+        </member>
+        <member name="T:Orleans.Configuration.AzureStorageClusteringOptions">
+            <summary>
+            Specify options used for AzureTableBasedMembership
+            </summary>
+        </member>
+        <member name="P:Orleans.Configuration.AzureStorageClusteringOptions.MaxStorageBusyRetries">
+            <summary>
+            Retry count for Azure Table operations.
+            </summary>
+        </member>
+        <member name="P:Orleans.Configuration.AzureStorageClusteringOptions.ConnectionString">
+            <summary>
+            Connection string for Azure Storage
+            </summary>
+        </member>
+        <member name="P:Orleans.Configuration.AzureStorageClusteringOptions.TableName">
+            <summary>
+            Table name for Azure Storage
+            </summary>
+        </member>
+        <member name="P:Orleans.Configuration.AzureStorageGatewayOptions.ConnectionString">
+            <summary>
+            Connection string for Azure Storage
+            </summary>
+        </member>
+        <member name="P:Orleans.Configuration.AzureStorageGatewayOptions.TableName">
+            <summary>
+            Table name for Azure Storage
+            </summary>
+        </member>
+        <member name="T:Orleans.Clustering.AzureStorage.AzureTableDataManager`1">
+            <summary>
+            Utility class to encapsulate row-based access to Azure table storage.
+            </summary>
+            <typeparam name="T">Table data entry used by this table / manager.</typeparam>
+        </member>
+        <member name="P:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.TableName">
+            <summary> Name of the table this instance is managing. </summary>
+        </member>
+        <member name="P:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.Logger">
+            <summary> Logger for this table manager instance. </summary>
+        </member>
+        <member name="P:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.ConnectionString">
+            <summary> Connection string for the Azure storage account used to host this table. </summary>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.#ctor(System.String,System.String,Microsoft.Extensions.Logging.ILoggerFactory)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="tableName">Name of the table to be connected to.</param>
+            <param name="storageConnectionString">Connection string for the Azure storage account used to host this table.</param>
+            <param name="loggerFactory">Logger factory to use.</param>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.InitTableAsync">
+            <summary>
+            Connects to, or creates and initializes a new Azure table if it does not already exist.
+            </summary>
+            <returns>Completion promise for this operation.</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.DeleteTableAsync">
+            <summary>
+            Deletes the Azure table.
+            </summary>
+            <returns>Completion promise for this operation.</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.ClearTableAsync">
+            <summary>
+            Deletes all entities the Azure table.
+            </summary>
+            <returns>Completion promise for this operation.</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.CreateTableEntryAsync(`0)">
+            <summary>
+            Create a new data entry in the Azure table (insert new, not update existing).
+            Fails if the data already exists.
+            </summary>
+            <param name="data">Data to be inserted into the table.</param>
+            <returns>Value promise with new Etag for this data entry after completing this storage operation.</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.UpsertTableEntryAsync(`0)">
+            <summary>
+            Inserts a data entry in the Azure table: creates a new one if does not exists or overwrites (without eTag) an already existing version (the "update in place" semantics).
+            </summary>
+            <param name="data">Data to be inserted or replaced in the table.</param>
+            <returns>Value promise with new Etag for this data entry after completing this storage operation.</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.MergeTableEntryAsync(`0,System.String)">
+            <summary>
+            Merges a data entry in the Azure table.
+            </summary>
+            <param name="data">Data to be merged in the table.</param>
+            <param name="eTag">ETag to apply.</param>
+            <returns>Value promise with new Etag for this data entry after completing this storage operation.</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.UpdateTableEntryAsync(`0,System.String)">
+            <summary>
+            Updates a data entry in the Azure table: updates an already existing data in the table, by using eTag.
+            Fails if the data does not already exist or of eTag does not match.
+            </summary>
+            <param name="data">Data to be updated into the table.</param>
+            /// <param name="dataEtag">ETag to use.</param>
+            <returns>Value promise with new Etag for this data entry after completing this storage operation.</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.DeleteTableEntryAsync(`0,System.String)">
+            <summary>
+            Deletes an already existing data in the table, by using eTag.
+            Fails if the data does not already exist or if eTag does not match.
+            </summary>
+            <param name="data">Data entry to be deleted from the table.</param>
+            <param name="eTag">ETag to use.</param>
+            <returns>Completion promise for this storage operation.</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.ReadSingleTableEntryAsync(System.String,System.String)">
+            <summary>
+            Read a single table entry from the storage table.
+            </summary>
+            <param name="partitionKey">The partition key for the entry.</param>
+            <param name="rowKey">The row key for the entry.</param>
+            <returns>Value promise for tuple containing the data entry and its corresponding etag.</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.ReadAllTableEntriesForPartitionAsync(System.String)">
+            <summary>
+            Read all entries in one partition of the storage table.
+            NOTE: This could be an expensive and slow operation for large table partitions!
+            </summary>
+            <param name="partitionKey">The key for the partition to be searched.</param>
+            <returns>Enumeration of all entries in the specified table partition.</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.ReadAllTableEntriesAsync">
+            <summary>
+            Read all entries in the table.
+            NOTE: This could be a very expensive and slow operation for large tables!
+            </summary>
+            <returns>Enumeration of all entries in the table.</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.DeleteTableEntriesAsync(System.Collections.Generic.IReadOnlyCollection{System.Tuple{`0,System.String}})">
+            <summary>
+            Deletes a set of already existing data entries in the table, by using eTag.
+            Fails if the data does not already exist or if eTag does not match.
+            </summary>
+            <param name="collection">Data entries and their corresponding etags to be deleted from the table.</param>
+            <returns>Completion promise for this storage operation.</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.ReadTableEntriesAndEtagsAsync(System.String)">
+            <summary>
+            Read data entries and their corresponding eTags from the Azure table.
+            </summary>
+            <param name="filter">Filter string to use for querying the table and filtering the results.</param>
+            <returns>Enumeration of entries in the table which match the query condition.</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.BulkInsertTableEntries(System.Collections.Generic.IReadOnlyCollection{`0})">
+            <summary>
+            Inserts a set of new data entries into the table.
+            Fails if the data does already exists.
+            </summary>
+            <param name="collection">Data entries to be inserted into the table.</param>
+            <returns>Completion promise for this storage operation.</returns>
+        </member>
+        <member name="T:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.TableQueryFilterBuilder">
+            <summary>
+            Helper functions for building table queries.
+            </summary>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.TableQueryFilterBuilder.MatchPartitionKeyFilter(System.String)">
+            <summary>
+            Builds query string to match partitionkey
+            </summary>
+            <param name="partitionKey"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.TableQueryFilterBuilder.MatchRowKeyFilter(System.String)">
+            <summary>
+            Builds query string to match rowkey
+            </summary>
+            <param name="rowKey"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableDataManager`1.TableQueryFilterBuilder.MatchPartitionKeyAndRowKeyFilter(System.String,System.String)">
+            <summary>
+            Builds a query string that matches a specific partitionkey and rowkey.
+            </summary>
+            <param name="partitionKey"></param>
+            <param name="rowKey"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Orleans.Clustering.AzureStorage.AzureTableDefaultPolicies">
+            <summary>
+            Utility class for default retry / timeout settings for Azure storage.
+            </summary>
+            <remarks>
+            These functions are mostly intended for internal usage by Orleans runtime, but due to certain assembly packaging constraints this class needs to have public visibility.
+            </remarks>
+        </member>
+        <member name="T:Orleans.Clustering.AzureStorage.AzureTableConstants">
+            <summary>
+            Constants related to Azure Table storage (also applies to Table endpoints in Cosmos DB).
+            </summary>
+        </member>
+        <member name="T:Orleans.Clustering.AzureStorage.AzureTableUtils">
+            <summary>
+            General utility functions related to Azure Table storage (also applies to Table endpoints in Cosmos DB).
+            </summary>
+        </member>
+        <member name="F:Orleans.Clustering.AzureStorage.AzureTableUtils.ANY_ETAG">
+            <summary>
+            ETag of value "*" to match any etag for conditional table operations (update, merge, delete).
+            </summary>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableUtils.TableStorageDataNotFound(System.Exception)">
+            <summary>
+            Inspect an exception returned from Azure storage libraries to check whether it means that attempt was made to read some data that does not exist in storage table.
+            </summary>
+            <param name="exc">Exception that was returned by Azure storage library operation</param>
+            <returns><c>True</c> if this exception means the data being read was not present in Azure table storage</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableUtils.ExtractRestErrorCode(System.Exception)">
+            <summary>
+            Extract REST error code from DataServiceClientException or DataServiceQueryException
+            </summary>
+            <param name="exc">Exception to be inspected.</param>
+            <returns>Returns REST error code if found, otherwise <c>null</c></returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableUtils.EvaluateException(System.Exception,System.Net.HttpStatusCode@,System.String@,System.Boolean)">
+            <summary>
+            Examine a storage exception, and if applicable extracts the HTTP status code, and REST error code if <c>getRESTErrors=true</c>.
+            </summary>
+            <param name="e">Exception to be examined.</param>
+            <param name="httpStatusCode">Output HTTP status code if applicable, otherwise HttpStatusCode.Unused (306)</param>
+            <param name="restStatus">When <c>getRESTErrors=true</c>, will output REST error code if applicable, otherwise <c>null</c></param>
+            <param name="getRESTErrors">Whether REST error code should also be examined / extracted.</param>
+            <returns>Returns <c>true</c> if HTTP status code and REST error were extracted.</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableUtils.IsRetriableHttpError(System.Net.HttpStatusCode,System.String)">
+            <summary>
+            Returns true if the specified HTTP status / error code is returned in a transient / retriable error condition
+            </summary>
+            <param name="httpStatusCode">HTTP error code value</param>
+            <param name="restStatusCode">REST error code value</param>
+            <returns><c>true</c> if this is a transient / retriable error condition</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableUtils.IsContentionError(System.Net.HttpStatusCode)">
+            <summary>
+            Check whether a HTTP status code returned from a REST call might be due to a (temporary) storage contention error.
+            </summary>
+            <param name="httpStatusCode">HTTP status code to be examined.</param>
+            <returns>Returns <c>true</c> if the HTTP status code is due to storage contention.</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableUtils.IsNotFoundError(System.Net.HttpStatusCode)">
+            <summary>
+            Check whether a HTTP status code returned from a REST call might be due to a (temporary) storage contention error.
+            </summary>
+            <param name="httpStatusCode">HTTP status code to be examined.</param>
+            <returns>Returns <c>true</c> if the HTTP status code is due to storage contention.</returns>
+        </member>
+        <member name="M:Orleans.Clustering.AzureStorage.AzureTableUtils.SanitizeTableProperty(System.String)">
+            <summary>
+            Remove any characters that can't be used in Azure PartitionKey or RowKey values.
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
