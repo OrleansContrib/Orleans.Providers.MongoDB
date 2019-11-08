@@ -8,6 +8,7 @@ using Orleans.Providers.MongoDB.Membership.Store;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Utils;
 using Orleans.Configuration;
+using Orleans.Providers.MongoDB.Membership.Store.Single;
 
 // ReSharper disable ConvertToLambdaExpression
 
@@ -17,15 +18,14 @@ namespace Orleans.Providers.MongoDB.Membership
     {
         private readonly ILogger<MongoGatewayListProvider> logger;
         private readonly MongoDBGatewayListProviderOptions options;
-        private readonly TimeSpan maxStaleness;
         private readonly string clusterId;
-        private MongoMembershipCollection gatewaysCollection;
+        private IMongoMembershipCollection gatewaysCollection;
 
         /// <inheritdoc />
         public bool IsUpdatable { get; } = true;
 
         /// <inheritdoc />
-        public TimeSpan MaxStaleness => maxStaleness;
+        public TimeSpan MaxStaleness { get; }
 
         public MongoGatewayListProvider(
             ILogger<MongoGatewayListProvider> logger,
@@ -36,18 +36,33 @@ namespace Orleans.Providers.MongoDB.Membership
             this.logger = logger;
             this.options = options.Value;
             this.clusterId = clusterOptions.Value.ClusterId;
-            this.maxStaleness = gatewayOptions.Value.GatewayListRefreshPeriod;
+            this.MaxStaleness = gatewayOptions.Value.GatewayListRefreshPeriod;
         }
 
         /// <inheritdoc />
         public Task InitializeGatewayListProvider()
         {
-            gatewaysCollection =
-                new MongoMembershipCollection(
-                    options.ConnectionString,
-                    options.DatabaseName,
-                    options.CollectionPrefix,
-                    options.CreateShardKeyForCosmos);
+            switch (options.Strategy)
+            {
+                case MongoDBMembershipStrategy.SingleDocument:
+                    gatewaysCollection =
+                        new SingleMembershipCollection(
+                            options.ConnectionString,
+                            options.DatabaseName,
+                            options.CollectionPrefix,
+                            options.CreateShardKeyForCosmos);
+                    break;
+                case MongoDBMembershipStrategy.MultipleTransactional:
+                    break;
+                case MongoDBMembershipStrategy.MultipleDeprecated:
+                    gatewaysCollection =
+                        new MultipleDeprecatedMembershipCollection(
+                            options.ConnectionString,
+                            options.DatabaseName,
+                            options.CollectionPrefix,
+                            options.CreateShardKeyForCosmos);
+                    break;
+            }
 
             return Task.CompletedTask;
         }

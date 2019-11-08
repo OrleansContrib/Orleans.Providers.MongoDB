@@ -26,7 +26,8 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
             {
                 ConnectionString = "mongodb://localhost/OrleansTest",
                 CollectionPrefix = "Test_",
-                DatabaseName = "OrleansTest"
+                DatabaseName = "OrleansTest",
+                Strategy = MongoDBMembershipStrategy.MultipleDeprecated
             });
 
             return new MongoMembershipTable(
@@ -41,7 +42,8 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
             {
                 ConnectionString = "mongodb://localhost/OrleansTest",
                 CollectionPrefix = "Test_",
-                DatabaseName = "OrleansTest"
+                DatabaseName = "OrleansTest",
+                Strategy = MongoDBMembershipStrategy.MultipleDeprecated
             });
 
             return new MongoGatewayListProvider(
@@ -54,6 +56,12 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
         protected override Task<string> GetConnectionString()
         {
             return Task.FromResult("mongodb://localhost/OrleansTest");
+        }
+
+        [Fact, TestCategory("Functional")]
+        public async Task MembershipTable_MongoDB_CleanupDefunctSiloEntries()
+        {
+            await MembershipTable_GetGateways();
         }
 
         [Fact, TestCategory("Functional")]
@@ -92,13 +100,13 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
             await MembershipTable_UpdateRow(false);
         }
 
-        [Fact]
+        [Fact, TestCategory("Functional")]
         public async Task MembershipTable_MongoDB_UpdateRowInParallel()
         {
             await MembershipTable_UpdateRowInParallel(false);
         }
 
-        [Fact]
+        [Fact, TestCategory("Functional")]
         public async Task MembershipTable_MongoDB_UpdateIAmAlive()
         {
             await MembershipTable_UpdateIAmAlive(false);

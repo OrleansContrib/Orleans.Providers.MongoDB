@@ -12,6 +12,7 @@ namespace Orleans.Providers.MongoDB.Utils
     {
         private const string CollectionFormat = "{0}Set";
 
+        protected static readonly UpdateOptions Upsert = new UpdateOptions { IsUpsert = true };
         protected static readonly SortDefinitionBuilder<TEntity> Sort = Builders<TEntity>.Sort;
         protected static readonly UpdateDefinitionBuilder<TEntity> Update = Builders<TEntity>.Update;
         protected static readonly FilterDefinitionBuilder<TEntity> Filter = Builders<TEntity>.Filter;
@@ -20,7 +21,7 @@ namespace Orleans.Providers.MongoDB.Utils
 
         private readonly IMongoDatabase mongoDatabase;
         private readonly Lazy<IMongoCollection<TEntity>> mongoCollection;
-        private readonly bool createSharedKey;
+        private readonly bool createShardKey;
 
         protected IMongoCollection<TEntity> Collection
         {
@@ -32,14 +33,14 @@ namespace Orleans.Providers.MongoDB.Utils
             get { return mongoDatabase; }
         }
 
-        protected CollectionBase(string connectionString, string databaseName, bool createSharedKey)
+        protected CollectionBase(string connectionString, string databaseName, bool createShardKey)
         {
             var client = MongoClientPool.Instance(connectionString);
 
             mongoDatabase = client.GetDatabase(databaseName);
             mongoCollection = CreateCollection();
 
-            this.createSharedKey = createSharedKey;
+            this.createShardKey = createShardKey;
         }
 
         protected virtual MongoCollectionSettings CollectionSettings()
@@ -64,7 +65,7 @@ namespace Orleans.Providers.MongoDB.Utils
                     CollectionName(),
                     CollectionSettings() ?? new MongoCollectionSettings());
 
-                if (this.createSharedKey)
+                if (this.createShardKey)
                 {
                     try
                     {

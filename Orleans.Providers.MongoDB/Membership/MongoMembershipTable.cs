@@ -7,6 +7,7 @@ using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
 using Orleans.Configuration;
+using Orleans.Providers.MongoDB.Membership.Store.Single;
 
 // ReSharper disable ConvertToLambdaExpression
 
@@ -17,7 +18,7 @@ namespace Orleans.Providers.MongoDB.Membership
         private readonly ILogger<MongoMembershipTable> logger;
         private readonly MongoDBMembershipTableOptions options;
         private readonly string clusterId;
-        private MongoMembershipCollection membershipCollection;
+        private IMongoMembershipCollection membershipCollection;
         
         public MongoMembershipTable(
             ILogger<MongoMembershipTable> logger,
@@ -32,12 +33,27 @@ namespace Orleans.Providers.MongoDB.Membership
         /// <inheritdoc />
         public Task InitializeMembershipTable(bool tryInitTableVersion)
         {
-            membershipCollection =
-                new MongoMembershipCollection(
-                    options.ConnectionString,
-                    options.DatabaseName,
-                    options.CollectionPrefix,
-                    options.CreateShardKeyForCosmos);
+            switch (options.Strategy)
+            {
+                case MongoDBMembershipStrategy.SingleDocument:
+                    membershipCollection =
+                        new SingleMembershipCollection(
+                            options.ConnectionString,
+                            options.DatabaseName,
+                            options.CollectionPrefix,
+                            options.CreateShardKeyForCosmos);
+                    break;
+                case MongoDBMembershipStrategy.MultipleTransactional:
+                    break;
+                case MongoDBMembershipStrategy.MultipleDeprecated:
+                    membershipCollection =
+                        new MultipleDeprecatedMembershipCollection(
+                            options.ConnectionString,
+                            options.DatabaseName,
+                            options.CollectionPrefix,
+                            options.CreateShardKeyForCosmos);
+                    break;
+            }
 
             return Task.CompletedTask;
         }
@@ -74,7 +90,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(InsertRow), () =>
             {
-                return membershipCollection.UpsertRow(clusterId, entry, null);
+                return membershipCollection.UpsertRow(clusterId, entry, null, tableVersion);
             });
         }
 
@@ -83,7 +99,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             return DoAndLog(nameof(UpdateRow), () =>
             {
-                return membershipCollection.UpsertRow(clusterId, entry, etag);
+                return membershipCollection.UpsertRow(clusterId, entry, etag, tableVersion);
             });
         }
 

@@ -1,0 +1,1980 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>OrleansProviders</name>
+    </assembly>
+    <members>
+        <member name="M:Orleans.Hosting.ClientBuilderExtensions.AddMemoryStreams``1(Orleans.IClientBuilder,System.String,System.Action{Orleans.Hosting.IClusterClientMemoryStreamConfigurator})">
+            <summary>
+            Configure cluster client to use memory streams. This return a configurator for further configuration
+            </summary>
+        </member>
+        <member name="T:Orleans.Hosting.MemoryGrainStorageSiloBuilderExtensions">
+            <summary>
+            Silo host builder extensions
+            </summary>
+        </member>
+        <member name="M:Orleans.Hosting.MemoryGrainStorageSiloBuilderExtensions.AddMemoryGrainStorageAsDefault(Orleans.Hosting.ISiloHostBuilder,System.Action{Orleans.Configuration.MemoryGrainStorageOptions})">
+            <summary>
+            Configure silo to use memory grain storage as the default grain storage.
+            </summary>
+        </member>
+        <member name="M:Orleans.Hosting.MemoryGrainStorageSiloBuilderExtensions.AddMemoryGrainStorage(Orleans.Hosting.ISiloHostBuilder,System.String,System.Action{Orleans.Configuration.MemoryGrainStorageOptions})">
+            <summary>
+            Configure silo to use memory grain storage as the default grain storage.
+            </summary>
+        </member>
+        <member name="M:Orleans.Hosting.MemoryGrainStorageSiloBuilderExtensions.AddMemoryGrainStorageAsDefault(Orleans.Hosting.ISiloHostBuilder,System.Action{Microsoft.Extensions.Options.OptionsBuilder{Orleans.Configuration.MemoryGrainStorageOptions}})">
+            <summary>
+            Configure silo to use memory grain storage as the default grain storage.
+            </summary>
+        </member>
+        <member name="M:Orleans.Hosting.MemoryGrainStorageSiloBuilderExtensions.AddMemoryGrainStorage(Orleans.Hosting.ISiloHostBuilder,System.String,System.Action{Microsoft.Extensions.Options.OptionsBuilder{Orleans.Configuration.MemoryGrainStorageOptions}})">
+             <summary>
+            Configure silo to use memory grain storage as the default grain storage.
+             </summary>
+        </member>
+        <member name="M:Orleans.Hosting.MemoryGrainStorageSiloBuilderExtensions.AddMemoryGrainStorageAsDefault(Orleans.Hosting.ISiloBuilder,System.Action{Orleans.Configuration.MemoryGrainStorageOptions})">
+            <summary>
+            Configure silo to use memory grain storage as the default grain storage.
+            </summary>
+        </member>
+        <member name="M:Orleans.Hosting.MemoryGrainStorageSiloBuilderExtensions.AddMemoryGrainStorage(Orleans.Hosting.ISiloBuilder,System.String,System.Action{Orleans.Configuration.MemoryGrainStorageOptions})">
+            <summary>
+            Configure silo to use memory grain storage as the default grain storage.
+            </summary>
+        </member>
+        <member name="M:Orleans.Hosting.MemoryGrainStorageSiloBuilderExtensions.AddMemoryGrainStorageAsDefault(Orleans.Hosting.ISiloBuilder,System.Action{Microsoft.Extensions.Options.OptionsBuilder{Orleans.Configuration.MemoryGrainStorageOptions}})">
+            <summary>
+            Configure silo to use memory grain storage as the default grain storage.
+            </summary>
+        </member>
+        <member name="M:Orleans.Hosting.MemoryGrainStorageSiloBuilderExtensions.AddMemoryGrainStorage(Orleans.Hosting.ISiloBuilder,System.String,System.Action{Microsoft.Extensions.Options.OptionsBuilder{Orleans.Configuration.MemoryGrainStorageOptions}})">
+             <summary>
+            Configure silo to use memory grain storage as the default grain storage.
+             </summary>
+        </member>
+        <member name="M:Orleans.Hosting.SiloBuilderExtensions.AddMemoryStreams``1(Orleans.Hosting.ISiloHostBuilder,System.String,System.Action{Orleans.Hosting.ISiloMemoryStreamConfigurator})">
+            <summary>
+            Configure silo to use memory streams.
+            </summary>
+        </member>
+        <member name="M:Orleans.Hosting.SiloBuilderExtensions.AddMemoryStreams``1(Orleans.Hosting.ISiloBuilder,System.String,System.Action{Orleans.Hosting.ISiloMemoryStreamConfigurator})">
+            <summary>
+            Configure silo to use memory streams.
+            </summary>
+        </member>
+        <member name="T:Orleans.Hosting.SimpleGeneratorOptions">
+            <summary>
+            Simple generator configuration class.
+            This class is used to configure a generator stream provider to generate streams using the SimpleGenerator
+            </summary>
+        </member>
+        <member name="P:Orleans.Hosting.SimpleGeneratorOptions.StreamNamespace">
+            <summary>
+            Stream namespace
+            </summary>
+        </member>
+        <member name="P:Orleans.Hosting.SimpleGeneratorOptions.StreamGeneratorType">
+            <summary>
+            Stream generator type
+            </summary>
+        </member>
+        <member name="P:Orleans.Hosting.SimpleGeneratorOptions.EventsInStream">
+            <summary>
+            Nuber of events to generate on this stream
+            </summary>
+        </member>
+        <member name="T:Orleans.Configuration.MemoryGrainStorageOptions">
+            <summary>
+            Options for MemoryGrainStorage
+            </summary>
+        </member>
+        <member name="F:Orleans.Configuration.MemoryGrainStorageOptions.NumStorageGrainsDefaultValue">
+            <summary>
+            Default number of queue storage grains.
+            </summary>
+        </member>
+        <member name="P:Orleans.Configuration.MemoryGrainStorageOptions.NumStorageGrains">
+            <summary>
+            Number of store grains to use.
+            </summary>
+        </member>
+        <member name="P:Orleans.Configuration.MemoryGrainStorageOptions.InitStage">
+            <summary>
+            Stage of silo lifecycle where storage should be initialized.  Storage must be initialized prior to use.
+            </summary>
+        </member>
+        <member name="F:Orleans.Configuration.MemoryGrainStorageOptions.DEFAULT_INIT_STAGE">
+            <summary>
+            Default init stage
+            </summary>
+        </member>
+        <member name="M:Orleans.Configuration.MemoryGrainStorageOptionsValidator.#ctor(Orleans.Configuration.MemoryGrainStorageOptions,System.String)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="options">The option to be validated.</param>
+            <param name="name">The option name to be validated.</param>
+        </member>
+        <member name="P:Orleans.Configuration.StreamCacheEvictionOptions.DataMinTimeInCache">
+            <summary>
+            Minimum time message will stay in cache before it is available for time based purge.
+            </summary>
+        </member>
+        <member name="F:Orleans.Configuration.StreamCacheEvictionOptions.DefaultDataMinTimeInCache">
+            <summary>
+            Default DataMinTimeInCache
+            </summary>
+        </member>
+        <member name="P:Orleans.Configuration.StreamCacheEvictionOptions.DataMaxAgeInCache">
+            <summary>
+            Difference in time between the newest and oldest messages in the cache.  Any messages older than this will be purged from the cache.
+            </summary>
+        </member>
+        <member name="F:Orleans.Configuration.StreamCacheEvictionOptions.DefaultDataMaxAgeInCache">
+            <summary>
+            Default DataMaxAgeInCache
+            </summary>
+        </member>
+        <member name="P:Orleans.Configuration.StreamStatisticOptions.StatisticMonitorWriteInterval">
+            <summary>
+            Statistic monitor write interval
+            Statistics generation is triggered by activity.  Interval will be ignored when streams are inactive.
+            </summary>
+        </member>
+        <member name="F:Orleans.Configuration.StreamStatisticOptions.DefaultStatisticMonitorWriteInterval">
+            <summary>
+            Default statistic monitor write interval
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.EventSequenceToken">
+            <summary>
+            Stream sequence token that tracks sequence number and event index
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.EventSequenceToken.SequenceNumber">
+            <summary>
+            Number of event batches in stream prior to this event batch
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.EventSequenceToken.EventIndex">
+            <summary>
+            Number of events in batch prior to this event
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.EventSequenceToken.#ctor(System.Int64)">
+            <summary>
+            Sequence token constructor
+            </summary>
+            <param name="seqNumber"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.EventSequenceToken.#ctor(System.Int64,System.Int32)">
+            <summary>
+            Sequence token constructor
+            </summary>
+            <param name="seqNumber"></param>
+            <param name="eventInd"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.EventSequenceToken.CreateSequenceTokenForEvent(System.Int32)">
+            <summary>
+            Creates a sequence token for a specific event in the current batch
+            </summary>
+            <param name="eventInd"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.EventSequenceToken.Equals(System.Object)">
+            <summary>
+            Determines whether the specified object is equal to the current object.
+            </summary>
+            <returns>
+            true if the specified object  is equal to the current object; otherwise, false.
+            </returns>
+            <param name="obj">The object to compare with the current object. </param><filterpriority>2</filterpriority>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.EventSequenceToken.Equals(Orleans.Streams.StreamSequenceToken)">
+            <summary>
+            Indicates whether the current object is equal to another object of the same type.
+            </summary>
+            <returns>
+            true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
+            </returns>
+            <param name="other">An object to compare with this object.</param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.EventSequenceToken.CompareTo(Orleans.Streams.StreamSequenceToken)">
+            <summary>
+            Compares the current object with another object of the same type.
+            </summary>
+            <returns>
+            A value that indicates the relative order of the objects being compared. The return value has the following meanings: Value Meaning Less than zero This object is less than the <paramref name="other"/> parameter.Zero This object is equal to <paramref name="other"/>. Greater than zero This object is greater than <paramref name="other"/>. 
+            </returns>
+            <param name="other">An object to compare with this object.</param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.EventSequenceToken.GetHashCode">
+            <summary>
+            GetHashCode method for current EventSequenceToken
+            </summary>
+            <returns> Hash code for current EventSequenceToken object </returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.EventSequenceToken.ToString">
+            <summary>
+            ToString method
+            </summary>
+            <returns> A string which represent current EventSequenceToken object </returns>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.EventSequenceTokenV2">
+            <summary>
+            Stream sequence token that tracks sequence number and event index
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.EventSequenceTokenV2.SequenceNumber">
+            <summary>
+            Number of event batches in stream prior to this event batch
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.EventSequenceTokenV2.EventIndex">
+            <summary>
+            Number of events in batch prior to this event
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.EventSequenceTokenV2.#ctor(System.Int64)">
+            <summary>
+            Sequence token constructor
+            </summary>
+            <param name="seqNumber"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.EventSequenceTokenV2.#ctor(System.Int64,System.Int32)">
+            <summary>
+            Sequence token constructor
+            </summary>
+            <param name="seqNumber"></param>
+            <param name="eventInd"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.EventSequenceTokenV2.CreateSequenceTokenForEvent(System.Int32)">
+            <summary>
+            Creates a sequence token for a specific event in the current batch
+            </summary>
+            <param name="eventInd"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.EventSequenceTokenV2.Equals(System.Object)">
+            <summary>
+            Determines whether the specified object is equal to the current object.
+            </summary>
+            <returns>
+            true if the specified object  is equal to the current object; otherwise, false.
+            </returns>
+            <param name="obj">The object to compare with the current object. </param><filterpriority>2</filterpriority>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.EventSequenceTokenV2.Equals(Orleans.Streams.StreamSequenceToken)">
+            <summary>
+            Indicates whether the current object is equal to another object of the same type.
+            </summary>
+            <returns>
+            true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
+            </returns>
+            <param name="other">An object to compare with this object.</param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.EventSequenceTokenV2.CompareTo(Orleans.Streams.StreamSequenceToken)">
+            <summary>
+            Compares the current object with another object of the same type.
+            </summary>
+            <returns>
+            A value that indicates the relative order of the objects being compared. The return value has the following meanings: Value Meaning Less than zero This object is less than the <paramref name="other"/> parameter.Zero This object is equal to <paramref name="other"/>. Greater than zero This object is greater than <paramref name="other"/>. 
+            </returns>
+            <param name="other">An object to compare with this object.</param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.EventSequenceTokenV2.GetHashCode">
+            <summary>
+            GetHashCode method for current EventSequenceToken
+            </summary>
+            <returns> Hash code for current EventSequenceToken object </returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.EventSequenceTokenV2.ToString">
+            <summary>
+            ToString method
+            </summary>
+            <returns> A string which represent current EventSequenceToken object </returns>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.DefaultBlockPoolMonitor">
+            <summary>
+            block pool monitor used as a default option in GeneratorStreamprovider and MemoryStreamProvider
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.DefaultBlockPoolMonitor.Report(System.Int64,System.Int64,System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.DefaultBlockPoolMonitor.TrackMemoryReleased(System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.DefaultBlockPoolMonitor.TrackMemoryAllocated(System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.DefaultCacheMonitor">
+            <summary>
+            cache monitor used as a default option in GeneratorStreamprovider and MemoryStreamProvider
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.DefaultCacheMonitor.TrackCachePressureMonitorStatusChange(System.String,System.Boolean,System.Nullable{System.Double},System.Nullable{System.Double},System.Nullable{System.Double})">
+            <inheritdoc />
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.DefaultCacheMonitor.ReportCacheSize(System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.DefaultCacheMonitor.ReportMessageStatistics(System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.DefaultCacheMonitor.TrackMemoryAllocated(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.DefaultCacheMonitor.TrackMemoryReleased(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.DefaultCacheMonitor.TrackMessagesAdded(System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.DefaultCacheMonitor.TrackMessagesPurged(System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.DefaultQueueAdapterReceiverMonitor">
+            <summary>
+            Queue adapter receiver monitor used as a default option in GeneratorStreamprovider and MemoryStreamProvider
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.DefaultQueueAdapterReceiverMonitor.TrackInitialization(System.Boolean,System.TimeSpan,System.Exception)">
+            <summary>
+            Track attempts to initialize the receiver.
+            </summary>
+            <param name="success">True if read succeeded, false if read failed.</param>
+            <param name="callTime"></param>
+            <param name="exception"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.DefaultQueueAdapterReceiverMonitor.TrackRead(System.Boolean,System.TimeSpan,System.Exception)">
+            <summary>
+            Track attempts to read from the queue.    Tracked per queue read operation.
+            </summary>
+            <param name="success">True if read succeeded, false if read failed.</param>
+            <param name="callTime"></param>
+            <param name="exception"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.DefaultQueueAdapterReceiverMonitor.TrackMessagesReceived(System.Int64,System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            Tracks messages read and time taken per successful read.  Tracked per successful queue read operation.
+            </summary>
+            <param name="count">Messages read.</param>
+            <param name="oldestMessageEnqueueTimeUtc"></param>
+            <param name="newestMessageEnqueueTimeUtc"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.DefaultQueueAdapterReceiverMonitor.TrackShutdown(System.Boolean,System.TimeSpan,System.Exception)">
+            <summary>
+            Track attempts to shutdown the receiver.
+            </summary>
+            <param name="success">True if read succeeded, false if read failed.</param>
+            <param name="callTime"></param>
+            <param name="exception"></param>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.IBlockPoolMonitor">
+            <summary>
+            Monitor track block pool related metrics. Block pool is used in cache system for memory management 
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.IBlockPoolMonitor.TrackMemoryAllocated(System.Int64)">
+            <summary>
+            Track memory newly allocated by cache
+            </summary>
+            <param name="allocatedMemoryInByte"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.IBlockPoolMonitor.TrackMemoryReleased(System.Int64)">
+            <summary>
+            Track memory released from cache
+            </summary>
+            <param name="releasedMemoryInByte"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.IBlockPoolMonitor.Report(System.Int64,System.Int64,System.Int64)">
+            <summary>
+            Periodically report block pool status
+            </summary>
+            <param name="totalSizeInByte">total memory this block pool allocated</param>
+            <param name="availableMemoryInByte">memory which is available for allocating to caches</param>
+            <param name="claimedMemoryInByte">memory is in use by caches</param>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.ObjectPoolMonitorBridge">
+            <summary>
+            ObjectPoolMonitor report metrics for ObjectPool, which are based on object count. BlockPoolMonitor report metrics for BlockPool, which are based on memory size. 
+            These two monitor converge in orleans cache infrastructure, where ObjectPool is used as block pool to allocate memory, where each object represent a block of memory
+            which has a size. ObjectPoolMonitorBridge is the bridge between these two monitors in cache infrastructure. When ObjectPoolMonitor is reporting a metric, 
+            the user configured BlockPoolMonitor will call its counterpart method and reporting metric based on the math: memoryInByte = objectCount*objectSizeInByte
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ObjectPoolMonitorBridge.#ctor(Orleans.Providers.Streams.Common.IBlockPoolMonitor,System.Int32)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="blockPoolMonitor"></param>
+            <param name="blockSizeInByte"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ObjectPoolMonitorBridge.TrackObjectAllocated">
+            <summary>
+            Track object allocated event and also call its blcokPoolMonitor to report TrackMemoryAllocatedByCache
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ObjectPoolMonitorBridge.TrackObjectReleased">
+            <summary>
+            Track object released, and also call its blockPoolMonitor to report TrackMemoryReleasedFromCache
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ObjectPoolMonitorBridge.Report(System.Int64,System.Int64,System.Int64)">
+            <summary>
+            Periodically report object pool status, and also call its blockPoolMonitor to report its counter part metrics 
+            </summary>
+            <param name="totalObjects"></param>
+            <param name="availableObjects"></param>
+            <param name="claimedObjects"></param>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.ICacheMonitor">
+            <summary>
+            Responsible for monitoring cache related metrics
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ICacheMonitor.TrackCachePressureMonitorStatusChange(System.String,System.Boolean,System.Nullable{System.Double},System.Nullable{System.Double},System.Nullable{System.Double})">
+            <summary>
+            Track cache pressure metrics when cache pressure monitor encounter a status change
+            </summary>
+            <param name="pressureMonitorType"></param>
+            <param name="underPressure"></param>
+            <param name="cachePressureContributionCount"></param>
+            <param name="currentPressure"></param>
+            <param name="flowControlThreshold"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ICacheMonitor.TrackMessagesAdded(System.Int64)">
+            <summary>
+            Track message added to the cache, and newest and oldest messages among them 
+            </summary>
+            <param name="messageAdded"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ICacheMonitor.TrackMessagesPurged(System.Int64)">
+            <summary>
+            Track message purged from the cache, and the newest and oldest messages among them
+            </summary>
+            <param name="messagePurged"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ICacheMonitor.TrackMemoryAllocated(System.Int32)">
+            <summary>
+            Track new memory allocated by the cache
+            </summary>
+            <param name="memoryInByte"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ICacheMonitor.TrackMemoryReleased(System.Int32)">
+            <summary>
+            Track memory returned to block pool
+            </summary>
+            <param name="memoryInByte"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ICacheMonitor.ReportMessageStatistics(System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Int64)">
+            <summary>
+            Periodically report cache status metrics
+            </summary>
+            <param name="oldestMessageEnqueueTimeUtc">The time in Utc when oldest message enqueued the queue.</param>
+            <param name="oldestMessageDequeueTimeUtc">The time in Utc when oldest message was read from the queue and put in cache.</param>
+            <param name="newestMessageEnqueueTimeUtc">The time in Utc when newest message enqueued the queue.</param>
+            <param name="totalMessageCount"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ICacheMonitor.ReportCacheSize(System.Int64)">
+            <summary>
+            report total cache size
+            </summary>
+            <param name="totalCacheSizeInByte"></param>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.IObjectPoolMonitor">
+            <summary>
+            Monitor track object pool related metrics
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.IObjectPoolMonitor.TrackObjectAllocated">
+            <summary>
+            Track every time when an object is allocated
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.IObjectPoolMonitor.TrackObjectReleased">
+            <summary>
+            Track every time an object was released back to the pool
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.IObjectPoolMonitor.Report(System.Int64,System.Int64,System.Int64)">
+            <summary>
+            Periodically report object pool status
+            </summary>
+            <param name="totalObjects">Total size of object pool</param>
+            <param name="availableObjects">Count for objects in the pool which is available for allocating</param>
+            <param name="claimedObjects">Count for objects which are claimed, hence not available</param>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.IQueueAdapterReceiverMonitor">
+            <summary>
+            Responsible for monitoring receiver performance metrics.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.IQueueAdapterReceiverMonitor.TrackInitialization(System.Boolean,System.TimeSpan,System.Exception)">
+            <summary>
+            Track attempts to initialize the receiver.
+            </summary>
+            <param name="success">True if read succeeded, false if read failed.</param>
+            <param name="callTime">Init operation time</param>
+            <param name="exception">Exception caught if initialize fail</param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.IQueueAdapterReceiverMonitor.TrackRead(System.Boolean,System.TimeSpan,System.Exception)">
+            <summary>
+            Track attempts to read from the partition.    Tracked per partition read operation.
+            </summary>
+            <param name="success">True if read succeeded, false if read failed.</param>
+            <param name="callTime">Time spent in read operation.</param>
+            <param name="exception">The exception caught if read failed.</param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.IQueueAdapterReceiverMonitor.TrackMessagesReceived(System.Int64,System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            Tracks messages read and time taken per successful read.  Tracked per successful partition read operation.
+            </summary>
+            <param name="count">Messages read.</param>
+            <param name="oldestMessageEnqueueTimeUtc"></param>
+            <param name="newestMessageEnqueueTimeUtc"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.IQueueAdapterReceiverMonitor.TrackShutdown(System.Boolean,System.TimeSpan,System.Exception)">
+            <summary>
+            Track attempts to shutdown the receiver.
+            </summary>
+            <param name="success">True if read succeeded, false if read failed.</param>
+            <param name="callTime">Shutdown operation time</param>
+            <param name="exception">Exception caught if shutdown fail</param>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.ReceiverMonitorDimensions">
+            <summary>
+            Aggregation dimensions for receiver monitor
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.ReceiverMonitorDimensions.QueueId">
+            <summary>
+            Eventhub partition
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ReceiverMonitorDimensions.#ctor(System.String)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="queueId"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ReceiverMonitorDimensions.#ctor">
+            <summary>
+            Zero parameter constructor
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.CacheMonitorDimensions">
+            <summary>
+            Aggregation dimensions for cache monitor
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.CacheMonitorDimensions.BlockPoolId">
+            <summary>
+            Block pool Id
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.BlockPoolMonitorDimensions">
+            <summary>
+            Aggregation dimensions for block pool monitors
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.BlockPoolMonitorDimensions.BlockPoolId">
+            <summary>
+            Block pool Id
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.CachedMessage">
+            <summary>
+            This is a tightly packed cached structure containing a queue message.
+            It should only contain value types.
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Common.CachedMessage.StreamGuid">
+            <summary>
+            Guid of streamId this event is part of
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Common.CachedMessage.StreamNamespace">
+            <summary>
+            Interned Namespace string of streamId this event is part of
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Common.CachedMessage.SequenceNumber">
+            <summary>
+            Sequence number.  Position of event in queue
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Common.CachedMessage.EventIndex">
+            <summary>
+            Event index.  Index in batch
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Common.CachedMessage.EnqueueTimeUtc">
+            <summary>
+            Time event was written to EventHub
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Common.CachedMessage.DequeueTimeUtc">
+            <summary>
+            Time event was read from EventHub into this cache
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Common.CachedMessage.Segment">
+            <summary>
+            Segment containing the serialized event data
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.CachedMessageBlock">
+            <summary>
+            CachedMessageBlock is a block of tightly packed structures containing tracking data for cached messages.  This data is 
+              tightly packed to reduced GC pressure.  The tracking data is used by the queue cache to walk the cache serving ordered
+              queue messages by stream.
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.CachedMessageBlock.Node">
+            <summary>
+            Linked list node, so this message block can be kept in a linked list
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.CachedMessageBlock.HasCapacity">
+            <summary>
+            More messages can be added to the blocks
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.CachedMessageBlock.IsEmpty">
+            <summary>
+            Block is empty
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.CachedMessageBlock.NewestMessageIndex">
+            <summary>
+            Index of most recent message added to the block
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.CachedMessageBlock.OldestMessageIndex">
+            <summary>
+            Index of oldest message in this block
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.CachedMessageBlock.OldestMessage">
+            <summary>
+            Oldest message in the block
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.CachedMessageBlock.NewestMessage">
+            <summary>
+            Newest message in this block
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.CachedMessageBlock.ItemCount">
+            <summary>
+            Message count in this block
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.CachedMessageBlock.#ctor(System.Int32)">
+            <summary>
+            Block of cached messages
+            </summary>
+            <param name="blockSize"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.CachedMessageBlock.Remove">
+            <summary>
+            Removes a message from the start of the block (oldest data).  Returns true if more items are still available.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.CachedMessageBlock.Add(Orleans.Providers.Streams.Common.CachedMessage)">
+            <summary>
+            Add a message from the queue to the block.
+            Converts the queue message to a cached message and stores it at the end of the block.
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.CachedMessageBlock.Item(System.Int32)">
+            <summary>
+            Access the cached message at the provided index.
+            </summary>
+            <param name="index"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.CachedMessageBlock.GetSequenceToken(System.Int32,Orleans.Providers.Streams.Common.ICacheDataAdapter)">
+            <summary>
+            Gets the sequence token of the cached message a the provided index
+            </summary>
+            <param name="index"></param>
+            <param name="dataAdapter"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.CachedMessageBlock.GetNewestSequenceToken(Orleans.Providers.Streams.Common.ICacheDataAdapter)">
+            <summary>
+            Gets the sequence token of the newest message in this block
+            </summary>
+            <param name="dataAdapter"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.CachedMessageBlock.GetOldestSequenceToken(Orleans.Providers.Streams.Common.ICacheDataAdapter)">
+            <summary>
+            Gets the sequence token of the oldest message in this block
+            </summary>
+            <param name="dataAdapter"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.CachedMessageBlock.GetIndexOfFirstMessageLessThanOrEqualTo(Orleans.Streams.StreamSequenceToken)">
+            <summary>
+            Gets the index of the first message in this block that has a sequence token at or before the provided token
+            </summary>
+            <param name="token"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.CachedMessageBlock.TryFindFirstMessage(Orleans.Streams.IStreamIdentity,Orleans.Providers.Streams.Common.ICacheDataAdapter,System.Int32@)">
+            <summary>
+            Tries to find the first message in the block that is part of the provided stream.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.CachedMessageBlock.TryFindNextMessage(System.Int32,Orleans.Streams.IStreamIdentity,Orleans.Providers.Streams.Common.ICacheDataAdapter,System.Int32@)">
+            <summary>
+            Tries to get the next message from the provided stream, starting at the start index.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.CachedMessageBlock.OnResetState">
+            <summary>
+            Resets this blocks state to that of an empty block.
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.CachedMessagePool">
+            <summary>
+            Pool of tightly packed cached messages that are kept in large blocks to reduce GC pressure.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.CachedMessagePool.#ctor(Orleans.Providers.Streams.Common.ICacheDataAdapter)">
+            <summary>
+            Allocates a pool of cached message blocks.
+            </summary>
+            <param name="cacheDataAdapter"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.CachedMessagePool.AllocateMessage(Orleans.Providers.Streams.Common.CachedMessage)">
+            <summary>
+            Allocates a message in a block and returns the block the message is in.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.ChronologicalEvictionStrategy">
+            <summary>
+            Eviction strategy that evicts data based off of age.
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Common.ChronologicalEvictionStrategy.inUseBuffers">
+            <summary>
+            Buffers which are currently in use in the cache
+            Protected for test purposes
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ChronologicalEvictionStrategy.#ctor(Microsoft.Extensions.Logging.ILogger,Orleans.Providers.Streams.Common.TimePurgePredicate,Orleans.Providers.Streams.Common.ICacheMonitor,System.Nullable{System.TimeSpan})">
+            <summary>
+            Constructor
+            </summary>
+            <param name="logger"></param>
+            <param name="timePurage"></param>
+            <param name="cacheMonitor"></param>
+            <param name="monitorWriteInterval">"Interval to write periodic statistics.  Only triggered for active caches.</param>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.ChronologicalEvictionStrategy.PurgeObservable">
+            <inheritdoc />
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.ChronologicalEvictionStrategy.OnPurged">
+            <summary>
+            Called with the newest item in the cache and last item purged after a cache purge has run.
+            For ordered reliable queues we shouldn't need to notify on every purged event, only on the last event 
+              of every set of events that get purged.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ChronologicalEvictionStrategy.OnBlockAllocated(Orleans.Providers.Streams.Common.FixedSizeBuffer)">
+            <inheritdoc />
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ChronologicalEvictionStrategy.PerformPurge(System.DateTime)">
+            <inheritdoc />
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ChronologicalEvictionStrategy.ReportPurge(Microsoft.Extensions.Logging.ILogger,Orleans.Providers.Streams.Common.IPurgeObservable,System.Int32)">
+            <summary>
+            Logs cache purge activity
+            </summary>
+            <param name="logger"></param>
+            <param name="purgeObservable"></param>
+            <param name="itemsPurged"></param>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.FixedSizeBuffer">
+            <summary>
+            Manages a contiguous block of memory.
+            Calls purge action with itself as the purge request when it's signaled to purge.
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Common.FixedSizeBuffer.SizeInByte">
+            <summary>
+            Buffer size in Byte
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.FixedSizeBuffer.Id">
+            <summary>
+            Unique identifier of this buffer
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.FixedSizeBuffer.#ctor(System.Int32)">
+            <summary>
+            Manages access to a fixed size byte buffer.
+            </summary>
+            <param name="blockSizeInByte"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.FixedSizeBuffer.TryGetSegment(System.Int32,System.ArraySegment{System.Byte}@)">
+            <summary>
+            Try to get a segment with a buffer of the specified size from this block.
+            Fail if there is not enough space available
+            </summary>
+            <param name="size"></param>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.FixedSizeBuffer.OnResetState">
+            <inheritdoc />
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.ICacheDataAdapter">
+            <summary>
+            Pooled queue cache stores data in tightly packed structures that need to be transformed to various
+              other formats quickly.  Since the data formats may change by queue type and data format,
+              this interface allows adapter developers to build custom data transforms appropriate for 
+              the various types of queue data.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ICacheDataAdapter.GetBatchContainer(Orleans.Providers.Streams.Common.CachedMessage@)">
+            <summary>
+            Converts a cached message to a batch container for delivery
+            </summary>
+            <param name="cachedMessage"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ICacheDataAdapter.GetSequenceToken(Orleans.Providers.Streams.Common.CachedMessage@)">
+            <summary>
+            Gets the stream sequence token from a cached message.
+            </summary>
+            <param name="cachedMessage"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.IEvictionStrategy">
+            <summary>
+            Eviction strategy for the PooledQueueCache
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.IEvictionStrategy.PurgeObservable">
+            <summary>
+            IPurgeObservable is implemented by the cache to do purge related actions, and invoked by EvictionStrategy
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.IEvictionStrategy.OnPurged">
+            <summary>
+            Method which will be called when purge is finished
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.IEvictionStrategy.PerformPurge(System.DateTime)">
+            <summary>
+            Method which should be called when pulling agent try to do a purge on the cache
+            </summary>
+            <param name="utcNow"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.IEvictionStrategy.OnBlockAllocated(Orleans.Providers.Streams.Common.FixedSizeBuffer)">
+            <summary>
+            Method which should be called when data adapter allocated a new block
+            </summary>
+            <param name="newBlock"></param>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.IPurgeObservable">
+            <summary>
+            IPurgeObservable is implemented by the cache to do purge related actions, and invoked by EvictionStrategy
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.IPurgeObservable.RemoveOldestMessage">
+            <summary>
+            Remove oldest message in the cache
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.IPurgeObservable.Newest">
+            <summary>
+            Newest message in the cache
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.IPurgeObservable.Oldest">
+            <summary>
+            Oldest message in the cache
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.IPurgeObservable.ItemCount">
+            <summary>
+            Message count
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.IPurgeObservable.IsEmpty">
+            <summary>
+            Determine if the cache is empty
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.IObjectPool`1">
+            <summary>
+            Simple object pool Interface.
+            Objects allocated should be returned to the pool when disposed.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.IObjectPool`1.Allocate">
+            <summary>
+            Allocates a pooled resource
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.IObjectPool`1.Free(`0)">
+            <summary>
+            Returns a resource to the pool
+            </summary>
+            <param name="resource"></param>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.PooledResource`1">
+            <summary>
+            Utility class to support pooled objects by allowing them to track the pool they came from and return to it when disposed
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.PooledResource`1.Pool">
+            <summary>
+            The pool to return this resource to upon disposal.
+            A pool must set this property upon resource allocation.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.PooledResource`1.SignalPurge">
+            <summary>
+            If this object is to be used in a fixed size object pool, this call should be
+              overridden with the purge implementation that returns the object to the pool.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.PooledResource`1.Dispose">
+            <summary>
+            Returns item to pool
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.PooledResource`1.OnResetState">
+            <summary>
+            Notifies the object that it has been purged, so it can reset itself to
+              the state of a newly allocated object.
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.ObjectPool`1">
+            <summary>
+            Simple object pool that uses a stack to store available objects.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Common.ObjectPool`1.monitor">
+            <summary>
+            monitor to report statistics for current object pool
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ObjectPool`1.#ctor(System.Func{`0},Orleans.Providers.Streams.Common.IObjectPoolMonitor,System.Nullable{System.TimeSpan})">
+            <summary>
+            Simple object pool
+            </summary>
+            <param name="factoryFunc">Function used to create new resources of type T</param>
+            <param name="monitor">monitor to report statistics for object pool</param>
+            <param name="monitorWriteInterval"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ObjectPool`1.Allocate">
+            <summary>
+            Allocates a pooled resource
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.ObjectPool`1.Free(`0)">
+            <summary>
+            Returns a resource to the pool
+            </summary>
+            <param name="resource"></param>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.PooledQueueCache">
+            <summary>
+            The PooledQueueCache is a cache that is intended to serve as a message cache in an IQueueCache.
+            It is capable of storing large numbers of messages (gigs worth of messages) for extended periods
+              of time (minutes to indefinite), while incurring a minimal performance hit due to garbage collection.
+            This pooled cache allocates memory and never releases it. It keeps freed resources available in pools 
+              that remain in application use through the life of the service. This means these objects go to gen2,
+              are compacted, and then stay there. This is relatively cheap, as the only cost they now incur is
+              the cost of checking to see if they should be freed in each collection cycle. Since this cache uses
+              small numbers of large objects with relatively simple object graphs, they are less costly to check
+              then large numbers of smaller objects with more complex object graphs.
+            For performance reasons this cache is designed to more closely align with queue specific data.  This is,
+              in part, why, unlike the SimpleQueueCache, this cache does not implement IQueueCache.  It is intended
+              to be used in queue specific implementations of IQueueCache.
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.PooledQueueCache.Newest">
+            <summary>
+            Cached message most recently added
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.PooledQueueCache.Oldest">
+            <summary>
+            Oldest message in cache
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.PooledQueueCache.ItemCount">
+            <summary>
+            Cached message count
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.PooledQueueCache.#ctor(Orleans.Providers.Streams.Common.ICacheDataAdapter,Microsoft.Extensions.Logging.ILogger,Orleans.Providers.Streams.Common.ICacheMonitor,System.Nullable{System.TimeSpan})">
+            <summary>
+            Pooled queue cache is a cache of message that obtains resource from a pool
+            </summary>
+            <param name="cacheDataAdapter"></param>
+            <param name="logger"></param>
+            <param name="cacheMonitor"></param>
+            <param name="cacheMonitorWriteInterval">cache monitor write interval.  Only triggered for active caches.</param>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.PooledQueueCache.IsEmpty">
+            <summary>
+            Indicates whether the cache is empty
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.PooledQueueCache.GetCursor(Orleans.Streams.IStreamIdentity,Orleans.Streams.StreamSequenceToken)">
+            <summary>
+            Acquires a cursor to enumerate through the messages in the cache at the provided sequenceToken, 
+              filtered on the specified stream.
+            </summary>
+            <param name="streamIdentity">stream identity</param>
+            <param name="sequenceToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.PooledQueueCache.TryGetNextMessage(System.Object,Orleans.Streams.IBatchContainer@)">
+            <summary>
+            Acquires the next message in the cache at the provided cursor
+            </summary>
+            <param name="cursorObj"></param>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.PooledQueueCache.Add(System.Collections.Generic.List{Orleans.Providers.Streams.Common.CachedMessage},System.DateTime)">
+            <summary>
+            Add a list of queue message to the cache 
+            </summary>
+            <param name="messages"></param>
+            <param name="dequeueTime"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.PooledQueueCache.RemoveOldestMessage">
+            <summary>
+            Remove oldest message in the cache, remove oldest block too if the block is empty
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.TimePurgePredicate">
+            <summary>
+            Determines if data should be purged based off time.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.TimePurgePredicate.#ctor(System.TimeSpan,System.TimeSpan)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="minTimeInCache">minimum time data should be kept in cache, unless purged due to data size.</param>
+            <param name="maxRelativeMessageAge">maximum age of data to keep in the cache</param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.TimePurgePredicate.ShouldPurgFromTime(System.TimeSpan,System.TimeSpan)">
+            <summary>
+            Checks to see if the message should be purged.
+            Message should be purged if its relative age is greater than maxRelativeMessageAge and has been in the cache longer than the minTimeInCache.
+            </summary>
+            <param name="timeInCache">amount of time message has been in this cache</param>
+            <param name="relativeAge">Age of message relative to the most recent events read</param>
+            <returns></returns>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.SegmentBuilder">
+            <summary>
+            Utility class for encoding data into an ArraySegment.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SegmentBuilder.CalculateAppendSize(System.Byte[])">
+            <summary>
+            Calculates how much space will be needed to append the provided bytes into the segment.
+            </summary>
+            <param name="bytes"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SegmentBuilder.CalculateAppendSize(System.ArraySegment{System.Byte})">
+            <summary>
+            Calculates how much space will be needed to append the provided bytes into the segment.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SegmentBuilder.CalculateAppendSize(System.String)">
+            <summary>
+            Calculates how much space will be needed to append the provided string into the segment.
+            </summary>
+            <param name="str"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SegmentBuilder.Append(System.ArraySegment{System.Byte},System.Int32@,System.Byte[])">
+            <summary>
+            Appends an array of bytes to the end of the segment
+            </summary>
+            <param name="writerOffset"></param>
+            <param name="bytes"></param>
+            <param name="segment"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SegmentBuilder.Append(System.ArraySegment{System.Byte},System.Int32@,System.ArraySegment{System.Byte})">
+            <summary>
+            Appends an array of bytes to the end of the segment
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SegmentBuilder.Append(System.ArraySegment{System.Byte},System.Int32@,System.String)">
+            <summary>
+            Appends a string to the end of the segment
+            </summary>
+            <param name="writerOffset"></param>
+            <param name="str"></param>
+            <param name="segment"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SegmentBuilder.ReadNextBytes(System.ArraySegment{System.Byte},System.Int32@)">
+            <summary>
+            Reads the next item in the segment as a byte array.  For performance, this is returned as a sub-segment of the original segment.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SegmentBuilder.ReadNextString(System.ArraySegment{System.Byte},System.Int32@)">
+            <summary>
+            Reads the next item in the segment as a string.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.SimpleQueueAdapterCache">
+            <summary>
+            Adapter for simple queue caches
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Common.SimpleQueueAdapterCache.CacheSizePropertyName">
+            <summary>
+            Cache size property name for configuration
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueAdapterCache.#ctor(Orleans.Configuration.SimpleQueueCacheOptions,System.String,Microsoft.Extensions.Logging.ILoggerFactory)">
+            <summary>
+            Adapter for simple queue caches
+            </summary>
+            <param name="options"></param>
+            <param name="providerName"></param>
+            <param name="loggerFactory"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueAdapterCache.CreateQueueCache(Orleans.Streams.QueueId)">
+            <summary>
+            Create a cache for a given queue id
+            </summary>
+            <param name="queueId"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueAdapterCache.ParseSize(Orleans.Providers.IProviderConfiguration,System.Int32)">
+            <summary>
+            Parse the size property from configuration
+            </summary>
+            <param name="config"></param>
+            <param name="defaultSize"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.SimpleQueueCache">
+            <summary>
+            A queue cache that keeps items in memory
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Common.SimpleQueueCache.Size">
+            <summary>
+            Number of items in the cache
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueCache.GetMaxAddCount">
+            <summary>
+            The limit of the maximum number of items that can be added
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueCache.#ctor(System.Int32,Microsoft.Extensions.Logging.ILogger)">
+            <summary>
+            SimpleQueueCache Constructor
+            </summary>
+            <param name="cacheSize"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueCache.IsUnderPressure">
+            <summary>
+            Returns true if this cache is under pressure.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueCache.TryPurgeFromCache(System.Collections.Generic.IList{Orleans.Streams.IBatchContainer}@)">
+            <summary>
+            Ask the cache if it has items that can be purged from the cache 
+            (so that they can be subsequently released them the underlying queue).
+            </summary>
+            <param name="purgedItems"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueCache.AddToCache(System.Collections.Generic.IList{Orleans.Streams.IBatchContainer})">
+            <summary>
+            Add a list of message to the cache
+            </summary>
+            <param name="msgs"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueCache.GetCacheCursor(Orleans.Streams.IStreamIdentity,Orleans.Streams.StreamSequenceToken)">
+            <summary>
+            Acquire a stream message cursor.  This can be used to retrieve messages from the
+              cache starting at the location indicated by the provided token.
+            </summary>
+            <param name="streamIdentity"></param>
+            <param name="token"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueCache.TryGetNextMessage(Orleans.Providers.Streams.Common.SimpleQueueCacheCursor,Orleans.Streams.IBatchContainer@)">
+            <summary>
+            Acquires the next message in the cache at the provided cursor
+            </summary>
+            <param name="cursor"></param>
+            <param name="batch"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Common.SimpleQueueCacheCursor">
+            <summary>
+            Cursor into a simple queue cache
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueCacheCursor.#ctor(Orleans.Providers.Streams.Common.SimpleQueueCache,Orleans.Streams.IStreamIdentity,Microsoft.Extensions.Logging.ILogger)">
+            <summary>
+            Cursor into a simple queue cache
+            </summary>
+            <param name="cache"></param>
+            <param name="streamIdentity"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueCacheCursor.GetCurrent(System.Exception@)">
+            <summary>
+            Get the current value.
+            </summary>
+            <param name="exception"></param>
+            <returns>
+            Returns the current batch container.
+            If null then the stream has completed or there was a stream error.  
+            If there was a stream error, an error exception will be provided in the output.
+            </returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueCacheCursor.MoveNext">
+            <summary>
+            Move to next message in the stream.
+            If it returns false, there are no more messages.  The enumerator is still
+             valid however and can be called again when more data has come in on this
+             stream.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueCacheCursor.Refresh(Orleans.Streams.StreamSequenceToken)">
+            <summary>
+            Refresh that cache cursor. Called when new data is added into a cache.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueCacheCursor.RecordDeliveryFailure">
+            <summary>
+            Record that delivery of the current event has failed
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueCacheCursor.Dispose">
+            <summary>
+            Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueCacheCursor.Dispose(System.Boolean)">
+            <summary>
+            Clean up cache data when done
+            </summary>
+            <param name="disposing"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Common.SimpleQueueCacheCursor.ToString">
+            <summary>
+            Convert object to string
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Generator.StreamGeneratorCommand">
+            <summary>
+            Stream generator commands
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Generator.StreamGeneratorCommand.Configure">
+            <summary>
+            Command to configure the generator
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Generator.GeneratorAdapterFactory">
+            <summary>
+            Adapter factory for stream generator stream provider.
+            This factory acts as the adapter and the adapter factory.  It creates receivers that use configurable generator
+              to generate event streams, rather than reading them from storage.
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Generator.GeneratorAdapterFactory.queueMapperOptions">
+            <summary>
+            Configuration property name for generator configuration type
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Generator.GeneratorAdapterFactory.IsRewindable">
+            <summary>
+            Determines whether this is a rewindable stream adapter - supports subscribing from previous point in time.
+            </summary>
+            <returns>True if this is a rewindable stream adapter, false otherwise.</returns>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Generator.GeneratorAdapterFactory.Direction">
+            <summary>
+            Direction of this queue adapter: Read, Write or ReadWrite.
+            </summary>
+            <returns>The direction in which this adapter provides data.</returns>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Generator.GeneratorAdapterFactory.Name">
+            <summary>
+            Name of the adapter. From IQueueAdapter.
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Generator.GeneratorAdapterFactory.CacheMonitorFactory">
+            <summary>
+            Create a cache monitor to report cache related metrics
+            Return a ICacheMonitor
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Generator.GeneratorAdapterFactory.BlockPoolMonitorFactory">
+            <summary>
+            Create a block pool monitor to monitor block pool related metrics
+            Return a IBlockPoolMonitor
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Generator.GeneratorAdapterFactory.ReceiverMonitorFactory">
+            <summary>
+            Create a monitor to monitor QueueAdapterReceiver related metrics
+            Return a IQueueAdapterReceiverMonitor
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.GeneratorAdapterFactory.Init">
+            <summary>
+            Initialize the factory
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.GeneratorAdapterFactory.CreateAdapter">
+            <summary>
+            Create an adapter
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.GeneratorAdapterFactory.GetQueueAdapterCache">
+            <summary>
+            Get the cache adapter
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.GeneratorAdapterFactory.GetStreamQueueMapper">
+            <summary>
+            Get the stream queue mapper
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.GeneratorAdapterFactory.GetDeliveryFailureHandler(Orleans.Streams.QueueId)">
+            <summary>
+            Get the delivery failure handler
+            </summary>
+            <param name="queueId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.GeneratorAdapterFactory.QueueMessageBatchAsync``1(System.Guid,System.String,System.Collections.Generic.IEnumerable{``0},Orleans.Streams.StreamSequenceToken,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Stores a batch of messages
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="streamGuid"></param>
+            <param name="streamNamespace"></param>
+            <param name="events"></param>
+            <param name="token"></param>
+            <param name="requestContext"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.GeneratorAdapterFactory.CreateReceiver(Orleans.Streams.QueueId)">
+            <summary>
+            Creates a queue receiver for the specified queueId
+            </summary>
+            <param name="queueId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.GeneratorAdapterFactory.ExecuteCommand(System.Int32,System.Object)">
+            <summary>
+            A function to execute a control command.
+            </summary>
+            <param name="command">A serial number of the command.</param>
+            <param name="arg">An opaque command argument</param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.GeneratorAdapterFactory.CreateQueueCache(Orleans.Streams.QueueId)">
+            <summary>
+            Create a cache for a given queue id
+            </summary>
+            <param name="queueId"></param>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Generator.GeneratorPooledCache">
+            <summary>
+            Pooled cache for generator stream provider
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.GeneratorPooledCache.#ctor(Orleans.Providers.Streams.Common.IObjectPool{Orleans.Providers.Streams.Common.FixedSizeBuffer},Microsoft.Extensions.Logging.ILogger,Orleans.Serialization.SerializationManager,Orleans.Providers.Streams.Common.ICacheMonitor,System.Nullable{System.TimeSpan})">
+            <summary>
+            Pooled cache for generator stream provider
+            </summary>
+            <param name="bufferPool"></param>
+            <param name="logger"></param>
+            <param name="serializationManager"></param>
+            <param name="cacheMonitor"></param>
+            <param name="monitorWriteInterval">monitor write interval.  Only triggered for active caches.</param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.GeneratorPooledCache.GetMaxAddCount">
+            <summary>
+            The limit of the maximum number of items that can be added
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.GeneratorPooledCache.AddToCache(System.Collections.Generic.IList{Orleans.Streams.IBatchContainer})">
+            <summary>
+            Add messages to the cache
+            </summary>
+            <param name="messages"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.GeneratorPooledCache.TryPurgeFromCache(System.Collections.Generic.IList{Orleans.Streams.IBatchContainer}@)">
+            <summary>
+            Ask the cache if it has items that can be purged from the cache 
+            (so that they can be subsequently released them the underlying queue).
+            </summary>
+            <param name="purgedItems"></param>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.GeneratorPooledCache.GetCacheCursor(Orleans.Streams.IStreamIdentity,Orleans.Streams.StreamSequenceToken)">
+            <summary>
+            Acquire a stream message cursor.  This can be used to retrieve messages from the
+              cache starting at the location indicated by the provided token.
+            </summary>
+            <param name="streamIdentity"></param>
+            <param name="token"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.GeneratorPooledCache.IsUnderPressure">
+            <summary>
+            Returns true if this cache is under pressure.
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Generator.GeneratedEvent">
+            <summary>
+            Event use in generated streams
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Generator.GeneratedEvent.GeneratedEventType">
+            <summary>
+            Generated event type
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Generator.GeneratedEvent.GeneratedEventType.Fill">
+            <summary>
+            filler event
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.Streams.Generator.GeneratedEvent.GeneratedEventType.Report">
+            <summary>
+            Event that should trigger reporting
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Generator.GeneratedEvent.EventType">
+            <summary>
+            Event type
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Generator.GeneratedEvent.Payload">
+            <summary>
+            Event payload
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Generator.SimpleGenerator">
+            <summary>
+            Simple Generator
+            Generates a single stream of a configurable number of events.  One event per poll.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.SimpleGenerator.TryReadEvents(System.DateTime,System.Int32,System.Collections.Generic.List{Orleans.Streams.IBatchContainer}@)">
+            <summary>
+            Until we've generated the configured number of events, return a single generated event
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Generator.IStreamGenerator">
+            <summary>
+            Interface of generators used by the GeneratorStreamProvider.  Any method of generating events
+             must conform to this interface to be used by the GeneratorStreamProvider.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.IStreamGenerator.TryReadEvents(System.DateTime,System.Int32,System.Collections.Generic.List{Orleans.Streams.IBatchContainer}@)">
+            <summary>
+            Tries to get an event, if the generator is configured to generate any at this time
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.Streams.Generator.IStreamGenerator.Configure(System.IServiceProvider,Orleans.Providers.Streams.Generator.IStreamGeneratorConfig)">
+            <summary>
+            Configures the generator
+            </summary>
+            <param name="serviceProvider"></param>
+            <param name="generatorConfig"></param>
+        </member>
+        <member name="T:Orleans.Providers.Streams.Generator.IStreamGeneratorConfig">
+            <summary>
+            Interface of configuration for generators used by the GeneratorStreamProvider.  This interface covers
+              the minimal set of information the stream provider needs to configure a generator to generate data.  Generators should
+              add any additional configuration information needed to it's implementation of this interface.
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.Streams.Generator.IStreamGeneratorConfig.StreamGeneratorType">
+            <summary>
+            Stream generator type
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.IMemoryStreamQueueGrain">
+            <summary>
+            Interface for In-memory stream queue grain.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.IMemoryStreamQueueGrain.Enqueue(Orleans.Providers.MemoryMessageData)">
+            <summary>
+            Enqueue an event.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.IMemoryStreamQueueGrain.Dequeue(System.Int32)">
+            <summary>
+            Dequeue up to maxCount events.
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.MemoryAdapterFactory`1">
+            <summary>
+            Adapter factory for in memory stream provider.
+            This factory acts as the adapter and the adapter factory.  The events are stored in an in-memory grain that 
+            behaves as an event queue, this provider adapter is primarily used for testing
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.MemoryAdapterFactory`1.Name">
+            <summary>
+            Name of the adapter. Primarily for logging purposes
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.MemoryAdapterFactory`1.IsRewindable">
+            <summary>
+            Determines whether this is a rewindable stream adapter - supports subscribing from previous point in time.
+            </summary>
+            <returns>True if this is a rewindable stream adapter, false otherwise.</returns>
+        </member>
+        <member name="P:Orleans.Providers.MemoryAdapterFactory`1.Direction">
+            <summary>
+            Direction of this queue adapter: Read, Write or ReadWrite.
+            </summary>
+            <returns>The direction in which this adapter provides data.</returns>
+        </member>
+        <member name="P:Orleans.Providers.MemoryAdapterFactory`1.StreamFailureHandlerFactory">
+            <summary>
+            Creates a failure handler for a partition.
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.MemoryAdapterFactory`1.CacheMonitorFactory">
+            <summary>
+            Create a cache monitor to report cache related metrics
+            Return a ICacheMonitor
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.MemoryAdapterFactory`1.BlockPoolMonitorFactory">
+            <summary>
+            Create a block pool monitor to monitor block pool related metrics
+            Return a IBlockPoolMonitor
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.MemoryAdapterFactory`1.ReceiverMonitorFactory">
+            <summary>
+            Create a monitor to monitor QueueAdapterReceiver related metrics
+            Return a IQueueAdapterReceiverMonitor
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.MemoryAdapterFactory`1.Init">
+            <summary>
+            Factory initialization.
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.MemoryAdapterFactory`1.CreateAdapter">
+            <summary>
+            Create queue adapter.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.MemoryAdapterFactory`1.GetQueueAdapterCache">
+            <summary>
+            Create queue message cache adapter
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.MemoryAdapterFactory`1.GetStreamQueueMapper">
+            <summary>
+            Create queue mapper
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.MemoryAdapterFactory`1.CreateReceiver(Orleans.Streams.QueueId)">
+            <summary>
+            Creates a queue receiver for the specified queueId
+            </summary>
+            <param name="queueId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.MemoryAdapterFactory`1.QueueMessageBatchAsync``1(System.Guid,System.String,System.Collections.Generic.IEnumerable{``0},Orleans.Streams.StreamSequenceToken,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Writes a set of events to the queue as a single batch associated with the provided streamId.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="streamGuid"></param>
+            <param name="streamNamespace"></param>
+            <param name="events"></param>
+            <param name="token"></param>
+            <param name="requestContext"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.MemoryAdapterFactory`1.CreateQueueCache(Orleans.Streams.QueueId)">
+            <summary>
+            Create a cache for a given queue id
+            </summary>
+            <param name="queueId"></param>
+        </member>
+        <member name="M:Orleans.Providers.MemoryAdapterFactory`1.GetDeliveryFailureHandler(Orleans.Streams.QueueId)">
+            <summary>
+            Acquire delivery failure handler for a queue
+            </summary>
+            <param name="queueId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.MemoryAdapterFactory`1.GenerateDeterministicGuid(Orleans.Streams.QueueId)">
+            <summary>
+            Generate a deterministic Guid from a queue Id. 
+            </summary>
+            <param name="queueId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.MemoryAdapterFactory`1.GetQueueGrain(Orleans.Streams.QueueId)">
+            <summary>
+            Get a MemoryStreamQueueGrain instance by queue Id. 
+            </summary>
+            <param name="queueId"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Orleans.Providers.IMemoryMessageBodySerializer">
+            <summary>
+            Implementations of this interface are responsible for serializing MemoryMessageBody objects
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.IMemoryMessageBodySerializer.Serialize(Orleans.Providers.MemoryMessageBody)">
+            <summary>
+            Serialize MemoryMessageBody to an array segment of bytes.
+            </summary>
+            <param name="body"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.IMemoryMessageBodySerializer.Deserialize(System.ArraySegment{System.Byte})">
+            <summary>
+            Deserialize an array segment into a MemoryMessageBody
+            </summary>
+            <param name="bodyBytes"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Orleans.Providers.DefaultMemoryMessageBodySerializer">
+            <summary>
+            Default IMemoryMessageBodySerializer
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.DefaultMemoryMessageBodySerializer.#ctor(Orleans.Serialization.SerializationManager)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Orleans.Providers.DefaultMemoryMessageBodySerializer"/> class.
+            </summary>
+            <param name="serializationManager"></param>
+        </member>
+        <member name="M:Orleans.Providers.DefaultMemoryMessageBodySerializer.Serialize(Orleans.Providers.MemoryMessageBody)">
+            <inheritdoc />
+        </member>
+        <member name="M:Orleans.Providers.DefaultMemoryMessageBodySerializer.Deserialize(System.ArraySegment{System.Byte})">
+            <inheritdoc />
+        </member>
+        <member name="T:Orleans.Providers.MemoryMessageBody">
+            <summary>
+            Body of message sent over MemoryStreamProvider
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.MemoryMessageBody.#ctor(System.Collections.Generic.IEnumerable{System.Object},System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Constructor
+            </summary>
+            <param name="events">Events that are part of this message</param>
+            <param name="contex">Context in which this message was sent</param>
+        </member>
+        <member name="P:Orleans.Providers.MemoryMessageBody.Events">
+            <summary>
+            Events in message
+            </summary>
+        </member>
+        <member name="P:Orleans.Providers.MemoryMessageBody.RequestContext">
+            <summary>
+            Message context
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.MemoryMessageData">
+            <summary>
+            Represents the event sent and received from an In-Memory queue grain. 
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.MemoryMessageData.StreamGuid">
+            <summary>
+            Stream Guid of the event data.
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.MemoryMessageData.StreamNamespace">
+            <summary>
+            Stream namespace.
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.MemoryMessageData.SequenceNumber">
+            <summary>
+            Position of even in stream.
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.MemoryMessageData.DequeueTimeUtc">
+            <summary>
+            Time message was read from message queue
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.MemoryMessageData.EnqueueTimeUtc">
+            <summary>
+            Time message was written to message queue
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.MemoryMessageData.Payload">
+            <summary>
+            Serialized event data.
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.MemoryPooledCache`1">
+            <summary>
+            Pooled cache for memory stream provider
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.MemoryPooledCache`1.#ctor(Orleans.Providers.Streams.Common.IObjectPool{Orleans.Providers.Streams.Common.FixedSizeBuffer},Orleans.Providers.Streams.Common.TimePurgePredicate,Microsoft.Extensions.Logging.ILogger,`0,Orleans.Providers.Streams.Common.ICacheMonitor,System.Nullable{System.TimeSpan})">
+            <summary>
+            Pooled cache for memory stream provider
+            </summary>
+            <param name="bufferPool"></param>
+            <param name="purgePredicate"></param>
+            <param name="logger"></param>
+            <param name="serializer"></param>
+            <param name="cacheMonitor"></param>
+            <param name="monitorWriteInterval">monitor write interval.  Only triggered for active caches.</param>
+        </member>
+        <member name="M:Orleans.Providers.MemoryPooledCache`1.GetMaxAddCount">
+            <summary>
+            The limit of the maximum number of items that can be added
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.MemoryPooledCache`1.AddToCache(System.Collections.Generic.IList{Orleans.Streams.IBatchContainer})">
+            <summary>
+            Add messages to the cache
+            </summary>
+            <param name="messages"></param>
+        </member>
+        <member name="M:Orleans.Providers.MemoryPooledCache`1.TryPurgeFromCache(System.Collections.Generic.IList{Orleans.Streams.IBatchContainer}@)">
+            <summary>
+            Ask the cache if it has items that can be purged from the cache 
+            (so that they can be subsequently released them the underlying queue).
+            </summary>
+            <param name="purgedItems"></param>
+        </member>
+        <member name="M:Orleans.Providers.MemoryPooledCache`1.GetCacheCursor(Orleans.Streams.IStreamIdentity,Orleans.Streams.StreamSequenceToken)">
+            <summary>
+            Acquire a stream message cursor.  This can be used to retrieve messages from the
+              cache starting at the location indicated by the provided token.
+            </summary>
+            <param name="streamIdentity"></param>
+            <param name="token"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.MemoryPooledCache`1.IsUnderPressure">
+            <summary>
+            Returns true if this cache is under pressure.
+            </summary>
+        </member>
+        <member name="T:Orleans.Providers.MemoryStreamQueueGrain">
+            <summary>
+            Memory stream queue grain. This grain works as a storage queue of event data. Enqueue and Dequeue operations are supported.
+            the max event count sets the max storage limit to the queue.
+            </summary>
+        </member>
+        <member name="F:Orleans.Providers.MemoryStreamQueueGrain.maxEventCount">
+            <summary>
+            max event count. 
+            </summary>
+        </member>
+        <member name="M:Orleans.Providers.MemoryStreamQueueGrain.Enqueue(Orleans.Providers.MemoryMessageData)">
+            <summary>
+            Enqueues an event data. If the current total count reaches the max limit. throws an exception.
+            </summary>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Providers.MemoryStreamQueueGrain.Dequeue(System.Int32)">
+            <summary>
+            Dequeues up to a max amount of maxCount event data from the queue.
+            </summary>
+            <param name="maxCount"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Orleans.Storage.MemoryGrainStorage">
+            <summary>
+            This is a simple in-memory grain implementation of a storage provider.
+            </summary>
+            <remarks>
+            This storage provider is ONLY intended for simple in-memory Development / Unit Test scenarios.
+            This class should NOT be used in Production environment, 
+             because [by-design] it does not provide any resilience 
+             or long-term persistence capabilities.
+            </remarks>
+            <example>
+            Example configuration for this storage provider in OrleansConfiguration.xml file:
+            <code>
+            &lt;OrleansConfiguration xmlns="urn:orleans">
+              &lt;Globals>
+                &lt;StorageProviders>
+                  &lt;Provider Type="Orleans.Storage.MemoryStorage" Name="MemoryStore" />
+              &lt;/StorageProviders>
+            </code>
+            </example>
+        </member>
+        <member name="F:Orleans.Storage.MemoryGrainStorage.name">
+            <summary> Name of this storage provider instance. </summary>
+        </member>
+        <member name="M:Orleans.Storage.MemoryGrainStorage.#ctor(System.String,Orleans.Configuration.MemoryGrainStorageOptions,Microsoft.Extensions.Logging.ILoggerFactory,Orleans.IGrainFactory)">
+            <summary> Default constructor. </summary>
+        </member>
+        <member name="M:Orleans.Storage.MemoryGrainStorage.ReadStateAsync(System.String,Orleans.Runtime.GrainReference,Orleans.IGrainState)">
+            <summary> Read state data function for this storage provider. </summary>
+            <see cref="M:Orleans.Storage.IGrainStorage.ReadStateAsync(System.String,Orleans.Runtime.GrainReference,Orleans.IGrainState)"/>
+        </member>
+        <member name="M:Orleans.Storage.MemoryGrainStorage.WriteStateAsync(System.String,Orleans.Runtime.GrainReference,Orleans.IGrainState)">
+            <summary> Write state data function for this storage provider. </summary>
+            <see cref="M:Orleans.Storage.IGrainStorage.WriteStateAsync(System.String,Orleans.Runtime.GrainReference,Orleans.IGrainState)"/>
+        </member>
+        <member name="M:Orleans.Storage.MemoryGrainStorage.ClearStateAsync(System.String,Orleans.Runtime.GrainReference,Orleans.IGrainState)">
+            <summary> Delete / Clear state data function for this storage provider. </summary>
+            <see cref="M:Orleans.Storage.IGrainStorage.ClearStateAsync(System.String,Orleans.Runtime.GrainReference,Orleans.IGrainState)"/>
+        </member>
+        <member name="T:Orleans.Storage.MemoryGrainStorageFactory">
+            <summary>
+            Factory for creating MemoryGrainStorage
+            </summary>
+        </member>
+        <member name="T:Orleans.Storage.Internal.MemoryStorageEtagMismatchException">
+            <summary>Exception used to communicate with the storage provider, so that it throws this exception to its caller.</summary>
+        </member>
+        <member name="P:Orleans.Storage.Internal.MemoryStorageEtagMismatchException.StoredEtag">
+            <summary>The Etag value currently held in persistent storage.</summary>
+        </member>
+        <member name="P:Orleans.Storage.Internal.MemoryStorageEtagMismatchException.ReceivedEtag">
+            <summary>The Etag value currently help in memory, and attempting to be updated.</summary>
+        </member>
+        <member name="T:Orleans.Storage.MemoryStorageGrain">
+            <summary>
+            Implementation class for the Storage Grain used by In-memory storage provider
+            <c>Orleans.Storage.MemoryStorage</c>
+            </summary>
+        </member>
+        <member name="T:Orleans.Storage.MemoryStorageGrain.GrainStateStore.DeletedState">
+            <summary>
+            Marker to record deleted state so we can detect the difference between deleted state and state that never existed.
+            </summary>
+        </member>
+        <member name="T:Orleans.Storage.MemoryGrainStorageWithLatency">
+            <summary>
+            This is a simple in-memory implementation of a storage provider which presents fixed latency of storage calls.
+            This class is useful for system testing and investigation of the effects of storage latency.
+            </summary>
+            <remarks>
+            This storage provider is ONLY intended for simple in-memory Test scenarios.
+            This class should NOT be used in Production environment, 
+             because [by-design] it does not provide any resilience 
+             or long-term persistence capabilities.
+            </remarks>
+            <example>
+            Example configuration for this storage provider in OrleansConfiguration.xml file:
+            <code>
+            &lt;OrleansConfiguration xmlns="urn:orleans">
+              &lt;Globals>
+                &lt;StorageProviders>
+                  &lt;Provider Type="Orleans.Storage.MemoryStorageWithLatency" Name="MemoryStoreWithLatency" Latency="00:00:00.500"/>
+              &lt;/StorageProviders>
+            </code>
+            </example>
+        </member>
+        <member name="M:Orleans.Storage.MemoryGrainStorageWithLatency.#ctor(System.String,Orleans.Storage.MemoryStorageWithLatencyOptions,Microsoft.Extensions.Logging.ILoggerFactory,Orleans.IGrainFactory)">
+            <summary> Default constructor. </summary>
+        </member>
+        <member name="M:Orleans.Storage.MemoryGrainStorageWithLatency.ReadStateAsync(System.String,Orleans.Runtime.GrainReference,Orleans.IGrainState)">
+            <summary> Read state data function for this storage provider. </summary>
+            <see cref="M:Orleans.Storage.IGrainStorage.ReadStateAsync(System.String,Orleans.Runtime.GrainReference,Orleans.IGrainState)"/>
+        </member>
+        <member name="M:Orleans.Storage.MemoryGrainStorageWithLatency.WriteStateAsync(System.String,Orleans.Runtime.GrainReference,Orleans.IGrainState)">
+            <summary> Write state data function for this storage provider. </summary>
+            <see cref="M:Orleans.Storage.IGrainStorage.WriteStateAsync(System.String,Orleans.Runtime.GrainReference,Orleans.IGrainState)"/>
+        </member>
+        <member name="M:Orleans.Storage.MemoryGrainStorageWithLatency.ClearStateAsync(System.String,Orleans.Runtime.GrainReference,Orleans.IGrainState)">
+            <summary> Delete / Clear state data function for this storage provider. </summary>
+            <see cref="M:Orleans.Storage.IGrainStorage.ClearStateAsync(System.String,Orleans.Runtime.GrainReference,Orleans.IGrainState)"/>
+        </member>
+        <member name="F:Orleans.Storage.StorageProviderUtils.ANY_ETAG">
+            <summary>
+            ETag of value "*" to match any etag for conditional table operations (update, nerge, delete).
+            </summary>
+        </member>
+        <member name="T:Orleans.Streams.LoadShedQueueFlowController">
+            <summary>
+            Flow control triggered by silo load shedding.
+            All or nothing trigger.  Will request maxint, or 0.
+            </summary>
+        </member>
+        <member name="M:Orleans.Streams.LoadShedQueueFlowController.CreateAsPercentOfLoadSheddingLimit(Orleans.Configuration.LoadSheddingOptions,System.Int32)">
+            <summary>
+            Creates a flow controller triggered when the CPU reaches a percentage of the cluster load shedding limit.
+            This is intended to reduce queue read rate prior to causing the silo to shed load.
+            Note:  Triggered only when load shedding is enabled.
+            </summary>
+            <param name="options">The silo statistics options.</param>
+            <param name="percentOfSiloSheddingLimit">Percentage of load shed limit which triggers a reduction of queue read rate.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Streams.LoadShedQueueFlowController.CreateAsPercentageOfCPU(System.Int32,Orleans.Configuration.LoadSheddingOptions)">
+            <summary>
+            Creates a flow controller triggered when the CPU reaches the specified limit.
+            Note:  Triggered only when load shedding is enabled.
+            </summary>
+            <param name="loadSheddingLimit">Percentage of CPU which triggers queue read rate reduction</param>
+            <param name="options">The silo statistics options.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Orleans.Streams.LoadShedQueueFlowController.#ctor(System.Int32,Orleans.Configuration.LoadSheddingOptions)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="loadSheddingLimit"></param>
+            <param name="options"></param>
+        </member>
+        <member name="M:Orleans.Streams.LoadShedQueueFlowController.GetMaxAddCount">
+            <summary>
+            The limit of the maximum number of items that can be added
+            </summary>
+        </member>
+    </members>
+</doc>
