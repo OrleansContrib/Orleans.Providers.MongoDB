@@ -125,6 +125,8 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
 
                     await Task.WhenAll(tableVersion, entries);
 
+                    await session.CommitTransactionAsync();
+
                     return ReturnMembershipTableData(entries.Result, tableVersion.Result);
                 }
                 catch (Exception)
@@ -141,6 +143,8 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
             {
                 try
                 {
+                    session.StartTransaction();
+
                     var tableVersion = tableVersionCollection.GetTableVersionAsync(deploymentId);
 
                     var id = ReturnId(deploymentId, address);
@@ -150,6 +154,8 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
                             .ToListAsync();
 
                     await Task.WhenAll(tableVersion, entries);
+
+                    await session.CommitTransactionAsync();
 
                     return ReturnMembershipTableData(entries.Result, tableVersion.Result);
                 }
