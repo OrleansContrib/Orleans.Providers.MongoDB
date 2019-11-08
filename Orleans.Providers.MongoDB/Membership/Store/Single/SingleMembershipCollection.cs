@@ -50,7 +50,6 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Single
 
         public Task DeleteMembershipTableEntries(string deploymentId)
         {
-            return Task.CompletedTask;
             return Collection.DeleteOneAsync(x => x.DeploymentId == deploymentId);
         }
 
@@ -103,9 +102,20 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Single
             {
                 var subDocument = MembershipBase.Create<Membership>(entry, Guid.NewGuid().ToString());
 
-                var result = await Collection.UpdateOneAsync(x => x.DeploymentId == deploymentId && x.VersionEtag == tableVersion.VersionEtag,
+                var memberKey = $"Members.{BuildKey(entry.SiloAddress)}";
+
+                var etagCheck = 
+                    etag == null ?
+                        Filter.Not(Filter.Exists(memberKey)) :
+                        Filter.Eq($"{memberKey}.Etag", etag);
+
+                var result = await Collection.UpdateOneAsync(
+                    Filter.And(
+                        Filter.Eq(x => x.DeploymentId, deploymentId),
+                        Filter.Eq(x => x.VersionEtag, tableVersion.VersionEtag),
+                        etagCheck),
                     Update
-                        .Set($"Members.{BuildKey(entry.SiloAddress)}", subDocument)
+                        .Set(memberKey, subDocument)
                         .Set(x => x.Version, tableVersion.Version)
                         .Set(x => x.VersionEtag, (tableVersion.Version + 1).ToString()),
                     Upsert);

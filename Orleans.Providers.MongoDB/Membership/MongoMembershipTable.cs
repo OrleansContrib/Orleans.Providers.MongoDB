@@ -8,6 +8,8 @@ using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
 using Orleans.Configuration;
 using Orleans.Providers.MongoDB.Membership.Store.Single;
+using Orleans.Providers.MongoDB.Membership.Store.MultipleDeprecated;
+using Orleans.Providers.MongoDB.Membership.Store.Multiple;
 
 // ReSharper disable ConvertToLambdaExpression
 
@@ -43,7 +45,13 @@ namespace Orleans.Providers.MongoDB.Membership
                             options.CollectionPrefix,
                             options.CreateShardKeyForCosmos);
                     break;
-                case MongoDBMembershipStrategy.MultipleTransactional:
+                case MongoDBMembershipStrategy.Muiltiple:
+                    membershipCollection =
+                        new MultipleMembershipCollection(
+                            options.ConnectionString,
+                            options.DatabaseName,
+                            options.CollectionPrefix,
+                            options.CreateShardKeyForCosmos);
                     break;
                 case MongoDBMembershipStrategy.MultipleDeprecated:
                     membershipCollection =

@@ -13,9 +13,9 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
 {
     [TestCategory("Membership")]
     [TestCategory("Mongo")]
-    public class MongoMembershipTableTests : MembershipTableTestsBase
+    public class MongoMembershipTableTests_Multiple : MembershipTableTestsBase
     {
-        public MongoMembershipTableTests(ConnectionStringFixture fixture, TestEnvironmentFixture environment)
+        public MongoMembershipTableTests_Multiple(ConnectionStringFixture fixture, TestEnvironmentFixture environment)
             : base(fixture, environment, new LoggerFilterOptions())
         {
         }
@@ -27,7 +27,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
                 ConnectionString = "mongodb://localhost/OrleansTest",
                 CollectionPrefix = "Test_",
                 DatabaseName = "OrleansTest",
-                Strategy = MongoDBMembershipStrategy.MultipleDeprecated
+                Strategy = MongoDBMembershipStrategy.Muiltiple
             });
 
             return new MongoMembershipTable(
@@ -43,7 +43,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
                 ConnectionString = "mongodb://localhost/OrleansTest",
                 CollectionPrefix = "Test_",
                 DatabaseName = "OrleansTest",
-                Strategy = MongoDBMembershipStrategy.MultipleDeprecated
+                Strategy = MongoDBMembershipStrategy.Muiltiple
             });
 
             return new MongoGatewayListProvider(
@@ -79,37 +79,37 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
         [Fact, TestCategory("Functional")]
         public async Task MembershipTable_MongoDB_InsertRow()
         {
-            await MembershipTable_InsertRow(false);
+            await MembershipTable_InsertRow(true);
         }
 
         [Fact, TestCategory("Functional")]
         public async Task MembershipTable_MongoDB_ReadRow_Insert_Read()
         {
-            await MembershipTable_ReadRow_Insert_Read(false);
+            await MembershipTable_ReadRow_Insert_Read(true);
         }
 
         [Fact, TestCategory("Functional")]
         public async Task MembershipTable_MongoDB_ReadAll_Insert_ReadAll()
         {
-            await MembershipTable_ReadAll_Insert_ReadAll(false);
+            await MembershipTable_ReadAll_Insert_ReadAll(true);
         }
 
         [Fact, TestCategory("Functional")]
         public async Task MembershipTable_MongoDB_UpdateRow()
         {
-            await MembershipTable_UpdateRow(false);
+            await MembershipTable_UpdateRow(true);
         }
 
         [Fact, TestCategory("Functional")]
         public async Task MembershipTable_MongoDB_UpdateRowInParallel()
         {
-            await MembershipTable_UpdateRowInParallel(false);
+            await MembershipTable_UpdateRowInParallel(true);
         }
 
         [Fact, TestCategory("Functional")]
         public async Task MembershipTable_MongoDB_UpdateIAmAlive()
         {
-            await MembershipTable_UpdateIAmAlive(false);
+            await MembershipTable_UpdateIAmAlive(true);
         }
     }
 }
