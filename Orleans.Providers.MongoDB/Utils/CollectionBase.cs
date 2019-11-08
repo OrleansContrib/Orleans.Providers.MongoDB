@@ -20,6 +20,7 @@ namespace Orleans.Providers.MongoDB.Utils
         protected static readonly ProjectionDefinitionBuilder<TEntity> Project = Builders<TEntity>.Projection;
 
         private readonly IMongoDatabase mongoDatabase;
+        private readonly IMongoClient mongoClient;
         private readonly Lazy<IMongoCollection<TEntity>> mongoCollection;
         private readonly bool createShardKey;
 
@@ -33,11 +34,16 @@ namespace Orleans.Providers.MongoDB.Utils
             get { return mongoDatabase; }
         }
 
+        public IMongoClient Client
+        {
+            get { return mongoClient; }
+        }
+
         protected CollectionBase(string connectionString, string databaseName, bool createShardKey)
         {
-            var client = MongoClientPool.Instance(connectionString);
+            mongoClient = MongoClientPool.Instance(connectionString);
 
-            mongoDatabase = client.GetDatabase(databaseName);
+            mongoDatabase = mongoClient.GetDatabase(databaseName);
             mongoCollection = CreateCollection();
 
             this.createShardKey = createShardKey;

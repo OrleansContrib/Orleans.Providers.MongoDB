@@ -1,90 +1,98 @@
 # Orleans.Providers.MongoDB
+
+![Nuget](https://img.shields.io/nuget/v/Orleans.Providers.MongoDB)
+
 > Feedback would be appreciated.
 
-A MongoDb implementation of the Orleans Providers. This includes the Membership (IMembershipTable & IGatewayListProvider), Reminder (IReminderTable), MongoStatisticsPublisher and IStorageProvider providers.
+A MongoDb implementation of the Orleans Providers. 
 
-Please see the rc1 branch for the new Orleans 2 rc1 implementation (https://github.com/OrleansContrib/Orleans.Providers.MongoDB/tree/rc1) 
+This includes
 
-## Usage
-### Host Configuration
+ * Membership (`IMembershipTable` & `IGatewayListProvider`)
+ * Reminders (`IReminderTable`)
+ * Storage (`IStoragePRovider`)
 
-
-```ps
-install-package Orleans.Providers.MongoDB
-```
-### Update OrleansConfiguration.xml in the Host application.
-```xml
-<OrleansConfiguration xmlns="urn:orleans">
-  <Globals>
-    <!--
-    There is currently a known issue with the "Custom" membership provider OrleansConfiguration.xml configuration file that will fail to parse correctly. For this reason you have to provide a placeholder SystemStore in the xml and then configure the provider in code before starting the Silo.
-    -->
-    <SystemStore SystemStoreType="None" DataConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" DeploymentId="OrleansTest" />
-    
-    <StorageProviders>
-        <Provider Type="Orleans.Providers.MongoDB.StorageProviders.MongoDBStorage" Name="MongoDBStore" Database="" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" />
-    </StorageProviders>
-    
-	<StatisticsProviders>
-      <Provider Type="Orleans.Providers.MongoDB.Statistics.MongoStatisticsPublisher" Name="MongoStatisticsPublisher" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" />
-    </StatisticsProviders>
-  </Globals>
-  <Defaults>
-    <Networking Address="" Port="11111"/>
-    <ProxyingGateway Address="" Port="30000"/>
-    <!--WriteLogStatisticsToTable should not be true in a production enviroment. Typically only used by Orleans developers-->
-    <Statistics ProviderType="MongoStatisticsPublisher" WriteLogStatisticsToTable="false"/>
-  </Defaults>
-</OrleansConfiguration>
-```
-### Add the following to the Host startup
-
-```cs
-var config = ClusterConfiguration.LocalhostPrimarySilo();
-config.LoadFromFile(@".\OrleansConfiguration.xml");
-
-using (var silo = new SiloHost("primary", config))
-{
-    // Init Mongo Membership
-    silo.Config.Globals.LivenessType = GlobalConfiguration.LivenessProviderType.Custom;
-    silo.Config.Globals.MembershipTableAssembly = "Orleans.Providers.MongoDB";
-
-    // Disable Reminder Service
-    //silo.Config.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Disabled;
-    
-    // Enable Reminder Service
-    silo.Config.Globals.ReminderServiceType = GlobalConfiguration.ReminderServiceProviderType.Custom;
-    silo.Config.Globals.ReminderTableAssembly = "Orleans.Providers.MongoDB";
-
-    silo.InitializeOrleansSilo();
-    var result = silo.StartOrleansSilo();
-}
-```
-### Client Configuration
+## Installation
 
 ```ps
 install-package Orleans.Providers.MongoDB
 ```
-### Update ClientConfiguration.xml in the Client application.
-```xml
-<ClientConfiguration xmlns="urn:orleans">
-  <SystemStore SystemStoreType="Custom" CustomGatewayProviderAssemblyName="Orleans.Providers.MongoDB" DataConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" DeploymentId="OrleansTest" />
-  <StatisticsProviders>
-    <Provider Type="Orleans.Providers.MongoDB.Statistics.MongoStatisticsPublisher" Name="MongoStatisticsPublisher" ConnectionString="mongodb://admin:pass123@localhost:27017/Orleans?authSource=admin" />
-  </StatisticsProviders>
-  
-   <Statistics ProviderType="MongoStatisticsPublisher" WriteLogStatisticsToTable="false"/>
-</ClientConfiguration>
+
+## Setup
+
+### Membership
+
+Use the client builder to setup mongo db:
+
+```csharp
+var client = new ClientBuilder()
+    .UseMongoDBClustering(options =>
+    {
+        options.ConnectionString = connectionString;
+        options.Strategy = MongoDBMembershipStrategy.Muiltiple
+    })
+    ...
+    .Build();
 ```
-### Add the following to the Client startup
 
-```cs
-GrainClient.Initialize(ClientConfiguration.LoadFromFile(@".\ClientConfiguration.xml"));
-initialized = GrainClient.IsInitialized;
+and the same for the silo builder:
+
+```csharp
+var silo = new SiloHostBuilder()
+     .UseMongoDBClustering(options =>
+    {
+        options.ConnectionString = connectionString;
+        options.Strategy = MongoDBMembershipStrategy.Muiltiple
+    })
+    ...
+    .Build();
 ```
-### Storage Provider Serialization (Default - JSON)
-Binary serialization has been added to the Storage Provider and is controlled by the UseJsonFormat="false" parameter.Switching the serialization type while there is data in the storage collections will lead to data loss. 
 
-## Todo
+The provider supports three different strategies for membership management:
 
-- Continue Refactor & add tests for storage
+1. ```Single```: A single document per deployment. Fastest for small clusters.
+2. ```Multiple```: One document per silo and an extra document for the table version. Needs a replica set and transaction support to work properly.
+3. ```MultipleDeprecated```: One document per silo but no support for the extended membership protocol. Not recommended.
+
+### Reminders
+
+Just use the silo builder:
+
+```csharp
+var silo = new SiloHostBuilder()
+    .UseMongoDBReminders(options =>
+    {
+        options.ConnectionString = connectionString;
+        options.CreateShardKeyForCosmos = createShardKey;
+    })
+    ...
+    .Build();
+```
+
+### Storage
+
+Just use the silo builder:
+
+```csharp
+var silo = new SiloHostBuilder()
+    .AddMongoDBGrainStorage(options =>
+    {
+        options.ConnectionString = connectionString;
+        options.CreateShardKeyForCosmos = createShardKey;
+
+        options.ConfigureJsonSerializerSettings = settings =>
+        {
+            settings.NullValueHandling = NullValueHandling.Include;
+            settings.ObjectCreationHandling = ObjectCreationHandling.Replace;
+            settings.DefaultValueHandling = DefaultValueHandling.Populate;
+        };
+    })
+    ...
+    .Build();
+```
+
+The provider uses Newtonsoft.JSON to serialize and deserialize MongoDB documents. In our benchmarks we have noticed that is slightly faster and has the benfit that you do not need to care about two serializers.
+
+## Remarks
+
+As you can see you have to pass in the connection string to each provider. But we will only create one MongoDB client for each unique connection string to keep the number of connections to your cluster or server as low as possible.

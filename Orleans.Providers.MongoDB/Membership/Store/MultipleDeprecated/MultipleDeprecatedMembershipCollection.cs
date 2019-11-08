@@ -51,7 +51,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store.MultipleDeprecated
         {
             var id = ReturnId(deploymentId, entry.SiloAddress);
 
-            var document = MongoMembershipDocument.Create(entry, deploymentId, Guid.NewGuid().ToString(), id);
+            var document = MongoMembershipDocument.Create(entry, deploymentId, id);
 
             try
             {
@@ -59,9 +59,9 @@ namespace Orleans.Providers.MongoDB.Membership.Store.MultipleDeprecated
 
                 return true;
             }
-            catch (MongoWriteException ex)
+            catch (MongoException ex)
             {
-                if (ex.WriteError.Category == ServerErrorCategory.DuplicateKey)
+                if (ex.IsDuplicateKey())
                 {
                     return false;
                 }

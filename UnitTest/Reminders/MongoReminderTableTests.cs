@@ -43,19 +43,19 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
         }
 
         [Fact]
-        public async Task RemindersTable_MongoDB_RemindersRange()
+        public async Task Test_RemindersRange()
         {
             await RemindersRange(50);
         }
 
         [Fact]
-        public async Task RemindersTable_MongoDB_RemindersParallelUpsert()
+        public async Task Test_RemindersParallelUpsert()
         {
             await RemindersParallelUpsert();
         }
 
         [Fact]
-        public async Task RemindersTable_MongoDB_ReminderSimple()
+        public async Task Test_ReminderSimple()
         {
             await ReminderSimple();
         }

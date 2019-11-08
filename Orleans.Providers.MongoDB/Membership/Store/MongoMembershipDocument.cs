@@ -11,9 +11,9 @@ namespace Orleans.Providers.MongoDB.Membership.Store
         [BsonRequired]
         public string DeploymentId { get; set; }
 
-        public static MongoMembershipDocument Create(MembershipEntry entry, string deploymentId, string etag, string id)
+        public static MongoMembershipDocument Create(MembershipEntry entry, string deploymentId, string id)
         {
-            var result = Create<MongoMembershipDocument>(entry, etag);
+            var result = Create<MongoMembershipDocument>(entry);
 
             result.Id = id;
             result.DeploymentId = deploymentId;

@@ -122,9 +122,9 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                             .Set(FieldDoc, newData),
                         Upsert);
                 }
-                catch (MongoWriteException ex)
+                catch (MongoException ex)
                 {
-                    if (ex.WriteError.Category == ServerErrorCategory.DuplicateKey)
+                    if (ex.IsDuplicateKey())
                     {
                         await ThrowForOtherEtag(grainCollection, grainKey, etag, ex);
 
@@ -139,9 +139,9 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                         {
                             await grainCollection.ReplaceOneAsync(Filter.Eq(FieldId, grainKey), document, Upsert);
                         }
-                        catch (MongoWriteException ex2)
+                        catch (MongoException ex2)
                         {
-                            if (ex2.WriteError.Category == ServerErrorCategory.DuplicateKey)
+                            if (ex2.IsDuplicateKey())
                             {
                                 await ThrowForOtherEtag(grainCollection, grainKey, etag, ex2);
                             }

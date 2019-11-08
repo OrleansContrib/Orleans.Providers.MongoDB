@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Orleans.Providers.MongoDB.Membership.Store.Single
 {
-    public sealed class Deployment
+    public sealed class DeploymentDocument
     {
         [BsonId]
         [BsonRepresentation(BsonType.String)]
@@ -19,7 +19,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Single
         public string VersionEtag { get; set; }
 
         [BsonRequired]
-        public Dictionary<string, Membership> Members { get; set; }
+        public Dictionary<string, DeploymentMembership> Members { get; set; }
 
         public TableVersion ToTableVersion()
         {

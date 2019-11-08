@@ -52,14 +52,14 @@ namespace Orleans.Providers.MongoDB.Membership.Store
         [BsonIgnoreIfDefault]
         public DateTime Timestamp { get; set; }
 
-        public static T Create<T>(MembershipEntry entry, string etag) where T : MembershipBase, new()
+        public static T Create<T>(MembershipEntry entry) where T : MembershipBase, new()
         {
             var suspectTimes =
                 entry.SuspectTimes?.Select(MongoSuspectTime.Create).ToList() ?? new List<MongoSuspectTime>();
 
             return new T
             {
-                Etag = etag,
+                Etag = EtagHelper.CreateNew(),
                 FaultZone = entry.FaultZone,
                 HostName = entry.HostName,
                 IAmAliveTime = LogFormatter.PrintDate(entry.IAmAliveTime),

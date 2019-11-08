@@ -1,6 +1,6 @@
 ﻿namespace Orleans.Providers.MongoDB.Membership.Store.Single
 {
-    public sealed class Membership : MembershipBase
+    public sealed class DeploymentMembership : MembershipBase
     {
     }
 }

@@ -8,15 +8,10 @@ using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Membership.Store.Single
 {
-    public sealed class SingleMembershipCollection : CollectionBase<Deployment>, IMongoMembershipCollection
+    public sealed class SingleMembershipCollection : CollectionBase<DeploymentDocument>, IMongoMembershipCollection
     {
         private static readonly TableVersion NotFound = new TableVersion(0, "0");
         private readonly string collectionPrefix;
-
-        protected override string CollectionName()
-        {
-            return $"{collectionPrefix}OrleansMembershipSingle";
-        }
 
         public SingleMembershipCollection(string connectionString, string databaseName, string collectionPrefix, bool createShardKey)
             : base(connectionString, databaseName, createShardKey)
@@ -24,11 +19,16 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Single
             this.collectionPrefix = collectionPrefix;
         }
 
+        protected override string CollectionName()
+        {
+            return $"{collectionPrefix}OrleansMembershipSingle";
+        }
+
         public async Task CleanupDefunctSiloEntries(string deploymentId, DateTimeOffset beforeDate)
         {
             var deployment = await Collection.Find(x => x.DeploymentId == deploymentId).FirstOrDefaultAsync();
 
-            var updates = new List<UpdateDefinition<Deployment>>();
+            var updates = new List<UpdateDefinition<DeploymentDocument>>();
 
             foreach (var kvp in deployment.Members)
             {
@@ -100,7 +100,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Single
         {
             try
             {
-                var subDocument = MembershipBase.Create<Membership>(entry, Guid.NewGuid().ToString());
+                var subDocument = MembershipBase.Create<DeploymentMembership>(entry);
 
                 var memberKey = $"Members.{BuildKey(entry.SiloAddress)}";
 
@@ -117,14 +117,14 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Single
                     Update
                         .Set(memberKey, subDocument)
                         .Set(x => x.Version, tableVersion.Version)
-                        .Set(x => x.VersionEtag, (tableVersion.Version + 1).ToString()),
+                        .Set(x => x.VersionEtag, EtagHelper.CreateNew()),
                     Upsert);
 
                 return true;
             }
-            catch (MongoWriteException ex)
+            catch (MongoException ex)
             {
-                if (ex.WriteError.Category == ServerErrorCategory.DuplicateKey)
+                if (ex.IsDuplicateKey())
                 {
                     return false;
                 }
