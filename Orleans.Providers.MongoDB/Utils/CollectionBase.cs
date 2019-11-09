@@ -39,10 +39,8 @@ namespace Orleans.Providers.MongoDB.Utils
             get { return mongoClient; }
         }
 
-        protected CollectionBase(string connectionString, string databaseName, bool createShardKey)
+        protected CollectionBase(IMongoClient mongoClient, string databaseName, bool createShardKey)
         {
-            mongoClient = MongoClientPool.Instance(connectionString);
-
             mongoDatabase = mongoClient.GetDatabase(databaseName);
             mongoCollection = CreateCollection();
 

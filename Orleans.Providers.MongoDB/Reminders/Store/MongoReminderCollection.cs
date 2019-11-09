@@ -12,19 +12,18 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
     public class MongoReminderCollection : CollectionBase<MongoReminderDocument>
     {
         private static readonly FindOneAndUpdateOptions<MongoReminderDocument> UpsertReplace = new FindOneAndUpdateOptions<MongoReminderDocument> { IsUpsert = true };
-        private static readonly UpdateOptions Upsert = new UpdateOptions { IsUpsert = true };
         private readonly IGrainReferenceConverter grainReferenceConverter;
         private readonly string serviceId;
         private readonly string collectionPrefix;
 
         public MongoReminderCollection(
-            string connectionsString, 
+            IMongoClient mongoClient,
             string databaseName,
             string collectionPrefix,
             bool createShardKey,
             string serviceId,
             IGrainReferenceConverter grainReferenceConverter)
-            : base(connectionsString, databaseName, createShardKey)
+            : base(mongoClient, databaseName, createShardKey)
         {
             this.serviceId = serviceId;
             this.collectionPrefix = collectionPrefix;

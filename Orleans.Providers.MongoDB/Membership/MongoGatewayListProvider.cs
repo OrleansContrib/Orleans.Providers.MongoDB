@@ -8,6 +8,7 @@ using Orleans.Providers.MongoDB.Membership.Store;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Utils;
 using Orleans.Configuration;
+using MongoDB.Driver;
 
 // ReSharper disable ConvertToLambdaExpression
 
@@ -15,6 +16,7 @@ namespace Orleans.Providers.MongoDB.Membership
 {
     public sealed class MongoGatewayListProvider : IGatewayListProvider
     {
+        private readonly IMongoClient mongoClient;
         private readonly ILogger<MongoGatewayListProvider> logger;
         private readonly MongoDBGatewayListProviderOptions options;
         private readonly string clusterId;
@@ -27,11 +29,13 @@ namespace Orleans.Providers.MongoDB.Membership
         public TimeSpan MaxStaleness { get; }
 
         public MongoGatewayListProvider(
+            IMongoClientFactory mongoClientFactory,
             ILogger<MongoGatewayListProvider> logger,
             IOptions<ClusterOptions> clusterOptions,
             IOptions<GatewayOptions> gatewayOptions,
             IOptions<MongoDBGatewayListProviderOptions> options)
         {
+            this.mongoClient = mongoClientFactory.Create(options.Value, "Membership");
             this.logger = logger;
             this.options = options.Value;
             this.clusterId = clusterOptions.Value.ClusterId;
@@ -48,7 +52,7 @@ namespace Orleans.Providers.MongoDB.Membership
 
         private void CreateCollection()
         {
-            gatewaysCollection = Factory.CreateCollection(options, options.Strategy);
+            gatewaysCollection = Factory.CreateCollection(mongoClient, options, options.Strategy);
         }
 
         /// <inheritdoc />

@@ -14,12 +14,12 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
         private readonly TableVersionCollection tableVersionCollection;
         private readonly string collectionPrefix;
 
-        public MultipleMembershipCollection(string connectionString, string databaseName, string collectionPrefix, bool createShardKey)
-            : base(connectionString, databaseName, createShardKey)
+        public MultipleMembershipCollection(IMongoClient mongoClient, string databaseName, string collectionPrefix, bool createShardKey)
+            : base(mongoClient, databaseName, createShardKey)
         {
             this.collectionPrefix = collectionPrefix;
 
-            tableVersionCollection = new TableVersionCollection(connectionString, databaseName, collectionPrefix, createShardKey);
+            tableVersionCollection = new TableVersionCollection(mongoClient, databaseName, collectionPrefix, createShardKey);
         }
 
         protected override string CollectionName()

@@ -26,15 +26,18 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         private const string FieldEtag = "_etag";
         private readonly ConcurrentDictionary<string, bool> configuredCollections = new ConcurrentDictionary<string, bool>();
         private readonly MongoDBGrainStorageOptions options;
+        private readonly IMongoClient mongoClient;
         private readonly ILogger<MongoGrainStorage> logger;
         private readonly IGrainStateSerializer serializer;
         private IMongoDatabase database;
 
         public MongoGrainStorage(
+            IMongoClientFactory mongoClientFactory,
             ILogger<MongoGrainStorage> logger,
             IGrainStateSerializer serializer,
             MongoDBGrainStorageOptions options)
         {
+            this.mongoClient = mongoClientFactory.Create(options, "Storage");
             this.logger = logger;
             this.options = options;
             this.serializer = serializer;
@@ -59,9 +62,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         {
             return DoAndLog(nameof(Init), () =>
             {
-                var client = MongoClientPool.Instance(options.ConnectionString);
-
-                database = client.GetDatabase(options.DatabaseName);
+                database = mongoClient.GetDatabase(options.DatabaseName);
 
                 return Task.CompletedTask;
             });

@@ -9,8 +9,8 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
         private static readonly TableVersion NotFound = new TableVersion(0, "0");
         private readonly string collectionPrefix;
 
-        public TableVersionCollection(string connectionString, string databaseName, string collectionPrefix, bool createShardKey) 
-            : base(connectionString, databaseName, createShardKey)
+        public TableVersionCollection(IMongoClient mongoClient, string databaseName, string collectionPrefix, bool createShardKey) 
+            : base(mongoClient, databaseName, createShardKey)
         {
             this.collectionPrefix = collectionPrefix;
         }

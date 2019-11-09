@@ -20,6 +20,24 @@ install-package Orleans.Providers.MongoDB
 
 ## Setup
 
+### Install MongoDB (BREAKING CHANGE)
+ 
+From 3.1 onwards you have to register the IMongoClient in the service locator.
+
+```csharp
+var silo = new SiloHostBuilder()
+    .UseMongoDBClient("mongodb://localhost")
+    ...
+    .Build();
+
+var client = new ClientBuilder()
+    .UseMongoDBClient("mongodb://localhost")
+    ...
+    .Build();
+```
+
+as an alternative you can also implement the IMongoClientFactory interface and override the client names with options.
+
 ### Membership
 
 Use the client builder to setup mongo db:
@@ -28,7 +46,7 @@ Use the client builder to setup mongo db:
 var client = new ClientBuilder()
     .UseMongoDBClustering(options =>
     {
-        options.ConnectionString = connectionString;
+        options.DatabaseName = dbName;
         options.Strategy = MongoDBMembershipStrategy.Muiltiple
     })
     ...
@@ -41,7 +59,7 @@ and the same for the silo builder:
 var silo = new SiloHostBuilder()
      .UseMongoDBClustering(options =>
     {
-        options.ConnectionString = connectionString;
+        options.DatabaseName = dbName;
         options.Strategy = MongoDBMembershipStrategy.Muiltiple
     })
     ...
@@ -62,7 +80,7 @@ Just use the silo builder:
 var silo = new SiloHostBuilder()
     .UseMongoDBReminders(options =>
     {
-        options.ConnectionString = connectionString;
+        options.DatabaseName = dbName;
         options.CreateShardKeyForCosmos = createShardKey;
     })
     ...
@@ -77,7 +95,7 @@ Just use the silo builder:
 var silo = new SiloHostBuilder()
     .AddMongoDBGrainStorage(options =>
     {
-        options.ConnectionString = connectionString;
+        options.DatabaseName = dbName;
         options.CreateShardKeyForCosmos = createShardKey;
 
         options.ConfigureJsonSerializerSettings = settings =>

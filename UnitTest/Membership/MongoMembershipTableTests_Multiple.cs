@@ -24,13 +24,13 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
         {
             var options = Options.Create(new MongoDBMembershipTableOptions
             {
-                ConnectionString = "mongodb+srv://foo:1q2w3e$R@squidex-jlpkt.mongodb.net/test?retryWrites=true&w=majority",
                 CollectionPrefix = "Test_",
                 DatabaseName = "OrleansTest",
                 Strategy = MongoDBMembershipStrategy.Muiltiple
             });
 
             return new MongoMembershipTable(
+                TestClients.ReplicaSet.Value,
                 loggerFactory.CreateLogger<MongoMembershipTable>(),
                 clusterOptions,
                 options);
@@ -40,13 +40,13 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
         {
             var options = Options.Create(new MongoDBGatewayListProviderOptions
             {
-                ConnectionString = "mongodb+srv://foo:1q2w3e$R@squidex-jlpkt.mongodb.net/test?retryWrites=true&w=majority",
                 CollectionPrefix = "Test_",
                 DatabaseName = "OrleansTest",
                 Strategy = MongoDBMembershipStrategy.Muiltiple
             });
 
             return new MongoGatewayListProvider(
+                TestClients.ReplicaSet.Value,
                 loggerFactory.CreateLogger<MongoGatewayListProvider>(),
                 clusterOptions,
                 gatewayOptions,

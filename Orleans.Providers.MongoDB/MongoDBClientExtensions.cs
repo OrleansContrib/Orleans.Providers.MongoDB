@@ -17,6 +17,15 @@ namespace Orleans
     public static class MongoDBClientExtensions
     {
         /// <summary>
+        /// Configure silo to use MongoDb with a passed in connection string.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
+        public static IClientBuilder UseMongoDBClient(this IClientBuilder builder, string connectionString)
+        {
+            return builder.ConfigureServices(services => services.AddMongoDBClient(connectionString));
+        }
+
+        /// <summary>
         /// Configure client to use MongoGatewayListProvider
         /// </summary>
         public static IClientBuilder UseMongoDBClustering(this IClientBuilder builder,
