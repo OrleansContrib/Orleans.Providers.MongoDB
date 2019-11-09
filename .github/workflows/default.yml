@@ -1,0 +1,27 @@
+name: .NET Core
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.0.100
+
+    - name: Build
+      run: |
+        cd Orleans.Providers.MongoDB
+        dotnet pack --configuration Release
+        
+    - name: Publish
+      run: |
+        cd Orleans.Providers.MongoDB/bin/Release
+        dotnet nuget push *.nupkg --source 'https://api.nuget.org/v3/index.json' -k ${{ secrets.nuget }}
+      if: github.ref == 'refs/heads/master'

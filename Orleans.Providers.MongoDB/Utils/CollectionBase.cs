@@ -41,6 +41,8 @@ namespace Orleans.Providers.MongoDB.Utils
 
         protected CollectionBase(IMongoClient mongoClient, string databaseName, bool createShardKey)
         {
+            this.mongoClient = mongoClient;
+
             mongoDatabase = mongoClient.GetDatabase(databaseName);
             mongoCollection = CreateCollection();
 
