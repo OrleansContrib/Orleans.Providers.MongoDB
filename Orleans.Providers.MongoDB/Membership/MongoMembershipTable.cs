@@ -7,6 +7,7 @@ using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
 using Orleans.Configuration;
+using MongoDB.Driver;
 
 // ReSharper disable ConvertToLambdaExpression
 
@@ -14,16 +15,19 @@ namespace Orleans.Providers.MongoDB.Membership
 {
     public sealed class MongoMembershipTable : IMembershipTable
     {
+        private readonly IMongoClient mongoClient;
         private readonly ILogger<MongoMembershipTable> logger;
         private readonly MongoDBMembershipTableOptions options;
         private readonly string clusterId;
         private IMongoMembershipCollection membershipCollection;
         
         public MongoMembershipTable(
+            IMongoClientFactory mongoClientFactory,
             ILogger<MongoMembershipTable> logger,
             IOptions<ClusterOptions> clusterOptions,
             IOptions<MongoDBMembershipTableOptions> options)
         {
+            this.mongoClient = mongoClientFactory.Create(options.Value, "Membership");
             this.logger = logger;
             this.options = options.Value;
             this.clusterId = clusterOptions.Value.ClusterId;
@@ -32,7 +36,7 @@ namespace Orleans.Providers.MongoDB.Membership
         /// <inheritdoc />
         public Task InitializeMembershipTable(bool tryInitTableVersion)
         {
-            membershipCollection = Factory.CreateCollection(options, options.Strategy);
+            membershipCollection = Factory.CreateCollection(mongoClient, options, options.Strategy);
 
             return Task.CompletedTask;
         }

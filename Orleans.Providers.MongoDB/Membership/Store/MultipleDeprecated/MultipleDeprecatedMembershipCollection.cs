@@ -15,8 +15,8 @@ namespace Orleans.Providers.MongoDB.Membership.Store.MultipleDeprecated
         private static readonly TableVersion tableVersion = new TableVersion(0, "0");
         private readonly string collectionPrefix;
 
-        public MultipleDeprecatedMembershipCollection(string connectionString, string databaseName, string collectionPrefix, bool createShardKey)
-            : base(connectionString, databaseName, createShardKey)
+        public MultipleDeprecatedMembershipCollection(IMongoClient mongoClient, string databaseName, string collectionPrefix, bool createShardKey)
+            : base(mongoClient, databaseName, createShardKey)
         {
             this.collectionPrefix = collectionPrefix;
         }

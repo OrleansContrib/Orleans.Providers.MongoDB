@@ -23,9 +23,10 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 {
                     options.AddApplicationPart(typeof(EmployeeGrain).Assembly).WithReferences();
                 })
+                .UseMongoDBClient(connectionString)
                 .UseMongoDBClustering(options =>
                 {
-                    options.ConnectionString = connectionString;
+                    options.DatabaseName = "OrleansTestApp";
                     options.CreateShardKeyForCosmos = createShardKey;
                 })
                 .AddStartupTask(async (s, ct) =>
@@ -36,12 +37,12 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 })
                 .UseMongoDBReminders(options =>
                 {
-                    options.ConnectionString = connectionString;
+                    options.DatabaseName = "OrleansTestApp";
                     options.CreateShardKeyForCosmos = createShardKey;
                 })
                 .AddMongoDBGrainStorage("MongoDBStore", options =>
                 {
-                    options.ConnectionString = connectionString;
+                    options.DatabaseName = "OrleansTestApp";
                     options.CreateShardKeyForCosmos = createShardKey;
 
                     options.ConfigureJsonSerializerSettings = settings =>
@@ -68,9 +69,10 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 {
                     options.AddApplicationPart(typeof(IHelloWorldGrain).Assembly);
                 })
+                .UseMongoDBClient(connectionString)
                 .UseMongoDBClustering(options =>
                 {
-                    options.ConnectionString = connectionString;
+                    options.DatabaseName = "OrleansTestApp";
                 })
                 .Configure<ClusterOptions>(options =>
                 {

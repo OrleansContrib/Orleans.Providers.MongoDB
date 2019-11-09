@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using Orleans.Providers.MongoDB.Configuration;
 
 namespace Orleans.Providers.MongoDB.Utils
 {
@@ -15,6 +16,18 @@ namespace Orleans.Providers.MongoDB.Utils
                 return true;
             }
             return false;
+        }
+
+        public static IMongoClient Create(this IMongoClientFactory mongoClientFactory, MongoDBOptions options, string defaultName)
+        {
+            var name = options.ClientName;
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                name = defaultName;
+            }
+
+            return mongoClientFactory.Create(name);
         }
     }
 }

@@ -25,6 +25,15 @@ namespace Orleans.Hosting
     public static class MongoDBSiloExtensions
     {
         /// <summary>
+        /// Configure silo to use MongoDb with a passed in connection string.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
+        public static ISiloHostBuilder UseMongoDBClient(this ISiloHostBuilder builder, string connectionString)
+        {
+            return builder.ConfigureServices(services => services.AddMongoDBClient(connectionString));
+        }
+
+        /// <summary>
         /// Configure ISiloHostBuilder to use MongoReminderTable.
         /// </summary>
         public static ISiloHostBuilder UseMongoDBReminders(this ISiloHostBuilder builder,

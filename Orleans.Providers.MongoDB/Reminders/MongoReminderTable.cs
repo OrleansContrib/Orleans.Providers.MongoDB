@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 using Orleans.Configuration;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Reminders.Store;
@@ -17,6 +18,7 @@ namespace Orleans.Providers.MongoDB.Reminders
 {
     public sealed class MongoReminderTable : IReminderTable
     {
+        private readonly IMongoClient mongoClient;
         private readonly ILogger logger;
         private readonly IGrainReferenceConverter grainReferenceConverter;
         private readonly MongoDBRemindersOptions options;
@@ -24,11 +26,13 @@ namespace Orleans.Providers.MongoDB.Reminders
         private MongoReminderCollection collection;
 
         public MongoReminderTable(
+            IMongoClientFactory mongoClientFactory,
             ILogger<MongoReminderTable> logger,
             IOptions<MongoDBRemindersOptions> options,
             IOptions<ClusterOptions> clusterOptions,
             IGrainReferenceConverter grainReferenceConverter)
         {
+            this.mongoClient = mongoClientFactory.Create(options.Value, "Membership");
             this.logger = logger;
             this.options = options.Value;
             this.serviceId = clusterOptions.Value.ServiceId ?? string.Empty;
@@ -40,7 +44,7 @@ namespace Orleans.Providers.MongoDB.Reminders
         {
             collection =
                 new MongoReminderCollection(
-                    options.ConnectionString,
+                    mongoClient,
                     options.DatabaseName,
                     options.CollectionPrefix,
                     options.CreateShardKeyForCosmos,

@@ -26,12 +26,13 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
         {
             var options = Options.Create(new MongoDBRemindersOptions
             {
-                ConnectionString = "mongodb://localhost/OrleansTest",
                 CollectionPrefix = "Test_",
                 DatabaseName = "OrleansTest"
             });
 
-            return new MongoReminderTable(loggerFactory.CreateLogger<MongoReminderTable>(), 
+            return new MongoReminderTable(
+                TestClients.Localhost.Value,
+                loggerFactory.CreateLogger<MongoReminderTable>(), 
                 options, 
                 clusterOptions,
                 ClusterFixture.Client.ServiceProvider.GetRequiredService<IGrainReferenceConverter>());
