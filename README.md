@@ -25,11 +25,22 @@ install-package Orleans.Providers.MongoDB
 From 3.1 onwards you have to register the IMongoClient in the service locator.
 
 ```csharp
+### Server side
+
+# via Silo Host Builder (ISiloHostBuilder)
 var silo = new SiloHostBuilder()
     .UseMongoDBClient("mongodb://localhost")
     ...
     .Build();
 
+# via Generic Host + Silo Builder (ISiloBuilder)
+var host = Host.CreateDefaultBuilder(args)
+	.UseOrleans((context, siloBuilder) => {
+		siloBuilder.UseMongoDBClient("mongodb://localhost")
+		...
+	});
+
+### Client side
 var client = new ClientBuilder()
     .UseMongoDBClient("mongodb://localhost")
     ...
