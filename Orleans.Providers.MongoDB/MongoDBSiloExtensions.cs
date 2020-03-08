@@ -269,7 +269,7 @@ namespace Orleans.Hosting
 
             services.ConfigureNamedOptionForLogging<MongoDBGrainStorageOptions>(name);
 
-            services.AddTransient<IConfigurationValidator>(sp => new MongoDBGrainStorageOptionsValidator(sp.GetService<IOptionsSnapshot<MongoDBGrainStorageOptions>>().Get(name), name));
+            services.AddTransient<IConfigurationValidator>(sp => new MongoDBGrainStorageOptionsValidator(sp.GetRequiredService<IOptionsSnapshot<MongoDBGrainStorageOptions>>().Get(name), name));
             services.AddSingletonNamedService(name, MongoGrainStorageFactory.Create);
             services.AddSingletonNamedService(name, (s, n) => (ILifecycleParticipant<ISiloLifecycle>)s.GetRequiredServiceByName<IGrainStorage>(n));
 
