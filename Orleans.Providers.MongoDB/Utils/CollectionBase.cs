@@ -67,6 +67,16 @@ namespace Orleans.Providers.MongoDB.Utils
         {
             return new Lazy<IMongoCollection<TEntity>>(() =>
             {
+                var collectionFilter = new ListCollectionNamesOptions
+                {
+                    Filter = Builders<BsonDocument>.Filter.Eq("name", CollectionName())
+                };
+
+                if (!mongoDatabase.ListCollectionNames(collectionFilter).Any())
+                {
+                    mongoDatabase.CreateCollection(CollectionName());
+                }
+
                 var databaseCollection = mongoDatabase.GetCollection<TEntity>(
                     CollectionName(),
                     CollectionSettings() ?? new MongoCollectionSettings());
