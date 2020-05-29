@@ -79,7 +79,7 @@ var silo = new SiloHostBuilder()
 
 The provider supports three different strategies for membership management:
 
-1. ```Single```: A single document per deployment. Fastest for small clusters.
+1. ```SingleDocument```: A single document per deployment. Fastest for small clusters.
 2. ```Multiple```: One document per silo and an extra document for the table version. Needs a replica set and transaction support to work properly.
 3. ```MultipleDeprecated```: One document per silo but no support for the extended membership protocol. Not recommended.
 
