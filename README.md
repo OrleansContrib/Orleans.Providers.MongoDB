@@ -104,7 +104,8 @@ Just use the silo builder:
 
 ```csharp
 var silo = new SiloHostBuilder()
-    .AddMongoDBGrainStorage(options =>
+    .AddMongoDBGrainStorage("grains-storage-provider-name"
+    options =>
     {
         options.DatabaseName = dbName;
         options.CreateShardKeyForCosmos = createShardKey;
