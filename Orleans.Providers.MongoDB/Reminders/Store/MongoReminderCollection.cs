@@ -11,7 +11,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
 {
     public class MongoReminderCollection : CollectionBase<MongoReminderDocument>
     {
-        private static readonly FindOneAndUpdateOptions<MongoReminderDocument> UpsertReplace = new FindOneAndUpdateOptions<MongoReminderDocument> { IsUpsert = true };
+        private static readonly FindOneAndUpdateOptions<MongoReminderDocument> FindAndUpsert = new FindOneAndUpdateOptions<MongoReminderDocument> { IsUpsert = true };
         private readonly IGrainReferenceConverter grainReferenceConverter;
         private readonly string serviceId;
         private readonly string collectionPrefix;
@@ -159,7 +159,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
                 var existingDocument =
                     await Collection.FindOneAndUpdateAsync<MongoReminderDocument, MongoReminderDocument>(x => x.Id == id && x.Etag == eTag,
                         Update.Set(x => x.IsDeleted, true),
-                        UpsertReplace);
+                        FindAndUpsert);
 
                 await Collection.DeleteManyAsync(x => x.IsDeleted);
 
@@ -191,7 +191,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
             {
                 await Collection.ReplaceOneAsync(x => x.Id == id,
                     updateDocument,
-                    Upsert);
+                    UpsertReplace);
             }
             catch (MongoException ex)
             {

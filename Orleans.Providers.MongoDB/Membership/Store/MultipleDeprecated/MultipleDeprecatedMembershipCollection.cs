@@ -55,7 +55,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store.MultipleDeprecated
 
             try
             {
-                await Collection.ReplaceOneAsync(x => x.Id == id && x.Etag == etag, document, Upsert);
+                await Collection.ReplaceOneAsync(x => x.Id == id && x.Etag == etag, document, UpsertReplace);
 
                 return true;
             }

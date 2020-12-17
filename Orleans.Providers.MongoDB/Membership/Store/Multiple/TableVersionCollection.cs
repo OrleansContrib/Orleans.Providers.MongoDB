@@ -45,8 +45,8 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
             {
                 await Collection.ReplaceOneAsync(session,
                     x => x.DeploymentId == deploymentId && x.VersionEtag == tableVersion.VersionEtag, 
-                    update, 
-                    Upsert);
+                    update,
+                    UpsertReplace);
 
                 return true;
             }
