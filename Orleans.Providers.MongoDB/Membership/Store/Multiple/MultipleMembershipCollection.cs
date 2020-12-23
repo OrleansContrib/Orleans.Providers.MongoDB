@@ -86,7 +86,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
 
             try
             {
-                await Collection.ReplaceOneAsync(session, x => x.Id == id && x.Etag == etag, document, Upsert);
+                await Collection.ReplaceOneAsync(session, x => x.Id == id && x.Etag == etag, document, UpsertReplace);
 
                 return true;
             }
