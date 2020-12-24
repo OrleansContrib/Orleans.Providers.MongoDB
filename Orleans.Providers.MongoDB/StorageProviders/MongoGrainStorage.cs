@@ -82,6 +82,8 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
                 if (existing != null)
                 {
+                    grainState.RecordExists = true;
+
                     if (existing.Contains(FieldDoc))
                     {
                         grainState.ETag = existing[FieldEtag].AsString;
@@ -111,6 +113,8 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
                 var newData = grainData.ToBson();
                 var newETag = Guid.NewGuid().ToString();
+
+                grainState.RecordExists = true;
 
                 try
                 {
@@ -169,6 +173,8 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             {
                 var grainCollection = GetCollection(grainType);
                 var grainKey = grainReference.ToKeyString();
+
+                grainState.RecordExists = false;
 
                 return grainCollection.DeleteManyAsync(Filter.Eq(FieldId, grainKey));
             });
