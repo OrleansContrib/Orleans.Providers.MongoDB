@@ -22,6 +22,5 @@ jobs:
         
     - name: Publish
       run: |
-        cd Orleans.Providers.MongoDB/bin/Release
-        dotnet nuget push *.nupkg --source 'https://api.nuget.org/v3/index.json' -k ${{ secrets.nuget }}
+        dotnet nuget push **/*.nupkg --source 'https://api.nuget.org/v3/index.json' --skip-duplicate -k ${{ secrets.nuget }} --no-symbols 1 
       if: github.ref == 'refs/heads/master'
