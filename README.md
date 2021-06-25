@@ -104,7 +104,7 @@ Just use the silo builder:
 
 ```csharp
 var silo = new SiloHostBuilder()
-    .AddMongoDBGrainStorage("grains-storage-provider-name"
+    .AddMongoDBGrainStorage("grains-storage-provider-name",
     options =>
     {
         options.DatabaseName = dbName;
