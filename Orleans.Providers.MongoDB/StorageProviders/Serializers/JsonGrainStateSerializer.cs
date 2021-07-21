@@ -17,7 +17,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders.Serializers
             options?.ConfigureJsonSerializerSettings?.Invoke(jsonSettings);
             this.serializer = JsonSerializer.Create(jsonSettings);
 
-            if(options?.ConfigureJsonSerializerSettings == null)
+            if (options?.ConfigureJsonSerializerSettings == null)
             {
                 //// https://github.com/OrleansContrib/Orleans.Providers.MongoDB/issues/44
                 //// Always include the default value, so that the deserialization process can overwrite default 
