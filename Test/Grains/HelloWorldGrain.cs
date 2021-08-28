@@ -7,7 +7,7 @@ namespace Orleans.Providers.MongoDB.Test.Grains
     {
         public Task<string> SayHello(string name)
         {
-            return Task.FromResult($"hello {name}");
+            return Task.FromResult($"Hello {name}");
         }
     }
 }

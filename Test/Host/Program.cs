@@ -1,9 +1,11 @@
 using System;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Orleans.Configuration;
 using Orleans.Hosting;
 using Orleans.Providers.MongoDB.Test.GrainInterfaces;
@@ -13,7 +15,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
 {
     public static class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var connectionString = "mongodb://localhost/OrleansTestApp";
             var createShardKey = false;
@@ -40,6 +42,25 @@ namespace Orleans.Providers.MongoDB.Test.Host
                     options.DatabaseName = "OrleansTestApp";
                     options.CreateShardKeyForCosmos = createShardKey;
                 })
+                .AddSimpleMessageStreamProvider("OrleansTestStream", options =>
+                {
+                    options.FireAndForgetDelivery = true;
+                    options.OptimizeForImmutableData = true;
+                    options.PubSubType = Orleans.Streams.StreamPubSubType.ExplicitGrainBasedOnly;
+                })
+                .AddMongoDBGrainStorage("PubSubStore", options =>
+                {
+                    options.DatabaseName = "OrleansTestAppPubSubStore";
+                    options.CreateShardKeyForCosmos = createShardKey;
+
+                    options.ConfigureJsonSerializerSettings = settings =>
+                    {
+                        settings.NullValueHandling = NullValueHandling.Include;
+                        settings.ObjectCreationHandling = ObjectCreationHandling.Replace;
+                        settings.DefaultValueHandling = DefaultValueHandling.Populate;
+                    };
+
+                })
                 .AddMongoDBGrainStorage("MongoDBStore", options =>
                 {
                     options.DatabaseName = "OrleansTestApp";
@@ -62,7 +83,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 .ConfigureLogging(logging => logging.AddConsole())
                 .Build();
 
-            silo.StartAsync().Wait();
+            await silo.StartAsync();
 
             var client = new ClientBuilder()
                 .ConfigureApplicationParts(options =>
@@ -82,64 +103,104 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 .ConfigureLogging(logging => logging.AddConsole())
                 .Build();
 
-            client.Connect().Wait();
+            await client.Connect();
 
-            // get a reference to the grain from the grain factory
+            await TestBasic(client);
+
+            if (!args.Contains("--skip-reminders"))
+            {
+                await TestReminders(client);
+            }
+
+            if (!args.Contains("--skip-streams"))
+            {
+                await TestStreams(client);
+            }
+
+            await TestState(client);
+            await TestStateWithCollections(client);
+
+            Console.ReadKey();
+
+            await silo.StopAsync();
+        }
+
+        private static async Task TestStreams(IClusterClient client)
+        {
+            var streamProducer = client.GetGrain<IStreamProducerGrain>(0);
+            var streamConsumer1 = client.GetGrain<IStreamConsumerGrain>(0);
+            var streamConsumer2 = client.GetGrain<IStreamConsumerGrain>(0);
+
+            _ = streamProducer.ProduceEvents();
+
+            await streamConsumer1.Activate();
+            await streamConsumer2.Activate();
+
+            await Task.Delay(1000);
+
+            var consumed1 = await streamConsumer1.GetConsumedItems();
+            var consumed2 = await streamConsumer1.GetConsumedItems();
+
+            Console.WriteLine("Consumed Events: {0}/{1}", consumed1, consumed2);
+        }
+
+        private static async Task TestBasic(IClusterClient client)
+        {
             var helloWorldGrain = client.GetGrain<IHelloWorldGrain>(1);
 
-            // call the grain
-            helloWorldGrain.SayHello("World").Wait();
+            await helloWorldGrain.SayHello("World");
+        }
 
-            if (!args.Contains("--ship-reminders"))
-            {
-                var reminderGrain = client.GetGrain<INewsReminderGrain>(1);
+        private static async Task TestReminders(IClusterClient client)
+        {
+            var reminderGrain = client.GetGrain<IReminderGrain>(1);
 
-                reminderGrain.StartReminder("TestReminder", TimeSpan.FromMinutes(1)).Wait();
-            }
+            await reminderGrain.StartReminder("TestReminder", TimeSpan.FromMinutes(1));
+        }
 
-            // Test State 
-            var employee = client.GetGrain<IEmployeeGrain>(1);
-            var employeeId = employee.ReturnLevel().Result;
-
-            if (employeeId == 100)
-            {
-                employee.SetLevel(50);
-            }
-            else
-            {
-                employee.SetLevel(100);
-            }
-
-            employeeId = employee.ReturnLevel().Result;
-
-            Console.WriteLine(employeeId);
-
-            // Test collections
+        private static async Task TestStateWithCollections(IClusterClient client)
+        {
             var vacationEmployee = client.GetGrain<IEmployeeGrain>(2);
-            var vacationEmployeeId = vacationEmployee.ReturnLevel().Result;
+            var vacationEmployeeId = await vacationEmployee.ReturnLevel();
 
             if (vacationEmployeeId == 0)
-            {                
+            {
                 for (int i = 0; i < 2; i++)
                 {
-                    vacationEmployee.AddVacationLeave();
+                    await vacationEmployee.AddVacationLeave();
                 }
 
                 for (int i = 0; i < 2; i++)
                 {
-                    vacationEmployee.AddSickLeave();
+                    await vacationEmployee.AddSickLeave();
                 }
 
-                vacationEmployee.SetLevel(101);
+                await vacationEmployee.SetLevel(101);
             }
 
             // Use ObjectCreationHandling.Replace in JsonSerializerSettings to replace the result during deserialization.
-            var leaveCount = vacationEmployee.ReturnLeaveCount().Result;
+            var leaveCount = await vacationEmployee.ReturnLeaveCount();
 
             Console.WriteLine($"Total leave count: {leaveCount}");
+        }
 
-            Console.ReadKey();
-            silo.StopAsync().Wait();
+        private static async Task TestState(IClusterClient client)
+        {
+            var employee = client.GetGrain<IEmployeeGrain>(1);
+            var employeeId = await employee.ReturnLevel();
+
+            if (employeeId == 100)
+            {
+                await employee.SetLevel(50);
+            }
+            else
+            {
+                await employee.SetLevel(100);
+            }
+
+            employeeId = await employee.ReturnLevel();
+
+            Console.WriteLine(employeeId);
         }
     }
 }
