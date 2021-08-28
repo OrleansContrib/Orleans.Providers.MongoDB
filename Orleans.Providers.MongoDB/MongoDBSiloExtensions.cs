@@ -161,7 +161,7 @@ namespace Orleans.Hosting
         {
             services.Configure<MongoDBMembershipTableOptions>(configuration);
             services.AddSingleton<IMembershipTable, MongoMembershipTable>();
-            services.AddSingleton<IConfigurationValidator, MongoDBOptionsValidator<MongoDBRemindersOptions>>();
+            services.AddSingleton<IConfigurationValidator, MongoDBOptionsValidator<MongoDBMembershipTableOptions>>();
 
             return services;
         }
