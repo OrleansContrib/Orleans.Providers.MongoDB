@@ -74,7 +74,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             return DoAndLog(nameof(ReadStateAsync), async () =>
             {
                 var grainCollection = GetCollection(grainType);
-                var grainKey = grainReference.ToKeyString();
+                var grainKey = this.options.KeyGenerator(grainReference);
 
                 var existing =
                     await grainCollection.Find(Filter.Eq(FieldId, grainKey))
@@ -105,7 +105,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             return DoAndLog(nameof(WriteStateAsync), async () =>
             {
                 var grainCollection = GetCollection(grainType);
-                var grainKey = grainReference.ToKeyString();
+                var grainKey = options.KeyGenerator(grainReference);
 
                 var grainData = serializer.Serialize(grainState);
 
@@ -172,7 +172,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             return DoAndLog(nameof(ClearStateAsync), () =>
             {
                 var grainCollection = GetCollection(grainType);
-                var grainKey = grainReference.ToKeyString();
+                var grainKey = options.KeyGenerator(grainReference);
 
                 grainState.RecordExists = false;
 

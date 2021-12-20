@@ -29,7 +29,7 @@ namespace Orleans.Providers.MongoDB.Configuration
         /// </summary>
         public bool CreateShardKeyForCosmos { get; set; }
 
-        internal void Validate(string name = null)
+        internal virtual void Validate(string name = null)
         {
             var typeName = GetType().Name;
 
