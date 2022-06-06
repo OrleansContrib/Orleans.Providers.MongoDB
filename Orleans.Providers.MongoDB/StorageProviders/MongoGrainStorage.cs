@@ -190,13 +190,13 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                 {
                     try
                     {
-                        database.RunCommand<BsonDocument>(new BsonDocument
+                        mongoClient.GetDatabase("admin").RunCommand<BsonDocument>(new BsonDocument
                         {
+                            ["shardCollection"] = $"{database.DatabaseNamespace.DatabaseName}.{collectionName}",
                             ["key"] = new BsonDocument
                             {
                                 ["_id"] = "hashed"
-                            },
-                            ["shardCollection"] = $"{database.DatabaseNamespace.DatabaseName}.{collectionName}"
+                            }
                         });
                     }
                     catch (MongoException)
