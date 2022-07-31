@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using MongoDB.Driver;
 using Orleans.Providers.MongoDB.Utils;
 
@@ -9,8 +10,13 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
         private static readonly TableVersion NotFound = new TableVersion(0, "0");
         private readonly string collectionPrefix;
 
-        public TableVersionCollection(IMongoClient mongoClient, string databaseName, string collectionPrefix, bool createShardKey) 
-            : base(mongoClient, databaseName, createShardKey)
+        public TableVersionCollection(
+            IMongoClient mongoClient,
+            string databaseName,
+            string collectionPrefix,
+            Action<MongoCollectionSettings> collectionConfigurator,
+            bool createShardKey)
+            : base(mongoClient, databaseName, collectionConfigurator, createShardKey)
         {
             this.collectionPrefix = collectionPrefix;
         }

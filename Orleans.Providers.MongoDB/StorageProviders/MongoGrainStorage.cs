@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using Orleans.Providers.MongoDB.Configuration;
@@ -17,15 +16,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 {
     public class MongoGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLifecycle>
     {
-        private static readonly UpdateOptions Upsert = new UpdateOptions { IsUpsert = true };
-        private static readonly ReplaceOptions UpsertReplace = new ReplaceOptions { IsUpsert = true };
-        private static readonly FilterDefinitionBuilder<BsonDocument> Filter = Builders<BsonDocument>.Filter;
-        private static readonly UpdateDefinitionBuilder<BsonDocument> Update = Builders<BsonDocument>.Update;
-        private static readonly ProjectionDefinitionBuilder<BsonDocument> Projection = Builders<BsonDocument>.Projection;
-        private const string FieldId = "_id";
-        private const string FieldDoc = "_doc";
-        private const string FieldEtag = "_etag";
-        private readonly ConcurrentDictionary<string, bool> configuredCollections = new ConcurrentDictionary<string, bool>();
+        private readonly ConcurrentDictionary<string, MongoGrainStorageCollection> collections = new ConcurrentDictionary<string, MongoGrainStorageCollection>();
         private readonly MongoDBGrainStorageOptions options;
         private readonly IMongoClient mongoClient;
         private readonly ILogger<MongoGrainStorage> logger;
@@ -49,11 +40,6 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             return OrleansJsonSerializer.UpdateSerializerSettings(OrleansJsonSerializer.GetDefaultSerializerSettings(typeResolver, providerRuntime.GrainFactory), config);
         }
 
-        protected virtual string ReturnGrainName(string grainType, GrainReference grainReference)
-        {
-            return grainType.Split('.', '+').Last();
-        }
-
         public void Participate(ISiloLifecycle lifecycle)
         {
             lifecycle.Subscribe<MongoGrainStorage>(ServiceLifecycleStage.ApplicationServices, Init);
@@ -71,99 +57,17 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
         public Task ReadStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
         {
-            return DoAndLog(nameof(ReadStateAsync), async () =>
+            return DoAndLog(nameof(ReadStateAsync), () =>
             {
-                var grainCollection = GetCollection(grainType);
-                var grainKey = this.options.KeyGenerator(grainReference);
-
-                var existing =
-                    await grainCollection.Find(Filter.Eq(FieldId, grainKey))
-                        .FirstOrDefaultAsync();
-
-                if (existing != null)
-                {
-                    grainState.RecordExists = true;
-
-                    if (existing.Contains(FieldDoc))
-                    {
-                        grainState.ETag = existing[FieldEtag].AsString;
-
-                        serializer.Deserialize(grainState, existing[FieldDoc].AsBsonDocument.ToJToken());
-                    }
-                    else
-                    {
-                        existing.Remove(FieldId);
-
-                        serializer.Deserialize(grainState, existing.ToJToken());
-                    }
-                }
+                return GetCollection(grainType, grainReference).ReadAsync(grainReference, grainState);
             });
         }
 
         public Task WriteStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
         {
-            return DoAndLog(nameof(WriteStateAsync), async () =>
+            return DoAndLog(nameof(WriteStateAsync), () =>
             {
-                var grainCollection = GetCollection(grainType);
-                var grainKey = options.KeyGenerator(grainReference);
-
-                var grainData = serializer.Serialize(grainState);
-
-                var etag = grainState.ETag;
-
-                var newData = grainData.ToBson();
-                var newETag = Guid.NewGuid().ToString();
-
-                grainState.RecordExists = true;
-
-                try
-                {
-                    await grainCollection.UpdateOneAsync(
-                        Filter.And(
-                            Filter.Eq(FieldId, grainKey),
-                            Filter.Eq(FieldEtag, grainState.ETag)
-                        ),
-                        Update
-                            .Set(FieldEtag, newETag)
-                            .Set(FieldDoc, newData),
-                        Upsert);
-                }
-                catch (MongoException ex)
-                {
-                    if (ex.IsDuplicateKey())
-                    {
-                        await ThrowForOtherEtag(grainCollection, grainKey, etag, ex);
-
-                        var document = new BsonDocument
-                        {
-                            [FieldId] = grainKey,
-                            [FieldEtag] = grainKey,
-                            [FieldDoc] = newData
-                        };
-
-                        try
-                        {
-                            await grainCollection.ReplaceOneAsync(Filter.Eq(FieldId, grainKey), document, UpsertReplace);
-                        }
-                        catch (MongoException ex2)
-                        {
-                            if (ex2.IsDuplicateKey())
-                            {
-                                await ThrowForOtherEtag(grainCollection, grainKey, etag, ex2);
-                            }
-                            else
-                            {
-                                throw;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-
-                grainState.ETag = newETag;
+                return GetCollection(grainType, grainReference).WriteAsync(grainReference, grainState);
             });
         }
 
@@ -171,59 +75,28 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         {
             return DoAndLog(nameof(ClearStateAsync), () =>
             {
-                var grainCollection = GetCollection(grainType);
-                var grainKey = options.KeyGenerator(grainReference);
-
-                grainState.RecordExists = false;
-
-                return grainCollection.DeleteManyAsync(Filter.Eq(FieldId, grainKey));
+                return GetCollection(grainType, grainReference).ClearAsync(grainReference, grainState);
             });
         }
 
-        private IMongoCollection<BsonDocument> GetCollection(string grainType)
+        private MongoGrainStorageCollection GetCollection(string grainType, GrainReference grainReference)
         {
-            var collectionName = options.CollectionPrefix + grainType.Split('.', '+').Last();
+            var collectionName = $"{options.CollectionPrefix}{ReturnGrainName(grainType, grainReference)}";
 
-            if (configuredCollections.TryAdd(collectionName, true))
-            {
-                if (options.CreateShardKeyForCosmos)
-                {
-                    try
-                    {
-                        mongoClient.GetDatabase("admin").RunCommand<BsonDocument>(new BsonDocument
-                        {
-                            ["shardCollection"] = $"{database.DatabaseNamespace.DatabaseName}.{collectionName}",
-                            ["key"] = new BsonDocument
-                            {
-                                ["_id"] = "hashed"
-                            }
-                        });
-                    }
-                    catch (MongoException)
-                    {
-                        // Shared key probably created already.
-                    }
-                }
-            }
-
-            return database.GetCollection<BsonDocument>(collectionName);
+            return collections.GetOrAdd(grainType, x =>
+                new MongoGrainStorageCollection(
+                    mongoClient,
+                    options.DatabaseName,
+                    collectionName,
+                    options.CollectionConfigurator,
+                    options.CreateShardKeyForCosmos,
+                    serializer,
+                    options.KeyGenerator));
         }
 
         private Task DoAndLog(string actionName, Func<Task> action)
         {
             return DoAndLog(actionName, async () => { await action(); return true; });
-        }
-
-        private static async Task ThrowForOtherEtag(IMongoCollection<BsonDocument> collection, string key, string etag, Exception ex)
-        {
-            var existingEtag =
-                await collection.Find(Filter.Eq(FieldId, key))
-                    .Project<BsonDocument>(Projection.Exclude(FieldDoc)).FirstOrDefaultAsync();
-
-            if (existingEtag != null && existingEtag.Contains(FieldEtag))
-            {
-                throw new InconsistentStateException(existingEtag[FieldEtag].AsString, etag, ex);
-            }
         }
 
         private async Task<T> DoAndLog<T>(string actionName, Func<Task<T>> action)
@@ -240,6 +113,11 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
                 throw;
             }
+        }
+
+        protected virtual string ReturnGrainName(string grainType, GrainReference grainReference)
+        {
+            return grainType.Split('.', '+').Last();
         }
     }
 }

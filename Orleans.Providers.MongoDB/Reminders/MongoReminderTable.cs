@@ -47,6 +47,7 @@ namespace Orleans.Providers.MongoDB.Reminders
                     mongoClient,
                     options.DatabaseName,
                     options.CollectionPrefix,
+                    options.CollectionConfigurator,
                     options.CreateShardKeyForCosmos,
                     serviceId,
                     grainReferenceConverter);

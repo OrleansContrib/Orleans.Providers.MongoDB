@@ -13,8 +13,9 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Single
         private static readonly TableVersion NotFound = new TableVersion(0, "0");
         private readonly string collectionPrefix;
 
-        public SingleMembershipCollection(IMongoClient mongoClient, string databaseName, string collectionPrefix, bool createShardKey)
-            : base(mongoClient, databaseName, createShardKey)
+        public SingleMembershipCollection(IMongoClient mongoClient, string databaseName, string collectionPrefix, bool createShardKey,
+            Action<MongoCollectionSettings> collectionConfigurator)
+            : base(mongoClient, databaseName, collectionConfigurator, createShardKey)
         {
             this.collectionPrefix = collectionPrefix;
         }

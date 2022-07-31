@@ -29,8 +29,9 @@ namespace Orleans.Providers.MongoDB.Configuration
             base.Validate(name);
 
             if (KeyGenerator == null)
+            {
                 throw new OrleansConfigurationException($"{nameof(KeyGenerator)} is required and cannot be null.");
-
+            }
         }
     }
 

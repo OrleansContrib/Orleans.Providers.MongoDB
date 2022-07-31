@@ -40,12 +40,13 @@ namespace Orleans.Providers.MongoDB.Utils
             get { return mongoClient; }
         }
 
-        protected CollectionBase(IMongoClient mongoClient, string databaseName, bool createShardKey)
+        protected CollectionBase(IMongoClient mongoClient, string databaseName,
+            Action<MongoCollectionSettings> collectionConfigurator, bool createShardKey)
         {
             this.mongoClient = mongoClient;
 
             mongoDatabase = mongoClient.GetDatabase(databaseName);
-            mongoCollection = CreateCollection();
+            mongoCollection = CreateCollection(collectionConfigurator);
 
             this.createShardKey = createShardKey;
         }
@@ -64,7 +65,7 @@ namespace Orleans.Providers.MongoDB.Utils
         {
         }
 
-        private Lazy<IMongoCollection<TEntity>> CreateCollection()
+        private Lazy<IMongoCollection<TEntity>> CreateCollection(Action<MongoCollectionSettings> collectionConfigurator)
         {
             return new Lazy<IMongoCollection<TEntity>>(() =>
             {
@@ -78,9 +79,13 @@ namespace Orleans.Providers.MongoDB.Utils
                     mongoDatabase.CreateCollection(CollectionName());
                 }
 
+                var collectionSettings = CollectionSettings() ?? new MongoCollectionSettings();
+
+                collectionConfigurator?.Invoke(collectionSettings);
+
                 var databaseCollection = mongoDatabase.GetCollection<TEntity>(
                     CollectionName(),
-                    CollectionSettings() ?? new MongoCollectionSettings());
+                    collectionSettings);
 
                 if (this.createShardKey)
                 {

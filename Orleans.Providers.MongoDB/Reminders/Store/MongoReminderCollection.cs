@@ -20,10 +20,11 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
             IMongoClient mongoClient,
             string databaseName,
             string collectionPrefix,
+            Action<MongoCollectionSettings> collectionConfigurator,
             bool createShardKey,
             string serviceId,
             IGrainReferenceConverter grainReferenceConverter)
-            : base(mongoClient, databaseName, createShardKey)
+            : base(mongoClient, databaseName, collectionConfigurator, createShardKey)
         {
             this.serviceId = serviceId;
             this.collectionPrefix = collectionPrefix;

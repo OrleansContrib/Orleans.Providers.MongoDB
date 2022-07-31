@@ -1,4 +1,6 @@
-﻿using Orleans.Runtime;
+﻿using MongoDB.Driver;
+using Orleans.Runtime;
+using System;
 
 // ReSharper disable InvertIf
 
@@ -28,6 +30,11 @@ namespace Orleans.Providers.MongoDB.Configuration
         /// True, to create a shard key when using with cosmos db.
         /// </summary>
         public bool CreateShardKeyForCosmos { get; set; }
+
+        /// <summary>
+        /// The collection configurator.
+        /// </summary>
+        public Action<MongoCollectionSettings> CollectionConfigurator { get; set; }
 
         internal virtual void Validate(string name = null)
         {
