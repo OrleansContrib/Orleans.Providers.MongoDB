@@ -62,7 +62,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
         [Fact, TestCategory("Functional")]
         public async Task Test_CleanupDefunctSiloEntries()
         {
-            await MembershipTable_GetGateways();
+            await MembershipTable_CleanupDefunctSiloEntries();
         }
 
         [Fact, TestCategory("Functional")]

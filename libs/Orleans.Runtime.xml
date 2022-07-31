@@ -216,22 +216,6 @@
             <param name="list"></param>
             <returns></returns>
         </member>
-        <member name="M:Orleans.Runtime.Catalog.DestroyActivationVoid(Orleans.Runtime.ActivationData)">
-            <summary>
-            Deletes activation immediately regardless of active transactions etc.
-            For use by grain delete, transaction abort, etc.
-            </summary>
-            <param name="activation"></param>
-        </member>
-        <member name="M:Orleans.Runtime.Catalog.DestroyActivations(System.Collections.Generic.List{Orleans.Runtime.ActivationData})">
-            <summary>
-            Forcibly deletes activations now, without waiting for any outstanding transactions to complete.
-            Deletes activation immediately regardless of active transactions etc.
-            For use by grain delete, transaction abort, etc.
-            </summary>
-            <param name="list"></param>
-            <returns></returns>
-        </member>
         <member name="M:Orleans.Runtime.Catalog.RejectAllQueuedMessages(Orleans.Runtime.ActivationData,System.String,System.Exception)">
             <summary>
             Rejects all messages enqueued for the provided activation.
@@ -338,6 +322,11 @@
             </summary>
             <param name="context">The <see cref="T:Orleans.Runtime.IGrainActivationContext"/> for the executing action.</param>
             <param name="grain">The grain to release.</param>
+        </member>
+        <member name="T:Orleans.Runtime.IncomingRequestMonitor">
+            <summary>
+            Monitors currently-active requests and sends status notifications to callers for long-running and blocked requests.
+            </summary>
         </member>
         <member name="T:Orleans.Runtime.Configuration.SiloClusteringValidator">
             <summary>
@@ -479,7 +468,7 @@
             <param name="incoming"></param>
             <returns></returns>
         </member>
-        <member name="M:Orleans.Runtime.Dispatcher.MarkSameCallChainMessageAsInterleaving(Orleans.Runtime.ActivationData,Orleans.Runtime.Message)">
+        <member name="M:Orleans.Runtime.Dispatcher.MarkSameCallChainMessageAsInterleaving(Orleans.Runtime.IGrainContext,Orleans.Runtime.Message)">
             <summary>
             https://github.com/dotnet/orleans/issues/3184
             Checks whether reentrancy is allowed for calls to grains that are already part of the call chain.
@@ -516,7 +505,7 @@
             </summary>
             <param name="message"></param>
         </member>
-        <member name="M:Orleans.Runtime.Dispatcher.AsyncSendMessage(Orleans.Runtime.Message,Orleans.Runtime.ActivationData)">
+        <member name="M:Orleans.Runtime.Dispatcher.AsyncSendMessage(Orleans.Runtime.Message,Orleans.Runtime.IGrainContext)">
             <summary>
             Send an outgoing message, may complete synchronously
             - may buffer for transaction completion / commit if it ends a transaction
@@ -537,7 +526,7 @@
             <param name="message"></param>
             <returns>Resolve when message is addressed (modifies message fields)</returns>
         </member>
-        <member name="M:Orleans.Runtime.Dispatcher.TransportMessage(Orleans.Runtime.Message,Orleans.Runtime.ActivationData)">
+        <member name="M:Orleans.Runtime.Dispatcher.TransportMessage(Orleans.Runtime.Message,Orleans.Runtime.IGrainContext)">
             <summary>
             Directly send a message to the transport without processing
             </summary>
@@ -665,16 +654,6 @@
             Interface for health check participants
             </summary>
         </member>
-        <member name="T:Orleans.Runtime.IHostedClient">
-            <summary>
-            A client which is hosted within a silo.
-            </summary>
-        </member>
-        <member name="T:Orleans.Runtime.DisabledHostedClient">
-            <summary>
-            An implementation of IHostedClient which throws an exception whenever it is accessed in order to instruct the user to enable external context calls.
-            </summary>
-        </member>
         <member name="T:Orleans.Runtime.IInvokable">
             <summary>
             Common internal interface for SystemTarget and ActivationData.
@@ -685,14 +664,10 @@
             Internal class for system grains to get access to runtime object
             </summary>
         </member>
-        <member name="P:Orleans.Runtime.InsideRuntimeClient.ClientInvokeCallback">
-            <inheritdoc />
-        </member>
-        <member name="M:Orleans.Runtime.InsideRuntimeClient.UnregisterCallback(Orleans.Runtime.CorrelationId)">
+        <member name="M:Orleans.Runtime.InsideRuntimeClient.UnregisterCallback(Orleans.Runtime.GrainId,Orleans.Runtime.CorrelationId)">
             <summary>
             UnRegister a callback.
             </summary>
-            <param name="id"></param>
         </member>
         <member name="M:Orleans.Runtime.InsideRuntimeClient.GetResponseTimeout">
             <inheritdoc />
@@ -735,6 +710,9 @@
             <inheritdoc />
         </member>
         <member name="M:Orleans.Runtime.InternalClusterClient.System#IDisposable#Dispose">
+            <inheritdoc />
+        </member>
+        <member name="M:Orleans.Runtime.InternalClusterClient.System#IAsyncDisposable#DisposeAsync">
             <inheritdoc />
         </member>
         <member name="M:Orleans.Runtime.InternalClusterClient.GetGrain``1(System.Guid,System.String)">
@@ -861,7 +839,7 @@
             Perform an action for each silo.
             </summary>
             <remarks>
-            Because SiloControl contains a reference to a system target, each method call using that reference 
+            Because SiloControl contains a reference to a system target, each method call using that reference
             will get routed either locally or remotely to the appropriate silo instance auto-magically.
             </remarks>
             <param name="siloAddresses">List of silos to perform the action for</param>
@@ -934,6 +912,11 @@
             <param name="name"></param>
             <returns></returns>
         </member>
+        <member name="M:Orleans.Runtime.SystemTarget.RegisterGrainTimer(System.Func{System.Object,System.Threading.Tasks.Task},System.Object,System.TimeSpan,System.TimeSpan,System.String)">
+            <summary>
+            Internal version of <see cref="M:Orleans.Runtime.SystemTarget.RegisterTimer(System.Func{System.Object,System.Threading.Tasks.Task},System.Object,System.TimeSpan,System.TimeSpan,System.String)"/> that returns the inner IGrainTimer
+            </summary>
+        </member>
         <member name="M:Orleans.Runtime.SystemTarget.ToString">
             <summary>Override of object.ToString()</summary>
         </member>
@@ -947,7 +930,15 @@
         </member>
         <member name="M:Orleans.Runtime.SystemTargetExtensions.ScheduleTask(Orleans.Runtime.SystemTarget,System.Func{System.Threading.Tasks.Task})">
             <summary>
-            Schedules the provided <paramref name="action"/> on the <see cref="T:Orleans.Runtime.SystemTarget"/>'s <see cref="T:Orleans.Runtime.ISchedulingContext"/>.
+            Schedules the provided <paramref name="action"/> on the <see cref="T:Orleans.Runtime.SystemTarget"/>.
+            </summary>
+            <param name="self">The <see cref="T:Orleans.Runtime.SystemTarget"/>.</param>
+            <param name="action">The action.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> which completes when the <paramref name="action"/> has completed.</returns>
+        </member>
+        <member name="M:Orleans.Runtime.SystemTargetExtensions.ScheduleTask``1(Orleans.Runtime.SystemTarget,System.Func{System.Threading.Tasks.Task{``0}})">
+            <summary>
+            Schedules the provided <paramref name="action"/> on the <see cref="T:Orleans.Runtime.SystemTarget"/>.
             </summary>
             <param name="self">The <see cref="T:Orleans.Runtime.SystemTarget"/>.</param>
             <param name="action">The action.</param>
@@ -955,7 +946,7 @@
         </member>
         <member name="M:Orleans.Runtime.SystemTargetExtensions.ScheduleTask(Orleans.Runtime.SystemTarget,System.Action)">
             <summary>
-            Schedules the provided <paramref name="action"/> on the <see cref="T:Orleans.Runtime.SystemTarget"/>'s <see cref="T:Orleans.Runtime.ISchedulingContext"/>.
+            Schedules the provided <paramref name="action"/> on the <see cref="T:Orleans.Runtime.SystemTarget"/>.
             </summary>
             <param name="self">The <see cref="T:Orleans.Runtime.SystemTarget"/>.</param>
             <param name="action">The action.</param>
@@ -1036,7 +1027,7 @@
             Facet Argument factory
             </summary>
         </member>
-        <member name="M:Orleans.Runtime.GrainDirectory.AdaptiveDirectoryCacheMaintainer.BuildGrainAndETagList(System.Collections.Generic.IEnumerable{Orleans.Runtime.GrainId})">
+        <member name="M:Orleans.Runtime.GrainDirectory.AdaptiveDirectoryCacheMaintainer.BuildGrainAndETagList(System.Collections.Generic.List{Orleans.Runtime.GrainId})">
             <summary>
             Gets the list of grains (all owned by the same silo) and produces a new list
             of tuples, where each tuple holds the grain and its generation counter currently stored in the cache
@@ -1055,6 +1046,16 @@
         </member>
         <member name="F:Orleans.Runtime.GrainDirectory.AdaptiveGrainDirectoryCache.exponentialTimerGrowth">
             controls the exponential growth factor (i.e., x2, x4) for the freshness timer (unit: none)
+        </member>
+        <member name="T:Orleans.Runtime.GrainDirectory.CachedGrainLocator">
+            <summary>
+            Implementation of <see cref="T:Orleans.GrainDirectory.IGrainLocator"/> that uses <see cref="T:Orleans.GrainDirectory.IGrainDirectory"/> stores.
+            </summary>
+        </member>
+        <member name="T:Orleans.Runtime.GrainDirectory.DhtGrainLocator">
+            <summary>
+            Implementation of <see cref="T:Orleans.GrainDirectory.IGrainLocator"/> that uses the in memory distributed directory of Orleans
+            </summary>
         </member>
         <member name="T:Orleans.Runtime.GrainDirectory.GrainDirectoryHandoffManager">
             <summary>
@@ -1172,6 +1173,12 @@
             Otherwise, i.e., if the value is null, the corresponding entry is removed.
             </param>
         </member>
+        <member name="T:Orleans.Runtime.GrainDirectory.GrainLocatorSelector">
+            <summary>
+            Special IGrainLocator implementation that will choose between the DhtGrainLocator and the new GrainLocator
+            This class will be removed once the DhtGrainLocator will be updated to support the IGrainDirectory interface
+            </summary>
+        </member>
         <member name="M:Orleans.Runtime.GrainDirectory.IGrainDirectoryCache.AddOrUpdate(Orleans.Runtime.GrainId,System.Collections.Generic.IReadOnlyList{System.Tuple{Orleans.Runtime.SiloAddress,Orleans.Runtime.ActivationId}},System.Int32)">
             <summary>
             Adds a new entry with the given version into the cache: key (grain) --> value
@@ -1251,15 +1258,6 @@
             <param name="grain">The ID of the grain to look up.</param>
             <param name="addresses">An output parameter that receives the list of locally-known activations of the grain.</param>
             <returns>True if remote addresses are complete within freshness constraint</returns>
-        </member>
-        <member name="M:Orleans.Runtime.GrainDirectory.ILocalGrainDirectory.LookupInCluster(Orleans.Runtime.GrainId,System.String)">
-            <summary>
-            Fetches complete directory information for a grain in an explicitly named cluster.
-            <para>This method must be called from a scheduler thread.</para>
-            </summary>
-            <param name="grain">The ID of the grain to look up.</param>
-            <param name="clusterId">The cluster in which to look up the grain</param>
-            <returns>A list of all known activations of the grain, and the e-tag.</returns>
         </member>
         <member name="M:Orleans.Runtime.GrainDirectory.ILocalGrainDirectory.InvalidateCacheEntry(Orleans.Runtime.ActivationAddress,System.Boolean)">
             <summary>
@@ -1364,54 +1362,11 @@
             <param name="isPrimary"></param>
             <returns></returns>
         </member>
-        <member name="T:Orleans.Runtime.GrainDirectory.ClusterGrainDirectory">
-            <summary>
-            This system target provides an entry point for remote clusters to call directory functions.
-            Since remote clusters do not have ring information about this cluster, they cannot send 
-            requests directly to the silo with the right directory partition
-            unless they know the activation address already. Therefore,
-            This class serves as an intermediary that forwards the requests to the correct silo.
-            </summary>
-        </member>
-        <member name="M:Orleans.Runtime.GrainDirectory.ClusterGrainDirectory.ProcessDeactivations(System.Collections.Generic.List{Orleans.Runtime.ActivationAddress})">
-            <summary>
-            Called by a remote cluster after it deactivates GSI grains, so this cluster can remove cached entries
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Orleans.Runtime.GrainDirectory.ClusterGrainDirectory.ProcessDeletion(Orleans.Runtime.GrainId)">
-            <summary>
-            Called by a remote cluster that wishes to eradicate all activations of a grain in all clusters
-            </summary>
-        </member>
-        <member name="M:Orleans.Runtime.GrainDirectory.ClusterGrainDirectory.Ping">
-            <summary>
-            Called on remote clusters to ping availability of a silo and determine cluster id.
-            </summary>
-        </member>
         <member name="T:Orleans.Runtime.GrainDirectory.ClusterLocalRegistrar">
             <summary>
             The registrar for the Cluster-Local Registration Strategy.
+            TODO Merge back logic in LocalGrainDirectory
             </summary>
-        </member>
-        <member name="T:Orleans.Runtime.GrainDirectory.GlobalSingleInstanceRegistrar">
-            <summary>
-            A grain registrar that coordinates the directory entries for a grain between
-            all the clusters in the current multi-cluster configuration.
-            It uses the global-single-instance protocol to ensure that there is eventually
-            only a single owner for each grain. When a new grain is registered, all other clusters are
-            contacted to see if an activation already exists. If so, a pointer to that activation is 
-            stored in the directory and returned. Otherwise, the new activation is registered.
-            The protocol uses special states to track the status of directory entries, as listed in 
-            <see cref="T:Orleans.GrainDirectory.GrainDirectoryEntryStatus"/>.
-            </summary>
-        </member>
-        <member name="M:Orleans.Runtime.GrainDirectory.GlobalSingleInstanceRegistrar.SendRequest(Orleans.Runtime.GrainId,System.String)">
-            <summary>
-            Send GSI protocol request to the given remote cluster
-            </summary>
-            <param name="grain">The grainId of the grain being activated</param>
-            <param name="remotecluster">The remote cluster name to send the request to.</param>
         </member>
         <member name="T:Orleans.Runtime.GrainDirectory.GlobalSingleInstanceResponseTracker">
             <summary>
@@ -1456,11 +1411,6 @@
             <returns>
             The function returns "true" if clusterLeft has precedence over clusterRight.
             </returns>
-        </member>
-        <member name="T:Orleans.Runtime.GrainDirectory.RegistrarManager">
-            <summary>
-            Maps multi-cluster registration strategies to the corresponding registrar
-            </summary>
         </member>
         <member name="T:Orleans.Runtime.GrainTypeData">
             <summary>
@@ -1518,11 +1468,15 @@
             Exposes private members of <see cref="T:Orleans.Runtime.MembershipService.ClusterHealthMonitor"/> for test purposes.
             </summary>
         </member>
-        <member name="M:Orleans.Runtime.MembershipService.ClusterHealthMonitor.CheckClusterConnectivity(Orleans.Runtime.SiloAddress[])">
+        <member name="P:Orleans.Runtime.MembershipService.ClusterHealthMonitor.SiloMonitors">
             <summary>
-            Attempts to probe all active silos in the cluster, returning a list of silos with which connectivity could not be verified.
+            Gets the collection of monitored silos.
             </summary>
-            <returns>A list of silos with which connectivity could not be verified.</returns>
+        </member>
+        <member name="M:Orleans.Runtime.MembershipService.ClusterHealthMonitor.OnProbeResultInternal(Orleans.Runtime.MembershipService.SiloHealthMonitor,Orleans.Runtime.MembershipService.SiloHealthMonitor.ProbeResult)">
+            <summary>
+            Performs the default action when a new probe result is created.
+            </summary>
         </member>
         <member name="T:Orleans.Runtime.MembershipService.IRemoteSiloProber">
             <summary>
@@ -1539,6 +1493,68 @@
             A <see cref="T:System.Threading.Tasks.Task"/> which completes when the probe returns successfully and faults when the probe fails.
             </returns>
         </member>
+        <member name="M:Orleans.Runtime.MembershipService.IRemoteSiloProber.ProbeIndirectly(Orleans.Runtime.SiloAddress,Orleans.Runtime.SiloAddress,System.TimeSpan,System.Int32)">
+            <summary>
+            Probes the specified <paramref name="target"/> indirectly, via <paramref name="intermediary"/>.
+            </summary>
+            <param name="intermediary">The silo which will perform a direct probe.</param>
+            <param name="target">The silo which will be probed.</param>
+            <param name="probeTimeout">The timeout which the <paramref name="intermediary" /> should apply to the probe.</param>
+            <param name="probeNumber">The probe number for diagnostic purposes.</param>
+        </member>
+        <member name="M:Orleans.Runtime.MembershipService.ILocalSiloHealthMonitor.GetLocalHealthDegradationScore(System.DateTime)">
+            <summary>
+            Returns the local health degradation score, which is a value between 0 (healthy) and <see cref="F:Orleans.Runtime.MembershipService.LocalSiloHealthMonitor.MaxScore"/> (unhealthy).
+            </summary>
+            <param name="checkTime">The time which the check is taking place.</param>
+            <returns>The local health degradation score, which is a value between 0 (healthy) and <see cref="F:Orleans.Runtime.MembershipService.LocalSiloHealthMonitor.MaxScore"/> (unhealthy).</returns>
+        </member>
+        <member name="P:Orleans.Runtime.MembershipService.ILocalSiloHealthMonitor.Complaints">
+            <summary>
+            The most recent list of detected health issues.
+            </summary>
+        </member>
+        <member name="T:Orleans.Runtime.MembershipService.LocalSiloHealthMonitor">
+            <summary>
+            Monitors the health of the local node using a combination of heuristics to create a health degradation score which
+            is exposed as a boolean value: whether or not the local node's health is degraded.
+            </summary>
+            <remarks>
+            The primary goal of this functionality is to passify degraded nodes so that they do not evict healthy nodes.
+            This functionality is inspired by the Lifeguard paper (https://arxiv.org/abs/1707.00788), which is a set of extensions
+            to the SWIM membership algorithm (https://research.cs.cornell.edu/projects/Quicksilver/public_pdfs/SWIM.pdf). Orleans
+            uses a strong consistency membership algorithm, and not all of the Lifeguard extensions to SWIM apply to Orleans'
+            membership algorithm (refutation, for example).
+            The monitor implements the following heuristics:
+            <list type="bullet">
+              <item>Check that this silos is marked as active in membership.</item>
+              <item>Check that no other silo suspects this silo.</item>
+              <item>Check for recently received successful ping responses.</item>
+              <item>Check for recently received ping requests.</item>
+              <item>Check that the .NET Thread Pool is able to process work items within one second.</item>
+              <item>Check that local async timers have been firing on-time (within 3 seconds of their due time).</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="P:Orleans.Runtime.MembershipService.LocalSiloHealthMonitor.Complaints">
+            <inheritdoc />
+        </member>
+        <member name="M:Orleans.Runtime.MembershipService.LocalSiloHealthMonitor.GetLocalHealthDegradationScore(System.DateTime)">
+            <inheritdoc />
+        </member>
+        <member name="M:Orleans.Runtime.MembershipService.LocalSiloHealthMonitor.GetLocalHealthDegradationScore(System.DateTime,System.Collections.Generic.List{System.String})">
+            <summary>
+            Returns the local health degradation score, which is a value between 0 (healthy) and <see cref="F:Orleans.Runtime.MembershipService.LocalSiloHealthMonitor.MaxScore"/> (unhealthy).
+            </summary>
+            <param name="checkTime">The time which the check is taking place.</param>
+            <param name="complaints">If not null, will be populated with the current set of detected health issues.</param>
+            <returns>The local health degradation score, which is a value between 0 (healthy) and <see cref="F:Orleans.Runtime.MembershipService.LocalSiloHealthMonitor.MaxScore"/> (unhealthy).</returns>
+        </member>
+        <member name="T:Orleans.Runtime.MembershipService.LocalSiloHealthMonitor.ThreadPoolMonitor">
+            <summary>
+            Measures queue delay on the .NET <see cref="T:System.Threading.ThreadPool"/>.
+            </summary>
+        </member>
         <member name="T:Orleans.Runtime.MembershipService.MembershipAgent">
             <summary>
             Responsible for updating membership table with details about the local silo.
@@ -1553,6 +1569,17 @@
             <param name="probeNumber">The probe number, for diagnostic purposes.</param>
             <returns>The result of pinging the remote silo.</returns>
         </member>
+        <member name="M:Orleans.Runtime.MembershipService.MembershipSystemTarget.ProbeRemoteSiloIndirectly(Orleans.Runtime.SiloAddress,Orleans.Runtime.SiloAddress,System.TimeSpan,System.Int32)">
+            <summary>
+            Send a ping to a remote silo via an intermediary silo. This is intended to be called from a <see cref="T:Orleans.Runtime.MembershipService.SiloHealthMonitor"/>
+            in order to initiate the call from the <see cref="T:Orleans.Runtime.MembershipService.MembershipSystemTarget"/>'s context
+            </summary>
+            <param name="intermediary">The intermediary which will directly probe the target.</param>
+            <param name="target">The target which will be probed.</param>
+            <param name="probeTimeout">The timeout for the eventual direct probe request.</param>
+            <param name="probeNumber">The probe number, for diagnostic purposes.</param>
+            <returns>The result of pinging the remote silo.</returns>
+        </member>
         <member name="T:Orleans.Runtime.MembershipService.MembershipTableCleanupAgent">
             <summary>
             Responsible for cleaning up dead membership table entries.
@@ -1564,24 +1591,32 @@
         <member name="M:Orleans.Runtime.MembershipService.RemoteSiloProber.Probe(Orleans.Runtime.SiloAddress,System.Int32)">
             <inheritdoc />
         </member>
+        <member name="M:Orleans.Runtime.MembershipService.RemoteSiloProber.ProbeIndirectly(Orleans.Runtime.SiloAddress,Orleans.Runtime.SiloAddress,System.TimeSpan,System.Int32)">
+            <inheritdoc />
+        </member>
         <member name="T:Orleans.Runtime.MembershipService.SiloHealthMonitor">
             <summary>
             Responsible for monitoring an individual remote silo.
             </summary>
         </member>
-        <member name="F:Orleans.Runtime.MembershipService.SiloHealthMonitor.nextProbeId">
+        <member name="F:Orleans.Runtime.MembershipService.SiloHealthMonitor._nextProbeId">
             <summary>
             The id of the next probe.
             </summary>
         </member>
-        <member name="F:Orleans.Runtime.MembershipService.SiloHealthMonitor.highestCompletedProbeId">
-            <summary>
-            The highest internal probe number which has completed.
-            </summary>
-        </member>
-        <member name="F:Orleans.Runtime.MembershipService.SiloHealthMonitor.missedProbes">
+        <member name="F:Orleans.Runtime.MembershipService.SiloHealthMonitor._failedProbes">
             <summary>
             The number of failed probes since the last successful probe.
+            </summary>
+        </member>
+        <member name="P:Orleans.Runtime.MembershipService.SiloHealthMonitor.ElapsedSinceLastResponse">
+            <summary>
+            The time since the last ping response was received from either the node being monitored or an intermediary.
+            </summary>
+        </member>
+        <member name="P:Orleans.Runtime.MembershipService.SiloHealthMonitor.LastRoundTripTime">
+            <summary>
+            The duration of time measured from just prior to sending the last probe which received a response until just after receiving and processing the response.
             </summary>
         </member>
         <member name="P:Orleans.Runtime.MembershipService.SiloHealthMonitor.SiloAddress">
@@ -1594,17 +1629,48 @@
             Whether or not this monitor is canceled.
             </summary>
         </member>
-        <member name="M:Orleans.Runtime.MembershipService.SiloHealthMonitor.Probe(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:Orleans.Runtime.MembershipService.SiloHealthMonitor.Start">
+            <summary>
+            Start the monitor.
+            </summary>
+        </member>
+        <member name="M:Orleans.Runtime.MembershipService.SiloHealthMonitor.StopAsync(System.Threading.CancellationToken)">
+            <summary>
+            Stop the monitor.
+            </summary>
+        </member>
+        <member name="M:Orleans.Runtime.MembershipService.SiloHealthMonitor.ProbeDirectly(System.Threading.CancellationToken)">
             <summary>
             Probes the remote silo.
             </summary>
-            <param name="diagnosticProbeNumber">The probe number, for diagnostic purposes.</param>
             <param name="cancellation">A token to cancel and fail the probe attempt.</param>
             <returns>The number of failed probes since the last successful probe.</returns>
+        </member>
+        <member name="M:Orleans.Runtime.MembershipService.SiloHealthMonitor.ProbeIndirectly(Orleans.Runtime.SiloAddress,System.TimeSpan,System.Threading.CancellationToken)">
+            <summary>
+            Probes the remote node via an intermediary silo.
+            </summary>
+            <param name="intermediary">The node to probe the target with.</param>
+            <param name="directProbeTimeout">The amount of time which the intermediary should allow for the target to respond.</param>
+            <param name="cancellation">A token to cancel and fail the probe attempt.</param>
+            <returns>The number of failed probes since the last successful probe.</returns>
+        </member>
+        <member name="M:Orleans.Runtime.MembershipService.SiloHealthMonitor.CheckHealth(System.DateTime,System.String@)">
+            <inheritdoc />
+        </member>
+        <member name="T:Orleans.Runtime.MembershipService.SiloHealthMonitor.ProbeResult">
+            <summary>
+            Represents the result of probing a silo.
+            </summary>
         </member>
         <member name="T:Orleans.Runtime.MembershipService.SiloStatusListenerManager">
             <summary>
             Manages <see cref="T:Orleans.Runtime.ISiloStatusListener"/> instances.
+            </summary>
+        </member>
+        <member name="M:Orleans.Runtime.IClusterMembershipService.TryKill(Orleans.Runtime.SiloAddress)">
+            <summary>
+            Unilaterally declares the specified silo defunct.
             </summary>
         </member>
         <member name="T:Orleans.Runtime.ISiloStatusListener">
@@ -1685,12 +1751,6 @@
             <param name="onlyActive">Include only silo who are currently considered to be active. If false, include all.</param>
             <returns>A list of silo statuses.</returns>
         </member>
-        <member name="M:Orleans.Runtime.ISiloStatusOracle.GetApproximateMultiClusterGateways">
-            <summary>
-            Get a list of silos that are designated to function as gateways.
-            </summary>
-            <returns></returns>
-        </member>
         <member name="M:Orleans.Runtime.ISiloStatusOracle.TryGetSiloName(Orleans.Runtime.SiloAddress,System.String@)">
             <summary>
             Get the name of a silo. 
@@ -1732,18 +1792,6 @@
             <param name="msg"></param>
             <returns>true if the message should be delivered to a proxied grain, false if not.</returns>
         </member>
-        <member name="P:Orleans.Runtime.Messaging.InboundMessageQueue.Count">
-            <inheritdoc />
-        </member>
-        <member name="M:Orleans.Runtime.Messaging.InboundMessageQueue.Stop">
-            <inheritdoc />
-        </member>
-        <member name="M:Orleans.Runtime.Messaging.InboundMessageQueue.PostMessage(Orleans.Runtime.Message)">
-            <inheritdoc />
-        </member>
-        <member name="M:Orleans.Runtime.Messaging.InboundMessageQueue.Dispose">
-            <inheritdoc />
-        </member>
         <member name="M:Orleans.Runtime.Messaging.MessageCenter.BlockApplicationMessages">
             <summary>
             Indicates that application messages should be blocked from being sent or received.
@@ -1769,88 +1817,20 @@
             Returns <see langword="true"/> if this process is overloaded, <see langword="false"/> otherwise.
             </summary>
         </member>
-        <member name="M:Orleans.Runtime.MultiClusterNetwork.IMultiClusterOracle.Start">
+        <member name="T:Orleans.Runtime.Messaging.ProbeRequestMonitor">
             <summary>
-            Starts this instance.
-            </summary>
-            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the work performed.</returns>
-        </member>
-        <member name="M:Orleans.Runtime.MultiClusterNetwork.IMultiClusterOracle.GetMultiClusterConfiguration">
-            <summary>
-            Get the latest multicluster configuration.
-            </summary>
-            <returns>The current multicluster configuration, or null if there is none</returns>
-        </member>
-        <member name="M:Orleans.Runtime.MultiClusterNetwork.IMultiClusterOracle.InjectMultiClusterConfiguration(Orleans.MultiCluster.MultiClusterConfiguration)">
-            <summary>
-            Inject a multicluster configuration. For this to have any effect, the timestamp must be newer 
-            than the latest configuration stored in the multicluster network.
-            </summary>
-            <returns>A task that completes once information has propagated to the multicluster channels</returns>
-        </member>
-        <member name="M:Orleans.Runtime.MultiClusterNetwork.IMultiClusterOracle.IsFunctionalClusterGateway(Orleans.Runtime.SiloAddress)">
-            <summary>
-            Whether a gateway is functional (to the best knowledge of this node) 
-            </summary>
-            <param name="siloAddress">A gateway whose status we are interested in.</param>
-        </member>
-        <member name="M:Orleans.Runtime.MultiClusterNetwork.IMultiClusterOracle.FindLaggingSilos(Orleans.MultiCluster.MultiClusterConfiguration)">
-            <summary>
-            Contact all silos in all clusters, return silos that do not have the expected configuration.
-            </summary>
-            <returns>A dictionary containing silo addresses and the corresponding configuration for all non-matching configurations</returns>
-        </member>
-        <member name="M:Orleans.Runtime.MultiClusterNetwork.IMultiClusterOracle.GetActiveClusters">
-            <summary>
-            Returns a list of cluster ids for active clusters based on what gateways we have stored in the table.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Orleans.Runtime.MultiClusterNetwork.IMultiClusterOracle.GetGateways">
-            <summary>
-            Returns the list of currently known multicluster gateways.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Orleans.Runtime.MultiClusterNetwork.IMultiClusterOracle.GetRandomClusterGateway(System.String)">
-            <summary>
-            Returns one of the active cluster gateways for a given cluster.
-            </summary>
-            <param name="cluster">the cluster for which we want a gateway</param>
-            <returns>a gateway address, or null if none is found for the given cluster</returns>
-        </member>
-        <member name="M:Orleans.Runtime.MultiClusterNetwork.IMultiClusterOracle.SubscribeToMultiClusterConfigurationEvents(Orleans.Runtime.MultiClusterNetwork.IMultiClusterConfigurationListener)">
-            <summary>
-            Subscribe to multicluster configuration change events.
-            </summary>
-            <param name="observer">An observer to receive configuration change notifications.</param>
-            <returns>bool value indicating that subscription succeeded or not.</returns>
-        </member>
-        <member name="M:Orleans.Runtime.MultiClusterNetwork.IMultiClusterOracle.UnSubscribeFromMultiClusterConfigurationEvents(Orleans.Runtime.MultiClusterNetwork.IMultiClusterConfigurationListener)">
-            <summary>
-            UnSubscribe from multicluster configuration change events.
-            </summary>
-            <returns>bool value indicating that subscription succeeded or not.</returns>
-        </member>
-        <member name="P:Orleans.Runtime.MultiClusterNetwork.IMultiClusterOracle.ProtocolMessageFilterForTesting">
-            <summary>
-            A test hook for dropping protocol messages between replicated grain instances
+            Monitors incoming cluster health probe requests
             </summary>
         </member>
-        <member name="T:Orleans.Runtime.MultiClusterNetwork.IMultiClusterConfigurationListener">
+        <member name="M:Orleans.Runtime.Messaging.ProbeRequestMonitor.OnReceivedProbeRequest">
             <summary>
-            Interface for subscribers to multi-cluster configuration changes.
+            Called when this silo receives a health probe request.
             </summary>
         </member>
-        <member name="M:Orleans.Runtime.MultiClusterNetwork.IMultiClusterConfigurationListener.OnMultiClusterConfigurationChange(Orleans.MultiCluster.MultiClusterConfiguration)">
+        <member name="P:Orleans.Runtime.Messaging.ProbeRequestMonitor.ElapsedSinceLastProbeRequest">
             <summary>
-            Called when a configuration change notification is received.
+            The duration which has elapsed since the most recently received health probe request.
             </summary>
-            <param name="next">the next multi-cluster configuration</param>
-            <returns></returns>
-        </member>
-        <member name="P:Orleans.Runtime.MultiClusterNetwork.MultiClusterOracle.ProtocolMessageFilterForTesting">
-            <inheritdoc/>
         </member>
         <member name="M:Orleans.Runtime.Placement.ActivationCountPlacementDirector.SelectSiloGreedy(Orleans.Runtime.PlacementStrategy,Orleans.Runtime.GrainId,Orleans.Runtime.Placement.IPlacementRuntime)">
             <summary>
@@ -1873,7 +1853,7 @@
             Interface for activation selectors.
             </summary>
         </member>
-        <member name="M:Orleans.Runtime.Placement.IPlacementRuntime.FastLookup(Orleans.Runtime.GrainId,Orleans.GrainDirectory.AddressesAndTag@)">
+        <member name="M:Orleans.Runtime.Placement.IPlacementRuntime.FastLookup(Orleans.Runtime.GrainId,System.Collections.Generic.List{Orleans.Runtime.ActivationAddress}@)">
             <summary>
             Lookup locally known directory information for a target grain
             </summary>
@@ -1911,15 +1891,6 @@
             <param name="updatedSilo">Updated silo.</param>
             <param name="newStats">New Silo statistics.</param>
         </member>
-        <member name="M:Orleans.Runtime.ReminderService.GrainBasedReminderTable.RemoveRow(Orleans.Runtime.GrainReference,System.String,System.String)">
-            <summary>
-            Remove a row from the table
-            </summary>
-            <param name="grainRef"></param>
-            <param name="reminderName"></param>
-            <param name="eTag"></param>
-            <returns>true if a row with <paramref name="grainRef"/> and <paramref name="reminderName"/> existed and was removed successfully, false otherwise</returns>
-        </member>
         <member name="M:Orleans.Runtime.ReminderService.LocalReminderService.Start">
             <summary>
             Attempt to retrieve reminders, that are my responsibility, from the global reminder table when starting this silo (reminder service instance)
@@ -1938,11 +1909,15 @@
             Attempt to retrieve reminders from the global reminder table
             </summary>
         </member>
-        <member name="M:Orleans.Runtime.ReminderService.LocalReminderService.AsyncTimerCallback(System.Object)">
+        <member name="P:Orleans.Runtime.ReminderService.LocalReminderService.LocalReminderData.LocalSequenceNumber">
             <summary>
-            Local timer expired ... notify it as a 'tick' to the grain who registered this reminder
+            Locally, we use this for resolving races between the periodic table reader, and any concurrent local register/unregister requests
             </summary>
-            <param name="rem">Reminder that this timeout represents</param>
+        </member>
+        <member name="P:Orleans.Runtime.ReminderService.LocalReminderService.LocalReminderData.IsRunning">
+            <summary>
+            Gets a value indicating whether this instance is running.
+            </summary>
         </member>
         <member name="T:Orleans.Runtime.Scheduler.ActivationTaskScheduler">
             <summary>
@@ -1967,13 +1942,7 @@
             <param name="task">The <see cref="T:System.Threading.Tasks.Task"/> to be executed.</param>
             <param name="taskWasPreviouslyQueued">A Boolean denoting whether or not task has previously been queued. If this parameter is True, then the task may have been previously queued (scheduled); if False, then the task is known not to have been queued, and this call is being made in order to execute the task inline without queuing it.</param>
         </member>
-        <member name="M:Orleans.Runtime.Scheduler.OrleansTaskScheduler.RunTask(System.Threading.Tasks.Task)">
-            <summary>
-            Run the specified task synchronously on the current thread
-            </summary>
-            <param name="task"><c>Task</c> to be executed</param>
-        </member>
-        <member name="M:Orleans.Runtime.Scheduler.SchedulerExtensions.RunOrQueueAction(Orleans.Runtime.Scheduler.OrleansTaskScheduler,System.Action,Orleans.Runtime.ISchedulingContext)">
+        <member name="M:Orleans.Runtime.Scheduler.SchedulerExtensions.RunOrQueueAction(Orleans.Runtime.Scheduler.OrleansTaskScheduler,System.Action,Orleans.Runtime.IGrainContext)">
             <summary>
             Execute a closure ensuring that it has a runtime context (e.g. to send messages from an arbitrary thread)
             </summary>
@@ -1981,21 +1950,17 @@
             <param name="action"></param>
             <param name="targetContext"></param>
         </member>
-        <member name="M:Orleans.Runtime.Scheduler.TaskWorkItem.#ctor(Orleans.Runtime.Scheduler.ITaskScheduler,System.Threading.Tasks.Task,Orleans.Runtime.ISchedulingContext,Microsoft.Extensions.Logging.ILogger)">
-            <summary>
-            Create a new TaskWorkItem for running the specified Task on the specified scheduler.
-            </summary>
-            <param name="sched">Scheduler to execute this Task action. A value of null means use the Orleans system scheduler.</param>
-            <param name="t">Task to be performed</param>
-            <param name="context">Execution context</param>
-            <param name="logger">logger to use</param>
-        </member>
         <member name="M:Orleans.Runtime.Scheduler.WorkItemGroup.EnqueueTask(System.Threading.Tasks.Task)">
             <summary>
             Adds a task to this activation.
             If we're adding it to the run list and we used to be waiting, now we're runnable.
             </summary>
             <param name="task">The work item to add.</param>
+        </member>
+        <member name="M:Orleans.Runtime.Scheduler.WorkItemGroup.GetScheduledTasks">
+            <summary>
+            For debugger purposes only.
+            </summary>
         </member>
         <member name="M:Orleans.Runtime.Scheduler.WorkItemGroup.Stop">
             <summary>
@@ -2154,11 +2119,6 @@
         <member name="P:Orleans.Runtime.Silo.SiloAddress">
             <summary> SiloAddress for this silo. </summary>
         </member>
-        <member name="P:Orleans.Runtime.Silo.SiloTerminatedEvent">
-            <summary>
-             Silo termination event used to signal shutdown of this silo.
-            </summary>
-        </member>
         <member name="M:Orleans.Runtime.Silo.#ctor(Orleans.Runtime.ILocalSiloDetails,System.IServiceProvider)">
             <summary>
             Initializes a new instance of the <see cref="T:Orleans.Runtime.Silo"/> class.
@@ -2276,6 +2236,20 @@
             <typeparam name="TInstance">The instance type.</typeparam>
             <param name="serviceProvider">The service provider.</param>
             <returns>A new factory.</returns>
+        </member>
+        <member name="T:Orleans.Runtime.Utilities.OrleansDebuggerHelper">
+            <summary>
+            Utility methods for aiding debugger sessions.
+            </summary>
+        </member>
+        <member name="M:Orleans.Runtime.Utilities.OrleansDebuggerHelper.GetGrainInstance(System.Object)">
+            <summary>
+            Returns the grain instance corresponding to the provided <paramref name="grainReference"/> if it is activated on current silo.
+            </summary>
+            <param name="grainReference">The grain reference.</param>
+            <returns>
+            The grain instance corresponding to the provided <paramref name="grainReference"/> if it is activated on current silo, or <see langword="null"/> otherwise.
+            </returns>
         </member>
         <member name="M:Orleans.Runtime.SiloUnobservedExceptionsHandlerServiceProviderExtensions.UseSiloUnobservedExceptionsHandler(Orleans.Hosting.ISiloBuilder)">
             <summary>
@@ -2516,6 +2490,12 @@
             Interval in which the list of connected clients is refreshed.
             </summary>
         </member>
+        <member name="P:Orleans.Configuration.SiloMessagingOptions.ClientGatewayShutdownNotificationTimeout">
+            <summary>
+            This is the period of time a gateway will wait after notifying connected client before continuing the
+            shutdown process
+            </summary>
+        </member>
         <member name="P:Orleans.Configuration.SiloMessagingOptions.MaxEnqueuedRequestsSoftLimit">
             <summary>
             Per grain threshold for pending requests.  Generated warning when exceeded.
@@ -2555,6 +2535,21 @@
             <summary>
             The SystemResponseTimeout attribute specifies the default timeout before an internal system request is assumed to have failed.
             <seealso cref="P:Orleans.Configuration.MessagingOptions.ResponseTimeoutWithDebugger"/>
+            </summary>
+        </member>
+        <member name="P:Orleans.Configuration.SiloMessagingOptions.GrainWorkloadAnalysisPeriod">
+            <summary>
+            The period of time between analyzing currently executing activation workloads.
+            </summary>
+        </member>
+        <member name="P:Orleans.Configuration.SiloMessagingOptions.RequestProcessingWarningTime">
+            <summary>
+            The period after which a currently executing request is deemed to be slow.
+            </summary>
+        </member>
+        <member name="P:Orleans.Configuration.SiloMessagingOptions.RequestQueueDelayWarningTime">
+            <summary>
+            The period after which an enqueued request is deemed to be delayed.
             </summary>
         </member>
         <member name="M:Orleans.Configuration.Overrides.SiloOptionsOverrides.AddProviderClusterOptions(Orleans.Hosting.ISiloHostBuilder,System.String,System.Action{Microsoft.Extensions.Options.OptionsBuilder{Orleans.Configuration.ClusterOptions}})">
@@ -2830,6 +2825,21 @@
             <param name="listenOnAnyHostAddress">Set to true to listen on all IP addresses of the host instead of just the advertiseIP.</param>
             <returns></returns>
         </member>
+        <member name="P:Orleans.Hosting.SiloHost.Services">
+            <inheritdoc />
+        </member>
+        <member name="P:Orleans.Hosting.SiloHost.Stopped">
+            <inheritdoc />
+        </member>
+        <member name="M:Orleans.Hosting.SiloHost.StartAsync(System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:Orleans.Hosting.SiloHost.StopAsync(System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:Orleans.Hosting.SiloHost.Dispose">
+            <inheritdoc />
+        </member>
         <member name="T:Orleans.Hosting.SiloHostBuilder">
             <summary>
             Functionality for building <see cref="T:Orleans.Hosting.ISiloHost"/> instances.
@@ -2908,21 +2918,6 @@
             <param name="builder">The builder.</param>
             <param name="filter">The filter.</param>
             <returns>The builder.</returns>
-        </member>
-        <member name="P:Orleans.Hosting.SiloWrapper.Services">
-            <inheritdoc />
-        </member>
-        <member name="P:Orleans.Hosting.SiloWrapper.Stopped">
-            <inheritdoc />
-        </member>
-        <member name="M:Orleans.Hosting.SiloWrapper.StartAsync(System.Threading.CancellationToken)">
-            <inheritdoc />
-        </member>
-        <member name="M:Orleans.Hosting.SiloWrapper.StopAsync(System.Threading.CancellationToken)">
-            <inheritdoc />
-        </member>
-        <member name="M:Orleans.Hosting.SiloWrapper.Dispose">
-            <inheritdoc />
         </member>
         <member name="M:Orleans.Hosting.GrainCallFilterExtensions.AddIncomingGrainCallFilter(Orleans.Hosting.ISiloBuilder,Orleans.IIncomingGrainCallFilter)">
             <summary>

@@ -107,7 +107,9 @@ namespace Orleans.Providers.MongoDB.Membership.Store.MultipleDeprecated
 
         public Task CleanupDefunctSiloEntries(string deploymentId, DateTimeOffset beforeDate)
         {
-            return Collection.DeleteManyAsync(x => x.DeploymentId == deploymentId && x.Status == (int)SiloStatus.Dead && x.Timestamp < beforeDate);
+            var beforeUtc = beforeDate.UtcDateTime;
+
+            return Collection.DeleteManyAsync(x => x.DeploymentId == deploymentId && x.Status != (int)SiloStatus.Active && x.Timestamp < beforeUtc);
         }
 
         public Task DeleteMembershipTableEntries(string deploymentId)

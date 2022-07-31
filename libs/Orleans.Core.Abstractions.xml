@@ -540,6 +540,11 @@
             Marker interface for addressable endpoints, such as grains, observers, and other system-internal addressable endpoints
             </summary>
         </member>
+        <member name="T:Orleans.Runtime.IGrainContext">
+            <summary>
+            Represents a grain from the perpsective of the runtime.
+            </summary>
+        </member>
         <member name="T:Orleans.Runtime.IGrainExtension">
             <summary>
             Marker interface for grain extensions, used by internal runtime extension endpoints
@@ -1906,6 +1911,14 @@
             <param name="grainReference">Grain reference which will be copied and then a call executed on it</param>
             <param name="grainMethodInvocation">Function that should invoke grain method and return resulting task</param>
         </member>
+        <member name="M:Orleans.GrainExtensions.InvokeOneWay``1(``0,System.Func{``0,System.Threading.Tasks.ValueTask})">
+            <summary>
+            Invokes a method of a grain interface is one-way fashion so that no response message will be sent to the caller.
+            </summary>
+            <typeparam name="T">Grain interface</typeparam>
+            <param name="grainReference">Grain reference which will be copied and then a call executed on it</param>
+            <param name="grainMethodInvocation">Function that should invoke grain method and return resulting ValueTask</param>
+        </member>
         <member name="T:Orleans.IGrain">
             <summary>
             Marker interface for grains
@@ -2231,20 +2244,20 @@
             <param name="grainInterfaceType">the runtime type of the grain interface</param>
             <returns></returns>
         </member>
-        <member name="M:Orleans.Core.IStorage`1.ClearStateAsync">
+        <member name="M:Orleans.Core.IStorage.ClearStateAsync">
             <summary>
-            Async method to cause the current grain state data to be cleared and reset. 
+            Async method to cause the current grain state data to be cleared and reset.
             This will usually mean the state record is deleted from backing store, but the specific behavior is defined by the storage provider instance configured for this grain.
             If Etags do not match, then this operation will fail; Set Etag = <c>null</c> to indicate "always delete".
             </summary>
         </member>
-        <member name="M:Orleans.Core.IStorage`1.WriteStateAsync">
+        <member name="M:Orleans.Core.IStorage.WriteStateAsync">
             <summary>
             Async method to cause write of the current grain state data into backing store.
             If Etags do not match, then this operation will fail; Set Etag = <c>null</c> to indicate "always overwrite".
             </summary>
         </member>
-        <member name="M:Orleans.Core.IStorage`1.ReadStateAsync">
+        <member name="M:Orleans.Core.IStorage.ReadStateAsync">
             <summary>
             Async method to cause refresh of the current grain state data from backing store.
             Any previous contents of the grain state data will be overwritten.
@@ -2264,10 +2277,58 @@
             its own independent directory. This is the default.
             </summary>
         </member>
-        <member name="T:Orleans.GrainDirectory.GlobalSingleInstanceRegistration">
+        <member name="T:Orleans.GrainDirectory.IGrainDirectory">
             <summary>
-            A multi-cluster registration strategy that uses the 
-            the global-single-instance protocol to coordinate grain directories.
+            Interface for grain directory implementations
+            </summary>
+        </member>
+        <member name="M:Orleans.GrainDirectory.IGrainDirectory.Register(Orleans.GrainDirectory.GrainAddress)">
+            <summary>
+            Register a <see cref="T:Orleans.GrainDirectory.GrainAddress"/> entry in the directory.
+            Only one <see cref="T:Orleans.GrainDirectory.GrainAddress"/> per <see cref="P:Orleans.GrainDirectory.GrainAddress.GrainId"/> can be registered. If there is already an
+            existing entry, the directory will not override it.
+            </summary>
+            <param name="address">The <see cref="T:Orleans.GrainDirectory.GrainAddress"/> to register</param>
+            <returns>The <see cref="T:Orleans.GrainDirectory.GrainAddress"/> that is effectively registered in the directory.</returns>
+        </member>
+        <member name="M:Orleans.GrainDirectory.IGrainDirectory.Unregister(Orleans.GrainDirectory.GrainAddress)">
+            <summary>
+            Unregister a <see cref="T:Orleans.GrainDirectory.GrainAddress"/> entry in the directory.
+            </summary>
+            <param name="address">The <see cref="T:Orleans.GrainDirectory.GrainAddress"/> to unregister</param>
+        </member>
+        <member name="M:Orleans.GrainDirectory.IGrainDirectory.Lookup(System.String)">
+            <summary>
+            Lookup for a <see cref="T:Orleans.GrainDirectory.GrainAddress"/> for a given Grain ID.
+            </summary>
+            <param name="grainId">The Grain ID to lookup</param>
+            <returns>The <see cref="T:Orleans.GrainDirectory.GrainAddress"/> entry found in the directory, if any</returns>
+        </member>
+        <member name="M:Orleans.GrainDirectory.IGrainDirectory.UnregisterSilos(System.Collections.Generic.List{System.String})">
+            <summary>
+            Unregister from the directory all entries that point to one of the silo in argument.
+            Can be a NO-OP depending on the implementation.
+            </summary>
+            <param name="siloAddresses">The silos to be removed from the directory</param>
+        </member>
+        <member name="T:Orleans.GrainDirectory.GrainAddress">
+            <summary>
+            Represents an entry in a <see cref="T:Orleans.GrainDirectory.IGrainDirectory"/>
+            </summary>
+        </member>
+        <member name="P:Orleans.GrainDirectory.GrainAddress.GrainId">
+            <summary>
+            Identifier of the Grain
+            </summary>
+        </member>
+        <member name="P:Orleans.GrainDirectory.GrainAddress.ActivationId">
+            <summary>
+            Id of the specific Grain activation
+            </summary>
+        </member>
+        <member name="P:Orleans.GrainDirectory.GrainAddress.SiloAddress">
+            <summary>
+            Address of the silo where the grain activation lives
             </summary>
         </member>
         <member name="T:Orleans.GrainDirectory.IMultiClusterRegistrationStrategy">
@@ -2287,23 +2348,6 @@
             <summary>
             A superclass for all multi-cluster registration strategies.
             Strategy object which is used as keys to select the proper registrar.
-            </summary>
-        </member>
-        <member name="T:Orleans.MultiCluster.RegistrationAttribute">
-            <summary>
-            base class for multi cluster registration strategies.
-            </summary>
-        </member>
-        <member name="T:Orleans.MultiCluster.GlobalSingleInstanceAttribute">
-            <summary>
-            This attribute indicates that instances of the marked grain class will have a single instance across all available clusters. Any requests in any clusters will be forwarded to the single activation instance.
-            </summary>
-        </member>
-        <member name="T:Orleans.MultiCluster.OneInstancePerClusterAttribute">
-            <summary>
-            This attribute indicates that instances of the marked grain class
-            will have an independent instance for each cluster with
-            no coordination.
             </summary>
         </member>
         <member name="T:Orleans.Interner`2">

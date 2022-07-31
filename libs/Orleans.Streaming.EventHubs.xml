@@ -785,6 +785,21 @@
             Get offset from cached message.  Left to derived class, as only it knows how to get this from the cached message.
             </summary>
         </member>
+        <member name="M:Orleans.ServiceBus.Providers.EventHubDataAdapter.GetPartitionKey(System.Guid,System.String)">
+            <summary>
+            Get the Event Hub partition key to use for a stream.
+            </summary>
+            <param name="streamGuid">The stream Guid.</param>
+            <param name="streamNamespace">The stream Namespace.</param>
+            <returns>The partition key to use for the stream.</returns>
+        </member>
+        <member name="M:Orleans.ServiceBus.Providers.EventHubDataAdapter.GetStreamIdentity(Microsoft.Azure.EventHubs.EventData)">
+            <summary>
+            Get the <see cref="T:Orleans.Streams.IStreamIdentity"/> for an event message.
+            </summary>
+            <param name="queueMessage">The event message.</param>
+            <returns>The stream identity.</returns>
+        </member>
         <member name="T:Orleans.ServiceBus.Providers.EventHubMessage">
             <summary>
             Replication of EventHub EventData class, reconstructed from cached data CachedEventHubMessage
@@ -866,7 +881,7 @@
             Protected for test purposes
             </summary>
         </member>
-        <member name="M:Orleans.ServiceBus.Providers.EventHubQueueCache.#ctor(System.String,System.Int32,Orleans.Providers.Streams.Common.IObjectPool{Orleans.Providers.Streams.Common.FixedSizeBuffer},Orleans.ServiceBus.Providers.IEventHubDataAdapter,Orleans.Providers.Streams.Common.IEvictionStrategy,Orleans.Streams.IStreamQueueCheckpointer{System.String},Microsoft.Extensions.Logging.ILogger,Orleans.Providers.Streams.Common.ICacheMonitor,System.Nullable{System.TimeSpan})">
+        <member name="M:Orleans.ServiceBus.Providers.EventHubQueueCache.#ctor(System.String,System.Int32,Orleans.Providers.Streams.Common.IObjectPool{Orleans.Providers.Streams.Common.FixedSizeBuffer},Orleans.ServiceBus.Providers.IEventHubDataAdapter,Orleans.Providers.Streams.Common.IEvictionStrategy,Orleans.Streams.IStreamQueueCheckpointer{System.String},Microsoft.Extensions.Logging.ILogger,Orleans.Providers.Streams.Common.ICacheMonitor,System.Nullable{System.TimeSpan},System.Nullable{System.TimeSpan})">
             <summary>
             EventHub queue cache.
             </summary>
@@ -879,6 +894,7 @@
             <param name="logger"></param>
             <param name="cacheMonitor"></param>
             <param name="cacheMonitorWriteInterval"></param>
+            <param name="metadataMinTimeInCache"></param>
         </member>
         <member name="M:Orleans.ServiceBus.Providers.EventHubQueueCache.SignalPurge">
             <inheritdoc />
@@ -981,7 +997,7 @@
             <param name="providerOptions"></param>
             <param name="cacheLogger"></param>
         </member>
-        <member name="M:Orleans.ServiceBus.Providers.EventHubQueueCacheFactory.CreateCache(System.String,Orleans.ServiceBus.Providers.IEventHubDataAdapter,Orleans.Configuration.StreamStatisticOptions,Orleans.Streams.IStreamQueueCheckpointer{System.String},Microsoft.Extensions.Logging.ILoggerFactory,Orleans.Providers.Streams.Common.IObjectPool{Orleans.Providers.Streams.Common.FixedSizeBuffer},System.String,Orleans.Providers.Streams.Common.TimePurgePredicate,Orleans.Serialization.SerializationManager,Orleans.ServiceBus.Providers.EventHubMonitorAggregationDimensions,Orleans.Runtime.ITelemetryProducer)">
+        <member name="M:Orleans.ServiceBus.Providers.EventHubQueueCacheFactory.CreateCache(System.String,Orleans.ServiceBus.Providers.IEventHubDataAdapter,Orleans.Configuration.StreamStatisticOptions,Orleans.Configuration.StreamCacheEvictionOptions,Orleans.Streams.IStreamQueueCheckpointer{System.String},Microsoft.Extensions.Logging.ILoggerFactory,Orleans.Providers.Streams.Common.IObjectPool{Orleans.Providers.Streams.Common.FixedSizeBuffer},System.String,Orleans.Providers.Streams.Common.TimePurgePredicate,Orleans.Serialization.SerializationManager,Orleans.ServiceBus.Providers.EventHubMonitorAggregationDimensions,Orleans.Runtime.ITelemetryProducer)">
             <summary>
             Default function to be called to create an EventhubQueueCache in IEventHubQueueCacheFactory.CreateCache method. User can 
             override this method to add more customization.
@@ -1303,11 +1319,6 @@
             Default EventHubPartitionRangeStart
             </summary>
         </member>
-        <member name="P:Orleans.Configuration.AzureTableStreamCheckpointerOptions.ConnectionString">
-            <summary>
-            Azure table storage connections string.
-            </summary>
-        </member>
         <member name="P:Orleans.Configuration.AzureTableStreamCheckpointerOptions.TableName">
             <summary>
             Azure table name.
@@ -1376,16 +1387,12 @@
         <member name="P:Orleans.Streaming.EventHubs.AzureTableDataManager`1.Logger">
             <summary> Logger for this table manager instance. </summary>
         </member>
-        <member name="P:Orleans.Streaming.EventHubs.AzureTableDataManager`1.ConnectionString">
-            <summary> Connection string for the Azure storage account used to host this table. </summary>
-        </member>
-        <member name="M:Orleans.Streaming.EventHubs.AzureTableDataManager`1.#ctor(System.String,System.String,Microsoft.Extensions.Logging.ILoggerFactory)">
+        <member name="M:Orleans.Streaming.EventHubs.AzureTableDataManager`1.#ctor(Orleans.Streaming.EventHubs.AzureStorageOperationOptions,Microsoft.Extensions.Logging.ILogger)">
             <summary>
             Constructor
             </summary>
-            <param name="tableName">Name of the table to be connected to.</param>
-            <param name="storageConnectionString">Connection string for the Azure storage account used to host this table.</param>
-            <param name="loggerFactory">Logger factory to use.</param>
+            <param name="options">Storage configuration.</param>
+            <param name="logger">Logger to use.</param>
         </member>
         <member name="M:Orleans.Streaming.EventHubs.AzureTableDataManager`1.InitTableAsync">
             <summary>
@@ -1416,6 +1423,13 @@
         <member name="M:Orleans.Streaming.EventHubs.AzureTableDataManager`1.UpsertTableEntryAsync(`0)">
             <summary>
             Inserts a data entry in the Azure table: creates a new one if does not exists or overwrites (without eTag) an already existing version (the "update in place" semantics).
+            </summary>
+            <param name="data">Data to be inserted or replaced in the table.</param>
+            <returns>Value promise with new Etag for this data entry after completing this storage operation.</returns>
+        </member>
+        <member name="M:Orleans.Streaming.EventHubs.AzureTableDataManager`1.InsertTableEntryAsync(`0)">
+            <summary>
+            Inserts a data entry in the Azure table: creates a new one if does not exists
             </summary>
             <param name="data">Data to be inserted or replaced in the table.</param>
             <returns>Value promise with new Etag for this data entry after completing this storage operation.</returns>
@@ -1492,6 +1506,12 @@
             <param name="collection">Data entries to be inserted into the table.</param>
             <returns>Completion promise for this storage operation.</returns>
         </member>
+        <member name="M:Orleans.Streaming.EventHubs.AzureTableDataManager`1.GetAccountKeyUsingAad">
+            <summary>
+            Cosmos DB does not support AAD auth directly. This method uses the Azure ARM API to fetch the key.
+            See https://docs.microsoft.com/en-us/azure/cosmos-db/managed-identity-based-authentication
+            </summary>
+        </member>
         <member name="T:Orleans.Streaming.EventHubs.AzureTableDataManager`1.TableQueryFilterBuilder">
             <summary>
             Helper functions for building table queries.
@@ -1519,13 +1539,16 @@
             <param name="rowKey"></param>
             <returns></returns>
         </member>
-        <member name="T:Orleans.Streaming.EventHubs.AzureTableDefaultPolicies">
+        <member name="T:Orleans.Streaming.EventHubs.AzureTableDataManager`1.DatabaseAccountListKeysResult">
             <summary>
-            Utility class for default retry / timeout settings for Azure storage.
+            Used to deserialize the response of the <c>listKeys</c> operation.
+            https://docs.microsoft.com/en-us/rest/api/cosmos-db-resource-provider/databaseaccounts/listkeys
             </summary>
-            <remarks>
-            These functions are mostly intended for internal usage by Orleans runtime, but due to certain assembly packaging constraints this class needs to have public visibility.
-            </remarks>
+        </member>
+        <member name="T:Orleans.Streaming.EventHubs.AzureTableDataManager`1.TableClientOptions">
+            <summary>
+            Required since ClientOptions is abstract
+            </summary>
         </member>
         <member name="T:Orleans.Streaming.EventHubs.AzureTableConstants">
             <summary>
@@ -1594,6 +1617,47 @@
             </summary>
             <param name="key"></param>
             <returns></returns>
+        </member>
+        <member name="P:Orleans.Streaming.EventHubs.AzureStorageOperationOptions.StoragePolicyOptions">
+            <summary>
+            Azure Storage Policy Options
+            </summary>
+        </member>
+        <member name="P:Orleans.Streaming.EventHubs.AzureStorageOperationOptions.ConnectionString">
+            <summary>
+            Connection string for Azure Cosmos DB Table
+            </summary>
+        </member>
+        <member name="P:Orleans.Streaming.EventHubs.AzureStorageOperationOptions.TokenCredential">
+            <summary>
+            Use AAD to retrieve the account key
+            </summary>
+        </member>
+        <member name="P:Orleans.Streaming.EventHubs.AzureStorageOperationOptions.TableEndpoint">
+            <summary>
+            The table endpoint (e.g. https://x.table.cosmos.azure.com.) Required for specifying <see cref="P:Orleans.Streaming.EventHubs.AzureStorageOperationOptions.TokenCredential"/>.
+            </summary>
+        </member>
+        <member name="P:Orleans.Streaming.EventHubs.AzureStorageOperationOptions.TableResourceId">
+            <summary>
+            If <see cref="P:Orleans.Streaming.EventHubs.AzureStorageOperationOptions.TokenCredential"/> is used, determines, sets the ID of the table storage account
+            (e.g. <c>/subscriptions/88e5ceb6-26bd-4bf5-8933-f4e05fd9efa6/resourceGroups/rg1/providers/Microsoft.DocumentDB/databaseAccounts/ac1</c>)
+            </summary>
+        </member>
+        <member name="P:Orleans.Streaming.EventHubs.AzureStorageOperationOptions.TokenCredentialTableKey">
+            <summary>
+            If <see cref="P:Orleans.Streaming.EventHubs.AzureStorageOperationOptions.TokenCredential"/> is used, determines the type of key.
+            </summary>
+        </member>
+        <member name="P:Orleans.Streaming.EventHubs.AzureStorageOperationOptions.TokenCredentialManagementUri">
+            <summary>
+            If <see cref="P:Orleans.Streaming.EventHubs.AzureStorageOperationOptions.TokenCredential"/> is used, determines the management endpoint.
+            </summary>
+        </member>
+        <member name="P:Orleans.Streaming.EventHubs.AzureStorageOperationOptions.TableName">
+            <summary>
+            Table name for Azure Storage
+            </summary>
         </member>
         <member name="T:OrleansServiceBus.Providers.Streams.EventHub.StatisticMonitors.DefaultEventHubBlockPoolMonitor">
             <summary>

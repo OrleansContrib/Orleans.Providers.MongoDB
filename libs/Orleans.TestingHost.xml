@@ -22,6 +22,16 @@
             Configures the client builder
             </summary>
         </member>
+        <member name="T:Orleans.TestingHost.IHostConfigurator">
+            <summary>
+            Allows implementations to configure the host builder when starting up each silo in the test cluster.
+            </summary>
+        </member>
+        <member name="M:Orleans.TestingHost.IHostConfigurator.Configure(Microsoft.Extensions.Hosting.IHostBuilder)">
+            <summary>
+            Configures the host builder.
+            </summary>
+        </member>
         <member name="T:Orleans.TestingHost.InProcessSiloHandle">
             <summary>
             Represents a handle to a silo that is deployed in the same process and AppDomain.
@@ -53,7 +63,17 @@
         </member>
         <member name="M:Orleans.TestingHost.ISiloBuilderConfigurator.Configure(Orleans.Hosting.ISiloHostBuilder)">
             <summary>
-            Configures the host builder.
+            Configures the silo host builder.
+            </summary>
+        </member>
+        <member name="T:Orleans.TestingHost.ISiloConfigurator">
+            <summary>
+            Allows implementations to configure the silo builder when starting up each silo in the test cluster.
+            </summary>
+        </member>
+        <member name="M:Orleans.TestingHost.ISiloConfigurator.Configure(Orleans.Hosting.ISiloBuilder)">
+            <summary>
+            Configures the silo builder.
             </summary>
         </member>
         <member name="T:Orleans.TestingHost.Logging.FileLoggingOutput">
@@ -155,6 +175,9 @@
         <member name="M:Orleans.TestingHost.SiloHandle.Dispose(System.Boolean)">
             <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
         </member>
+        <member name="M:Orleans.TestingHost.SiloHandle.DisposeAsync">
+            <inheritdoc />
+        </member>
         <member name="M:Orleans.TestingHost.SiloHandle.Finalize">
             <inheritdoc />
         </member>
@@ -228,7 +251,12 @@
             Delegate used to create and start an individual silo.
             </summary>
         </member>
-        <member name="M:Orleans.TestingHost.TestCluster.#ctor(Orleans.TestingHost.TestClusterOptions,System.Collections.Generic.IReadOnlyList{Microsoft.Extensions.Configuration.IConfigurationSource})">
+        <member name="P:Orleans.TestingHost.TestCluster.PortAllocator">
+            <summary>
+            The port allocator.
+            </summary>
+        </member>
+        <member name="M:Orleans.TestingHost.TestCluster.#ctor(Orleans.TestingHost.TestClusterOptions,System.Collections.Generic.IReadOnlyList{Microsoft.Extensions.Configuration.IConfigurationSource},Orleans.TestingHost.ITestClusterPortAllocator)">
             <summary>
             Configures the test cluster plus client in-process.
             </summary>
@@ -378,6 +406,11 @@
             </summary>
             <param name="initialSilosCount">The number of initial silos to deploy.</param>
         </member>
+        <member name="P:Orleans.TestingHost.TestClusterBuilder.PortAllocator">
+            <summary>
+            Gets or sets the port allocator used to allocate consecutive silo ports.
+            </summary>
+        </member>
         <member name="P:Orleans.TestingHost.TestClusterBuilder.Properties">
             <summary>
             Configuration values which will be provided to the silos and clients created by this builder.
@@ -397,6 +430,12 @@
             to construct the <see cref="T:Microsoft.Extensions.Configuration.IConfiguration"/> for the host.</param>
             <returns>The same instance of the host builder for chaining.</returns>
         </member>
+        <member name="M:Orleans.TestingHost.TestClusterBuilder.AddSiloBuilderConfigurator``1">
+            <summary>
+            Adds an implementation of <see cref="T:Orleans.TestingHost.ISiloConfigurator"/>, <see cref="T:Orleans.TestingHost.IHostConfigurator"/>, or <see cref="T:Orleans.TestingHost.ISiloBuilderConfigurator"/> to configure silos created by the test cluster.
+            </summary>
+            <typeparam name="T">The configurator type.</typeparam>
+        </member>
         <member name="T:Orleans.TestingHost.TestClusterHostFactory">
             <summary>
             Utility for creating silos given a name and collection of configuration sources.
@@ -409,16 +448,6 @@
             <param name="hostName">The silo name if it is not already specified in the configuration.</param>
             <param name="configurationSources">The configuration.</param>
             <returns>A new silo.</returns>
-        </member>
-        <member name="T:Orleans.TestingHost.TestClusterNetworkHelper">
-            <summary>
-            Methods for assisting in networking configuration for test clusters.
-            </summary>
-        </member>
-        <member name="M:Orleans.TestingHost.TestClusterNetworkHelper.GetRandomAvailableServerPorts">
-            <summary>
-            Returns two ports which are not currently in use by any TCP listeners.
-            </summary>
         </member>
         <member name="T:Orleans.TestingHost.FaultInjectionGrainStorageOptions">
             <summary>
@@ -472,6 +501,16 @@
             <param name="name"></param>
             <param name="injectedGrainStorageFactory"></param>
             <returns></returns>
+        </member>
+        <member name="M:Orleans.TestingHost.SiloHostBuilderExtensions.AddFaultInjectionMemoryStorage(Orleans.Hosting.ISiloBuilder,System.String,System.Action{Orleans.Configuration.MemoryGrainStorageOptions},System.Action{Orleans.TestingHost.FaultInjectionGrainStorageOptions})">
+            <summary>
+            Configure silo to use FaultInjectionMemoryStorage
+            </summary>
+        </member>
+        <member name="M:Orleans.TestingHost.SiloHostBuilderExtensions.AddFaultInjectionMemoryStorage(Orleans.Hosting.ISiloBuilder,System.String,System.Action{Microsoft.Extensions.Options.OptionsBuilder{Orleans.Configuration.MemoryGrainStorageOptions}},System.Action{Microsoft.Extensions.Options.OptionsBuilder{Orleans.TestingHost.FaultInjectionGrainStorageOptions}})">
+            <summary>
+            Configure silo to use FaultInjectionMemoryStorage
+            </summary>
         </member>
         <member name="M:Orleans.TestingHost.SiloHostBuilderExtensions.AddFaultInjectionMemoryStorage(Orleans.Hosting.ISiloHostBuilder,System.String,System.Action{Orleans.Configuration.MemoryGrainStorageOptions},System.Action{Orleans.TestingHost.FaultInjectionGrainStorageOptions})">
             <summary>

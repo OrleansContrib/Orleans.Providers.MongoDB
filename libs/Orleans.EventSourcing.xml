@@ -55,57 +55,6 @@
         <member name="P:Orleans.EventSourcing.Common.BatchedNotificationMessage.Version">
             <summary>The version number - for a batch, this is the maximum version contained.</summary>
         </member>
-        <member name="T:Orleans.EventSourcing.Common.NotificationTracker">
-            <summary>
-            Helper class for tracking notifications that a grain sends to other clusters after updating the log.
-            </summary>
-        </member>
-        <member name="P:Orleans.EventSourcing.Common.NotificationTracker.UnresolvedConnectionIssues">
-            <summary>
-            returns unresolved connection issues observed by the workers
-            </summary>
-        </member>
-        <member name="M:Orleans.EventSourcing.Common.NotificationTracker.UpdateNotificationTargets(System.Collections.Generic.IReadOnlyList{System.String})">
-            <summary>
-            Update the multicluster configuration (change who to send notifications to)
-            </summary>
-        </member>
-        <member name="T:Orleans.EventSourcing.Common.NotificationTracker.NotificationWorker">
-            <summary>
-            Asynchronous batch worker that sends notifications to a particular cluster.
-            </summary>
-        </member>
-        <member name="F:Orleans.EventSourcing.Common.NotificationTracker.NotificationWorker.QueuedMessage">
-            <summary>
-            Queue messages
-            </summary>
-        </member>
-        <member name="F:Orleans.EventSourcing.Common.NotificationTracker.NotificationWorker.QueueState">
-            <summary>
-            Queue state
-            </summary>
-        </member>
-        <member name="F:Orleans.EventSourcing.Common.NotificationTracker.NotificationWorker.LastConnectionIssue">
-            <summary>
-            Last exception
-            </summary>
-        </member>
-        <member name="F:Orleans.EventSourcing.Common.NotificationTracker.NotificationWorker.Done">
-            <summary>
-            Is current task done or not
-            </summary>
-        </member>
-        <member name="M:Orleans.EventSourcing.Common.NotificationTracker.NotificationWorker.#ctor(Orleans.EventSourcing.Common.NotificationTracker,System.String)">
-            <summary>
-            Initialize a new instance of NotificationWorker class
-            </summary>
-        </member>
-        <member name="M:Orleans.EventSourcing.Common.NotificationTracker.NotificationWorker.Enqueue(Orleans.EventSourcing.Common.INotificationMessage)">
-            <summary>
-            Enqueue method
-            </summary>
-            <param name="msg">The message to enqueue</param>
-        </member>
         <member name="T:Orleans.EventSourcing.Common.PrimaryBasedLogViewAdaptor`3">
              <summary>
              A general template for constructing log view adaptors that are based on
@@ -191,11 +140,6 @@
             Merge two notification messages, for batching. Override to handle notification subtypes.
             </summary>
         </member>
-        <member name="M:Orleans.EventSourcing.Common.PrimaryBasedLogViewAdaptor`3.OnConfigurationChange(Orleans.MultiCluster.MultiClusterConfiguration)">
-            <summary>
-            Called when configuration of the multicluster is changing.
-            </summary>
-        </member>
         <member name="P:Orleans.EventSourcing.Common.PrimaryBasedLogViewAdaptor`3.Host">
             <summary>
             The grain that is using this adaptor.
@@ -204,16 +148,6 @@
         <member name="P:Orleans.EventSourcing.Common.PrimaryBasedLogViewAdaptor`3.Services">
             <summary>
             The runtime services required for implementing notifications between grain instances in different cluster.
-            </summary>
-        </member>
-        <member name="P:Orleans.EventSourcing.Common.PrimaryBasedLogViewAdaptor`3.Configuration">
-            <summary>
-            The current multi-cluster configuration for this grain instance.
-            </summary>
-        </member>
-        <member name="F:Orleans.EventSourcing.Common.PrimaryBasedLogViewAdaptor`3.notificationTracker">
-            <summary>
-            Tracks notifications sent. Created lazily since many copies will never need to send notifications.
             </summary>
         </member>
         <member name="M:Orleans.EventSourcing.Common.PrimaryBasedLogViewAdaptor`3.#ctor(Orleans.LogConsistency.ILogViewAdaptorHost{`0,`1},`0,Orleans.LogConsistency.ILogConsistencyProtocolServices)">
@@ -268,11 +202,6 @@
             Block until this cluster is joined to the multicluster.
             </summary>
         </member>
-        <member name="M:Orleans.EventSourcing.Common.PrimaryBasedLogViewAdaptor`3.GetCaughtUpWithConfigurationAsync(System.DateTime)">
-            <summary>
-            Wait until this cluster has received a configuration that is at least as new as timestamp
-            </summary>
-        </member>
         <member name="M:Orleans.EventSourcing.Common.PrimaryBasedLogViewAdaptor`3.Submit(`1)">
             <inheritdoc />
         </member>
@@ -299,12 +228,6 @@
             Called from network
             </summary>
             <param name="payLoad"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Orleans.EventSourcing.Common.PrimaryBasedLogViewAdaptor`3.OnMultiClusterConfigurationChange(Orleans.MultiCluster.MultiClusterConfiguration)">
-            <summary>
-            Called by MultiClusterOracle when there is a configuration change.
-            </summary>
             <returns></returns>
         </member>
         <member name="M:Orleans.EventSourcing.Common.PrimaryBasedLogViewAdaptor`3.EnableStatsCollection">
@@ -335,13 +258,6 @@
             Retries until some batch commits or there are no updates left.
             </summary>
         </member>
-        <member name="P:Orleans.EventSourcing.Common.PrimaryBasedLogViewAdaptor`3.UnresolvedConnectionIssues">
-            <summary>
-            returns a list of all connection health issues that have not been restored yet.
-            Such issues are observed while communicating with the primary, or while trying to 
-            notify other clusters, for example.
-            </summary>
-        </member>
         <member name="F:Orleans.EventSourcing.Common.PrimaryBasedLogViewAdaptor`3.LastPrimaryIssue">
             <summary>
             Store the last issue that occurred while reading or updating primary.
@@ -366,13 +282,6 @@
             <summary>
             go through updates and remove all the conditional updates that have already failed
             </summary>
-        </member>
-        <member name="M:Orleans.EventSourcing.Common.PrimaryBasedLogViewAdaptor`3.BroadcastNotification(Orleans.EventSourcing.Common.INotificationMessage,System.String)">
-            <summary>
-            Send a notification message to all remote instances
-            </summary>
-            <param name="msg">the notification message to send</param>
-            <param name="exclude">if non-null, exclude this cluster id from the notification</param>
         </member>
         <member name="T:Orleans.EventSourcing.Common.SubmissionEntry`1">
             <summary>
@@ -703,9 +612,6 @@
             Any exceptions thrown are caught and logged by the <see cref="T:Orleans.LogConsistency.ILogViewAdaptorFactory"/>.</para>
             </summary>
         </member>
-        <member name="P:Orleans.EventSourcing.JournaledGrain`2.UnresolvedConnectionIssues">
-            <inheritdoc />
-        </member>
         <member name="M:Orleans.EventSourcing.JournaledGrain`2.EnableStatsCollection">
             <inheritdoc />
         </member>
@@ -762,16 +668,6 @@
         <member name="M:Orleans.EventSourcing.JournaledGrain`2.Orleans#MultiCluster#ILogConsistencyProtocolParticipant#DeactivateProtocolParticipant">
             <summary>
             Notify log view adaptor of deactivation
-            </summary>
-        </member>
-        <member name="M:Orleans.EventSourcing.JournaledGrain`2.Orleans#MultiCluster#ILogConsistencyProtocolParticipant#OnProtocolMessageReceived(Orleans.MultiCluster.ILogConsistencyProtocolMessage)">
-            <summary>
-            Receive a protocol message from other clusters, passed on to log view adaptor.
-            </summary>
-        </member>
-        <member name="M:Orleans.EventSourcing.JournaledGrain`2.Orleans#MultiCluster#ILogConsistencyProtocolParticipant#OnMultiClusterConfigurationChange(Orleans.MultiCluster.MultiClusterConfiguration)">
-            <summary>
-            Receive a configuration change, pass on to log view adaptor.
             </summary>
         </member>
         <member name="M:Orleans.EventSourcing.JournaledGrain`2.Orleans#LogConsistency#ILogViewAdaptorHost{TGrainState,TEventBase}#OnViewChanged(System.Boolean,System.Boolean)">

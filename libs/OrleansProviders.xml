@@ -54,12 +54,12 @@
             Configure silo to use memory grain storage as the default grain storage.
              </summary>
         </member>
-        <member name="M:Orleans.Hosting.SiloBuilderExtensions.AddMemoryStreams``1(Orleans.Hosting.ISiloHostBuilder,System.String,System.Action{Orleans.Hosting.ISiloMemoryStreamConfigurator})">
+        <member name="M:Orleans.Hosting.SiloBuilderMemoryStreamExtensions.AddMemoryStreams``1(Orleans.Hosting.ISiloHostBuilder,System.String,System.Action{Orleans.Hosting.ISiloMemoryStreamConfigurator})">
             <summary>
             Configure silo to use memory streams.
             </summary>
         </member>
-        <member name="M:Orleans.Hosting.SiloBuilderExtensions.AddMemoryStreams``1(Orleans.Hosting.ISiloBuilder,System.String,System.Action{Orleans.Hosting.ISiloMemoryStreamConfigurator})">
+        <member name="M:Orleans.Hosting.SiloBuilderMemoryStreamExtensions.AddMemoryStreams``1(Orleans.Hosting.ISiloBuilder,System.String,System.Action{Orleans.Hosting.ISiloMemoryStreamConfigurator})">
             <summary>
             Configure silo to use memory streams.
             </summary>
@@ -135,6 +135,18 @@
         <member name="F:Orleans.Configuration.StreamCacheEvictionOptions.DefaultDataMaxAgeInCache">
             <summary>
             Default DataMaxAgeInCache
+            </summary>
+        </member>
+        <member name="P:Orleans.Configuration.StreamCacheEvictionOptions.MetadataMinTimeInCache">
+            <summary>
+            Minimum time message metadata (<see cref="T:Orleans.Streams.StreamSequenceToken"/>) will stay in cache before it is available for time based purge.
+            Used to avoid cache miss if the full message was purged.
+            Set to null to disable this tracking.
+            </summary>
+        </member>
+        <member name="F:Orleans.Configuration.StreamCacheEvictionOptions.DefaultMetadataMinTimeInCache">
+            <summary>
+            Default MetadataMinTimeInCache
             </summary>
         </member>
         <member name="P:Orleans.Configuration.StreamStatisticOptions.StatisticMonitorWriteInterval">
@@ -1027,7 +1039,7 @@
             Cached message count
             </summary>
         </member>
-        <member name="M:Orleans.Providers.Streams.Common.PooledQueueCache.#ctor(Orleans.Providers.Streams.Common.ICacheDataAdapter,Microsoft.Extensions.Logging.ILogger,Orleans.Providers.Streams.Common.ICacheMonitor,System.Nullable{System.TimeSpan})">
+        <member name="M:Orleans.Providers.Streams.Common.PooledQueueCache.#ctor(Orleans.Providers.Streams.Common.ICacheDataAdapter,Microsoft.Extensions.Logging.ILogger,Orleans.Providers.Streams.Common.ICacheMonitor,System.Nullable{System.TimeSpan},System.Nullable{System.TimeSpan})">
             <summary>
             Pooled queue cache is a cache of message that obtains resource from a pool
             </summary>
@@ -1035,6 +1047,7 @@
             <param name="logger"></param>
             <param name="cacheMonitor"></param>
             <param name="cacheMonitorWriteInterval">cache monitor write interval.  Only triggered for active caches.</param>
+            <param name="purgeMetadataInterval"></param>
         </member>
         <member name="P:Orleans.Providers.Streams.Common.PooledQueueCache.IsEmpty">
             <summary>
@@ -1857,7 +1870,7 @@
         <member name="F:Orleans.Storage.MemoryGrainStorage.name">
             <summary> Name of this storage provider instance. </summary>
         </member>
-        <member name="M:Orleans.Storage.MemoryGrainStorage.#ctor(System.String,Orleans.Configuration.MemoryGrainStorageOptions,Microsoft.Extensions.Logging.ILoggerFactory,Orleans.IGrainFactory)">
+        <member name="M:Orleans.Storage.MemoryGrainStorage.#ctor(System.String,Orleans.Configuration.MemoryGrainStorageOptions,Microsoft.Extensions.Logging.ILogger{Orleans.Storage.MemoryGrainStorage},Orleans.IGrainFactory)">
             <summary> Default constructor. </summary>
         </member>
         <member name="M:Orleans.Storage.MemoryGrainStorage.ReadStateAsync(System.String,Orleans.Runtime.GrainReference,Orleans.IGrainState)">
@@ -1892,7 +1905,7 @@
             <c>Orleans.Storage.MemoryStorage</c>
             </summary>
         </member>
-        <member name="T:Orleans.Storage.MemoryStorageGrain.GrainStateStore.DeletedState">
+        <member name="T:Orleans.Storage.MemoryStorageGrain.DeletedState">
             <summary>
             Marker to record deleted state so we can detect the difference between deleted state and state that never existed.
             </summary>

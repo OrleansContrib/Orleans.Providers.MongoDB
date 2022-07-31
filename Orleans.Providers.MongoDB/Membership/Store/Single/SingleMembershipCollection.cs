@@ -34,7 +34,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Single
             {
                 var member = kvp.Value;
 
-                if (member.Status == (int)SiloStatus.Dead && member.Timestamp < beforeDate)
+                if (member.Status != (int)SiloStatus.Active && member.Timestamp < beforeDate)
                 {
                     updates.Add(Update.Unset($"Members.{kvp.Key}"));
                 }
