@@ -8,35 +8,37 @@ namespace Orleans.Providers.MongoDB.StorageProviders.Serializers
 {
     public class JsonGrainStateSerializer : IGrainStateSerializer
     {
-        private readonly JsonSerializer serializer;
+        private readonly JsonSerializerSettings jsonSettings;
 
         public JsonGrainStateSerializer(ITypeResolver typeResolver, IGrainFactory grainFactory, MongoDBGrainStorageOptions options)
         {
-            var jsonSettings = OrleansJsonSerializer.GetDefaultSerializerSettings(typeResolver, grainFactory);           
+            jsonSettings = OrleansJsonSerializer.GetDefaultSerializerSettings(typeResolver, grainFactory);           
 
             options?.ConfigureJsonSerializerSettings?.Invoke(jsonSettings);
-            this.serializer = JsonSerializer.Create(jsonSettings);
 
             if (options?.ConfigureJsonSerializerSettings == null)
             {
                 //// https://github.com/OrleansContrib/Orleans.Providers.MongoDB/issues/44
                 //// Always include the default value, so that the deserialization process can overwrite default 
                 //// values that are not equal to the system defaults.
-                this.serializer.NullValueHandling = NullValueHandling.Include;
-                this.serializer.DefaultValueHandling = DefaultValueHandling.Populate;
+                jsonSettings.NullValueHandling = NullValueHandling.Include;
+                jsonSettings.DefaultValueHandling = DefaultValueHandling.Populate;
             }            
         }
 
         public void Deserialize(IGrainState grainState, JObject entityData)
         {
             var jsonReader = new JTokenReader(entityData);
+            var jsonSerializer = JsonSerializer.CreateDefault(jsonSettings);
 
-            serializer.Populate(jsonReader, grainState.State);
+            jsonSerializer.Populate(jsonReader, grainState.State);
         }
 
         public JObject Serialize(IGrainState grainState)
         {
-            return JObject.FromObject(grainState.State, serializer);
+            var jsonSerializer = JsonSerializer.CreateDefault(jsonSettings);
+
+            return JObject.FromObject(grainState.State, jsonSerializer);
         }
     }
 }
