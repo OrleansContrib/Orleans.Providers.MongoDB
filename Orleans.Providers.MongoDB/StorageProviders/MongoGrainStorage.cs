@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using Orleans.Providers.MongoDB.Configuration;
@@ -11,6 +6,11 @@ using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
 using Orleans.Serialization;
 using Orleans.Storage;
+using System;
+using System.Collections.Concurrent;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
 {
@@ -34,14 +34,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             this.options = options;
             this.serializer = serializer;
         }
-
-
-        // TODO: enable configuration of serializer-settings
-        //protected virtual JsonSerializerSettings ReturnSerializerSettings(ITypeResolver typeResolver, IProviderRuntime providerRuntime, IProviderConfiguration config)
-        //{
-        //    return OrleansJsonSerializer.UpdateSerializerSettings(OrleansJsonSerializer.GetDefaultSerializerSettings(typeResolver, providerRuntime.GrainFactory), config);
-        //}
-
+        
         public void Participate(ISiloLifecycle lifecycle)
         {
             lifecycle.Subscribe<MongoGrainStorage>(ServiceLifecycleStage.ApplicationServices, Init);
