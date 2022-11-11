@@ -8,7 +8,7 @@
     <Description>A MongoDb implementation of the Orleans Providers. This includes custering (IMembershipTable and IGatewayListProvider), reminders (IReminderTable) and storage providers (IGrainStorage).</Description>
     <Copyright>MIT</Copyright>
     <PackageTags>Orleans OrleansProviders MongoDB</PackageTags>
-    <PackageReleaseNotes>Migration to Orleans 7.0 completed.</PackageReleaseNotes>
+    <PackageReleaseNotes>Migration to Orleans 7.0: in progress.</PackageReleaseNotes>
     <PackageIcon>OrleansLogo.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/OrleansContrib/Orleans.Providers.MongoDB</PackageProjectUrl>

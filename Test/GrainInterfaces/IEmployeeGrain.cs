@@ -2,7 +2,7 @@
 
 namespace Orleans.Providers.MongoDB.Test.GrainInterfaces
 {
-    public interface IEmployeeGrain : IGrainBase
+    public interface IEmployeeGrain : IGrainWithIntegerKey
   {
         Task SetLevel(int level);
 

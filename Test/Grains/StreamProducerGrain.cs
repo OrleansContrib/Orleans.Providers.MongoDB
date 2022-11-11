@@ -1,6 +1,7 @@
 ﻿using Orleans.Providers.MongoDB.Test.GrainInterfaces;
 using System;
 using System.Threading.Tasks;
+using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Test.Grains
 {
@@ -9,7 +10,7 @@ namespace Orleans.Providers.MongoDB.Test.Grains
         public async Task ProduceEvents()
         {
             var streamProvider = this.GetStreamProvider("OrleansTestStream");
-            var streamOfNumbers = streamProvider.GetStream<int>(Guid.Empty, "MyNamespace");
+            var streamOfNumbers = streamProvider.GetStream<int>(StreamId.Create("MyNamespace", Guid.Empty));
 
             var i = 0;
 
