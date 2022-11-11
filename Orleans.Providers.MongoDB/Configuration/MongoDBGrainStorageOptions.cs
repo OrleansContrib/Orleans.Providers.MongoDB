@@ -22,7 +22,7 @@ namespace Orleans.Providers.MongoDB.Configuration
         /// The key generation strategy used by the storage provider. It defaults to calling ToKeyString
         /// in the grain reference.
         /// </summary>
-        public GrainStorageKeyGenerator KeyGenerator { get; set; } = x => x.ToKeyString();
+        public GrainStorageKeyGenerator KeyGenerator { get; set; } = x => x.ToString();
 
         internal override void Validate(string name = null)
         {
@@ -38,5 +38,5 @@ namespace Orleans.Providers.MongoDB.Configuration
     /// <summary>
     /// Delegate representing a strategy for generating the key of the persisted state in MongoDB.
     /// </summary>
-    public delegate string GrainStorageKeyGenerator(GrainReference grainReference);
+    public delegate string GrainStorageKeyGenerator(GrainId grainId);
 }

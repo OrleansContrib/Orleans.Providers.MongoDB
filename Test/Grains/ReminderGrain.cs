@@ -9,14 +9,14 @@ namespace Orleans.Providers.MongoDB.Test.Grains
     {
         public async Task RemoveReminder(string reminder)
         {
-            var reminderType = await GetReminder(reminder);
+            var reminderType = await this.GetReminder(reminder);
 
-            await UnregisterReminder(reminderType);
+            await this.UnregisterReminder(reminderType);
         }
 
         public async Task<IGrainReminder> StartReminder(string reminderName, TimeSpan period)
         {
-            var reminder = await RegisterOrUpdateReminder(reminderName, period - TimeSpan.FromSeconds(2), period);
+            var reminder = await this.RegisterOrUpdateReminder(reminderName, period - TimeSpan.FromSeconds(2), period);
 
             return reminder;
         }

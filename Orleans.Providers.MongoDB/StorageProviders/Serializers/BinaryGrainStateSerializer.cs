@@ -5,23 +5,24 @@ namespace Orleans.Providers.MongoDB.StorageProviders.Serializers
 {
     public sealed class BinaryGrainStateSerializer : IGrainStateSerializer
     {
-        private readonly SerializationManager serializationManager;
+        private readonly Serializer serializer;
 
-        public BinaryGrainStateSerializer(SerializationManager serializationManager)
+        public BinaryGrainStateSerializer(Serializer serializer)
         {
-            this.serializationManager = serializationManager;
+            this.serializer = serializer;
         }
 
-        public void Deserialize(IGrainState grainState, JObject entityData)
+        public void Deserialize<T>(IGrainState<T> grainState, JObject entityData)
         {
-            grainState.State = serializationManager.DeserializeFromByteArray<object>((byte[])entityData["statedata"]);
+            grainState.State = serializer.Deserialize<T>((byte[])entityData["statedata"]);
         }
 
-        public JObject Serialize(IGrainState grainState)
+        public JObject Serialize<T>(IGrainState<T> grainState)
         {
-            var byteArray = serializationManager.SerializeToByteArray(grainState.State);
+            var byteArray = serializer.SerializeToArray(grainState.State);
 
             return new JObject(new JProperty("statedata", byteArray));
         }
+
     }
 }

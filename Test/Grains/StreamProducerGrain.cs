@@ -8,7 +8,7 @@ namespace Orleans.Providers.MongoDB.Test.Grains
     {
         public async Task ProduceEvents()
         {
-            var streamProvider = GetStreamProvider("OrleansTestStream");
+            var streamProvider = this.GetStreamProvider("OrleansTestStream");
             var streamOfNumbers = streamProvider.GetStream<int>(Guid.Empty, "MyNamespace");
 
             var i = 0;

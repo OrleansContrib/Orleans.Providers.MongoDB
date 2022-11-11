@@ -12,7 +12,6 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
     public class MongoReminderCollection : CollectionBase<MongoReminderDocument>
     {
         private static readonly FindOneAndUpdateOptions<MongoReminderDocument> FindAndUpsert = new FindOneAndUpdateOptions<MongoReminderDocument> { IsUpsert = true };
-        private readonly IGrainReferenceConverter grainReferenceConverter;
         private readonly string serviceId;
         private readonly string collectionPrefix;
 
@@ -22,13 +21,11 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
             string collectionPrefix,
             Action<MongoCollectionSettings> collectionConfigurator,
             bool createShardKey,
-            string serviceId,
-            IGrainReferenceConverter grainReferenceConverter)
+            string serviceId)
             : base(mongoClient, databaseName, collectionConfigurator, createShardKey)
         {
             this.serviceId = serviceId;
             this.collectionPrefix = collectionPrefix;
-            this.grainReferenceConverter = grainReferenceConverter;
         }
 
         protected override string CollectionName()
@@ -94,36 +91,36 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
                         x.GrainHash <= endHash)
                     .ToListAsync();
 
-            return new ReminderTableData(reminders.Select(x => x.ToEntry(grainReferenceConverter)));
+            return new ReminderTableData(reminders.Select(x => x.ToEntry()));
         }
 
-        public virtual async Task<ReminderEntry> ReadRow(GrainReference grainRef, string reminderName)
+        public virtual async Task<ReminderEntry> ReadRow(GrainId grainId, string reminderName)
         {
-            var grainId = grainRef.ToKeyString();
+            var idString = grainId.ToString();
 
             var reminder =
                 await Collection.Find(x =>
                         x.IsDeleted == false &&
                         x.ServiceId == serviceId &&
-                        x.GrainId == grainId &&
+                        x.GrainId == idString &&
                         x.ReminderName == reminderName)
                     .FirstOrDefaultAsync();
 
-            return reminder?.ToEntry(grainReferenceConverter);
+            return reminder?.ToEntry();
         }
 
-        public virtual async Task<ReminderTableData> ReadReminderRowsAsync(GrainReference grainRef)
+        public virtual async Task<ReminderTableData> ReadReminderRowsAsync(GrainId grainId)
         {
-            var grainId = grainRef.ToKeyString();
+          var idString = grainId.ToString();
 
-            var reminders =
+          var reminders =
                 await Collection.Find(x =>
                         x.IsDeleted == false &&
                         x.ServiceId == serviceId &&
-                        x.GrainId == grainId)
+                        x.GrainId == idString)
                     .ToListAsync();
 
-            return new ReminderTableData(reminders.Select(x => x.ToEntry(grainReferenceConverter)));
+            return new ReminderTableData(reminders.Select(x => x.ToEntry()));
         }
 
         public virtual async Task<ReminderTableData> ReadRowsOutRange(uint beginHash, uint endHash)
@@ -135,25 +132,25 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
                         (x.GrainHash > beginHash || x.GrainHash <= endHash))
                     .ToListAsync();
 
-            return new ReminderTableData(reminders.Select(x => x.ToEntry(grainReferenceConverter)));
+            return new ReminderTableData(reminders.Select(x => x.ToEntry()));
         }
 
-        public virtual async Task<ReminderTableData> ReadRow(GrainReference grainRef)
+        public virtual async Task<ReminderTableData> ReadRow(GrainId grainId)
         {
-            var grainId = grainRef.ToKeyString();
+            var idString = grainId.ToString();
 
             var reminders =
                 await Collection.Find(r =>
                         r.ServiceId == serviceId &&
-                        r.GrainId == grainId)
+                        r.GrainId == idString)
                     .ToListAsync();
 
-            return new ReminderTableData(reminders.Select(x => x.ToEntry(grainReferenceConverter)));
+            return new ReminderTableData(reminders.Select(x => x.ToEntry()));
         }
 
-        public async Task<bool> RemoveRow(GrainReference grainRef, string reminderName, string eTag)
+        public async Task<bool> RemoveRow(GrainId grainId, string reminderName, string eTag)
         {
-            var id = ReturnId(serviceId, grainRef, reminderName);
+            var id = ReturnId(serviceId, grainId, reminderName);
 
             try
             {
@@ -183,7 +180,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
 
         public virtual async Task<string> UpsertRow(ReminderEntry entry)
         {
-            var id = ReturnId(serviceId, entry.GrainRef, entry.ReminderName);
+            var id = ReturnId(serviceId, entry.GrainId, entry.ReminderName);
 
             var updatedEtag = Guid.NewGuid().ToString();
             var updateDocument = MongoReminderDocument.Create(id, serviceId, entry, updatedEtag);
@@ -207,9 +204,9 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
             return entry.ETag;
         }
 
-        private static string ReturnId(string serviceId, GrainReference grainRef, string reminderName)
+        private static string ReturnId(string serviceId, GrainId grainId, string reminderName)
         {
-            return $"{serviceId}_{grainRef.ToKeyString()}_{reminderName}";
+            return $"{serviceId}_{grainId.ToString()}_{reminderName}";
         }
     }
 }
