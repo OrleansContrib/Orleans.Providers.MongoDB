@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Reminders;
-using Orleans.Runtime;
+using Orleans.Providers.MongoDB.UnitTest.Fixtures;
 using TestExtensions;
 using UnitTests;
 using UnitTests.RemindersTest;
@@ -14,10 +13,9 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
 {
     [TestCategory("Reminders")]
     [TestCategory("Mongo")]
-    [Collection(TestEnvironmentFixture.DefaultCollection)]
     public class MongoReminderTableTests : ReminderTableTestsBase
     {
-        public MongoReminderTableTests(ConnectionStringFixture fixture, TestEnvironmentFixture clusterFixture) 
+        public MongoReminderTableTests(ConnectionStringFixture fixture, TestEnvironmentFixture clusterFixture)
             : base(fixture, clusterFixture, new LoggerFilterOptions())
         {
         }
@@ -31,16 +29,15 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
             });
 
             return new MongoReminderTable(
-                TestClients.Localhost.Value,
-                loggerFactory.CreateLogger<MongoReminderTable>(), 
-                options, 
-                clusterOptions,
-                ClusterFixture.Client.ServiceProvider.GetRequiredService<IGrainReferenceConverter>());
+                MongoDatabaseFixture.DatabaseFactory,
+                loggerFactory.CreateLogger<MongoReminderTable>(),
+                options,
+                clusterOptions);
         }
 
         protected override Task<string> GetConnectionString()
         {
-            return Task.FromResult("mongodb://localhost/OrleansTest");
+            return Task.FromResult(MongoDatabaseFixture.DatabaseConnectionString);
         }
 
         [Fact]

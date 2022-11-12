@@ -1,11 +1,11 @@
-﻿using MongoDB.Bson;
+﻿using System;
+using System.Threading.Tasks;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
 using Orleans.Storage;
-using System;
-using System.Threading.Tasks;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
 {
@@ -25,7 +25,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             Action<MongoCollectionSettings> collectionConfigurator,
             bool createShardKey,
             IGrainStateSerializer serializer,
-            GrainStorageKeyGenerator keyGenerator) 
+            GrainStorageKeyGenerator keyGenerator)
             : base(mongoClient, databaseName, collectionConfigurator, createShardKey)
         {
             this.collectionName = collectionName;
@@ -38,9 +38,9 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             return collectionName;
         }
 
-        public async Task ReadAsync(GrainReference grainReference, IGrainState grainState)
+        public async Task ReadAsync<T>(GrainId grainId, IGrainState<T> grainState)
         {
-            var grainKey = keyGenerator(grainReference);
+            var grainKey = keyGenerator(grainId);
 
             var existing =
                 await Collection.Find(Filter.Eq(FieldId, grainKey))
@@ -65,9 +65,9 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             }
         }
 
-        public async Task WriteAsync(GrainReference grainReference, IGrainState grainState)
+        public async Task WriteAsync<T>(GrainId grainId, IGrainState<T> grainState)
         {
-            var grainKey = keyGenerator(grainReference);
+            var grainKey = keyGenerator(grainId);
 
             var grainData = serializer.Serialize(grainState);
 
@@ -127,9 +127,9 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             grainState.ETag = newETag;
         }
 
-        public Task ClearAsync(GrainReference grainReference, IGrainState grainState)
+        public Task ClearAsync<T>(GrainId grainId, IGrainState<T> grainState)
         {
-            var grainKey = keyGenerator(grainReference);
+            var grainKey = keyGenerator(grainId);
 
             grainState.RecordExists = false;
 

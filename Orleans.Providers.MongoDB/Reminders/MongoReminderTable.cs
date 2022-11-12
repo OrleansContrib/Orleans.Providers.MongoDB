@@ -20,7 +20,6 @@ namespace Orleans.Providers.MongoDB.Reminders
     {
         private readonly IMongoClient mongoClient;
         private readonly ILogger logger;
-        private readonly IGrainReferenceConverter grainReferenceConverter;
         private readonly MongoDBRemindersOptions options;
         private readonly string serviceId;
         private MongoReminderCollection collection;
@@ -29,14 +28,12 @@ namespace Orleans.Providers.MongoDB.Reminders
             IMongoClientFactory mongoClientFactory,
             ILogger<MongoReminderTable> logger,
             IOptions<MongoDBRemindersOptions> options,
-            IOptions<ClusterOptions> clusterOptions,
-            IGrainReferenceConverter grainReferenceConverter)
+            IOptions<ClusterOptions> clusterOptions)
         {
             this.mongoClient = mongoClientFactory.Create(options.Value, "Membership");
             this.logger = logger;
             this.options = options.Value;
             this.serviceId = clusterOptions.Value.ServiceId ?? string.Empty;
-            this.grainReferenceConverter = grainReferenceConverter;
         }
 
         /// <inheritdoc />
@@ -49,36 +46,35 @@ namespace Orleans.Providers.MongoDB.Reminders
                     options.CollectionPrefix,
                     options.CollectionConfigurator,
                     options.CreateShardKeyForCosmos,
-                    serviceId,
-                    grainReferenceConverter);
+                    serviceId);
 
             return Task.CompletedTask;
         }
 
         /// <inheritdoc />
-        public Task<ReminderTableData> ReadRows(GrainReference key)
+        public Task<ReminderTableData> ReadRows(GrainId grainId)
         {
             return DoAndLog(nameof(ReadRows), () =>
             {
-                return collection.ReadRow(key);
+                return collection.ReadRow(grainId);
             });
         }
 
         /// <inheritdoc />
-        public Task<bool> RemoveRow(GrainReference grainRef, string reminderName, string eTag)
+        public Task<bool> RemoveRow(GrainId grainId, string reminderName, string eTag)
         {
             return DoAndLog(nameof(RemoveRow), () =>
             {
-                return collection.RemoveRow(grainRef, reminderName, eTag);
+                return collection.RemoveRow(grainId, reminderName, eTag);
             });
         }
 
         /// <inheritdoc />
-        public Task<ReminderEntry> ReadRow(GrainReference grainRef, string reminderName)
+        public Task<ReminderEntry> ReadRow(GrainId grainId, string reminderName)
         {
             return DoAndLog(nameof(ReadRow), () =>
             {
-                return collection.ReadRow(grainRef, reminderName);
+                return collection.ReadRow(grainId, reminderName);
             });
         }
 
