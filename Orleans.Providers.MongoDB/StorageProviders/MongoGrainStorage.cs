@@ -5,11 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
-using Newtonsoft.Json;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
-using Orleans.Serialization;
 using Orleans.Storage;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
@@ -35,11 +33,6 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             this.serializer = serializer;
         }
 
-        protected virtual JsonSerializerSettings ReturnSerializerSettings(ITypeResolver typeResolver, IProviderRuntime providerRuntime, IProviderConfiguration config)
-        {
-            return OrleansJsonSerializer.UpdateSerializerSettings(OrleansJsonSerializer.GetDefaultSerializerSettings(typeResolver, providerRuntime.GrainFactory), config);
-        }
-
         public void Participate(ISiloLifecycle lifecycle)
         {
             lifecycle.Subscribe<MongoGrainStorage>(ServiceLifecycleStage.ApplicationServices, Init);
@@ -55,33 +48,32 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             });
         }
 
-        public Task ReadStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
+        public Task ReadStateAsync<T>(string grainType, GrainId grainId, IGrainState<T> grainState)
         {
             return DoAndLog(nameof(ReadStateAsync), () =>
             {
-                return GetCollection(grainType, grainReference).ReadAsync(grainReference, grainState);
+                return GetCollection(grainType, grainId).ReadAsync(grainId, grainState);
             });
         }
-
-        public Task WriteStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
+        public Task WriteStateAsync<T>(string grainType, GrainId grainId, IGrainState<T> grainState)
         {
             return DoAndLog(nameof(WriteStateAsync), () =>
             {
-                return GetCollection(grainType, grainReference).WriteAsync(grainReference, grainState);
+                return GetCollection(grainType, grainId).WriteAsync(grainId, grainState);
             });
         }
 
-        public Task ClearStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
+        public Task ClearStateAsync<T>(string grainType, GrainId grainId, IGrainState<T> grainState)
         {
             return DoAndLog(nameof(ClearStateAsync), () =>
             {
-                return GetCollection(grainType, grainReference).ClearAsync(grainReference, grainState);
+                return GetCollection(grainType, grainId).ClearAsync(grainId, grainState);
             });
         }
 
-        private MongoGrainStorageCollection GetCollection(string grainType, GrainReference grainReference)
+        private MongoGrainStorageCollection GetCollection(string grainType, GrainId grainId)
         {
-            var collectionName = $"{options.CollectionPrefix}{ReturnGrainName(grainType, grainReference)}";
+            var collectionName = $"{options.CollectionPrefix}{ReturnGrainName(grainType, grainId)}";
 
             return collections.GetOrAdd(grainType, x =>
                 new MongoGrainStorageCollection(
@@ -115,7 +107,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             }
         }
 
-        protected virtual string ReturnGrainName(string grainType, GrainReference grainReference)
+        protected virtual string ReturnGrainName(string grainType, GrainId grainId)
         {
             return grainType.Split('.', '+').Last();
         }

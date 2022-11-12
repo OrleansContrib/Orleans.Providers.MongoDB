@@ -1,24 +1,23 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="EphemeralMongo6" Version="0.1.3" />
     <PackageReference Include="FakeItEasy" Version="7.3.1" />
-    <PackageReference Include="FluentAssertions" Version="6.7.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
-    <PackageReference Include="Microsoft.Orleans.CodeGenerator.MSBuild" Version="3.6.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Orleans.TestingHost" Version="3.6.2" />
-    <PackageReference Include="MongoDB.Driver" Version="2.17.1" />
-    <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.console" Version="2.4.1">
+    <PackageReference Include="FluentAssertions" Version="6.8.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
+    <PackageReference Include="Microsoft.Orleans.Sdk" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Orleans.TestingHost" Version="7.0.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.18.0" />
+    <PackageReference Include="xunit" Version="2.4.2" />
+    <PackageReference Include="xunit.runner.console" Version="2.4.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -34,33 +33,94 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectDependency Include="..\libs\orleans\src\Orleans.Serialization.Abstractions\Orleans.Serialization.Abstractions.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Orleans.Analyzers\Orleans.Analyzers.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Orleans.CodeGenerator\Orleans.CodeGenerator.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Orleans.Serialization\Orleans.Serialization.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Orleans.Core.Abstractions\Orleans.Core.Abstractions.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Orleans.Core\Orleans.Core.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Orleans.Runtime\Orleans.Runtime.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Orleans.BroadcastChannel\Orleans.BroadcastChannel.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Azure\Orleans.Clustering.AzureStorage\Orleans.Clustering.AzureStorage.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Azure\Orleans.Persistence.AzureStorage\Orleans.Persistence.AzureStorage.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Orleans.EventSourcing\Orleans.EventSourcing.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Azure\Orleans.GrainDirectory.AzureStorage\Orleans.GrainDirectory.AzureStorage.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Orleans.Sdk\Orleans.Sdk.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Orleans.Persistence.Memory\Orleans.Persistence.Memory.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Orleans.Reminders\Orleans.Reminders.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Orleans.Streaming\Orleans.Streaming.csproj" />
+    <ProjectDependency Include="..\libs\orleans\test\Misc\TestInterfaces\TestInterfaces.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Orleans.Serialization.FSharp\Orleans.Serialization.FSharp.csproj" />
+    <ProjectDependency Include="..\libs\orleans\test\Grains\TestGrainInterfaces\TestGrainInterfaces.csproj" />
+    <ProjectDependency Include="..\libs\orleans\test\Grains\TestFSharp\TestFSharp.fsproj" />
+    <ProjectDependency Include="..\libs\orleans\src\BootstrapBuild\Orleans.CodeGenerator.MSBuild.Bootstrap\Orleans.CodeGenerator.MSBuild.Bootstrap.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Orleans.CodeGenerator.MSBuild\Orleans.CodeGenerator.MSBuild.csproj" />
+    <ProjectDependency Include="..\libs\orleans\test\Misc\TestFSharpInterfaces\TestFSharpInterfaces.fsproj" />
+    <ProjectDependency Include="..\libs\orleans\test\Grains\TestFSharpGrainInterfaces\TestFSharpGrainInterfaces.csproj" />
+    <ProjectDependency Include="..\libs\orleans\src\Orleans.TestingHost\Orleans.TestingHost.csproj" />
+    <ProjectDependency Include="..\libs\orleans\test\TestInfrastructure\TestExtensions\TestExtensions.csproj" />
+    <ProjectDependency Include="..\libs\orleans\test\Grains\TestGrains\TestGrains.csproj" />
+    <ProjectDependency Include="..\libs\orleans\test\Grains\TestInternalGrainInterfaces\TestInternalGrainInterfaces.csproj" />
+    <ProjectDependency Include="..\libs\orleans\test\Grains\TestInternalGrains\TestInternalGrains.csproj" />
+    <ProjectDependency Include="..\libs\orleans\test\Grains\TestVersionGrains\TestVersionGrains.csproj" />
+    <ProjectDependency Include="..\libs\orleans\test\Tester\Tester.csproj" />
+    <ProjectDependency Include="..\libs\orleans\test\TesterInternal\TesterInternal.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Tester">
-      <HintPath>..\libs\Tester.dll</HintPath>
+      <HintPath>..\libs\orleans\test\TesterInternal\bin\$(Configuration)\$(TargetFramework)\Tester.dll</HintPath>
     </Reference>
     <Reference Include="TesterInternal">
-      <HintPath>..\libs\TesterInternal.dll</HintPath>
+      <HintPath>..\libs\orleans\test\TesterInternal\bin\$(Configuration)\$(TargetFramework)\TesterInternal.dll</HintPath>
     </Reference>
     <Reference Include="TestExtensions">
-      <HintPath>..\libs\TestExtensions.dll</HintPath>
+      <HintPath>..\libs\orleans\test\TesterInternal\bin\$(Configuration)\$(TargetFramework)\TestExtensions.dll</HintPath>
     </Reference>
     <Reference Include="TestGrainInterfaces">
-      <HintPath>..\libs\TestGrainInterfaces.dll</HintPath>
+      <HintPath>..\libs\orleans\test\TesterInternal\bin\$(Configuration)\$(TargetFramework)\TestGrainInterfaces.dll</HintPath>
     </Reference>
     <Reference Include="TestGrains">
-      <HintPath>..\libs\TestGrains.dll</HintPath>
-    </Reference>
-    <Reference Include="TestInterfaces">
-      <HintPath>..\libs\TestInterfaces.dll</HintPath>
+      <HintPath>..\libs\orleans\test\TesterInternal\bin\$(Configuration)\$(TargetFramework)\TestGrains.dll</HintPath>
     </Reference>
     <Reference Include="TestInternalGrainInterfaces">
-      <HintPath>..\libs\TestInternalGrainInterfaces.dll</HintPath>
+      <HintPath>..\libs\orleans\test\TesterInternal\bin\$(Configuration)\$(TargetFramework)\TestInternalGrainInterfaces.dll</HintPath>
     </Reference>
     <Reference Include="TestInternalGrains">
-      <HintPath>..\libs\TestInternalGrains.dll</HintPath>
+      <HintPath>..\libs\orleans\test\TesterInternal\bin\$(Configuration)\$(TargetFramework)\TestInternalGrains.dll</HintPath>
     </Reference>
     <Reference Include="TestVersionGrains">
-      <HintPath>..\libs\TestVersionGrains.dll</HintPath>
+      <HintPath>..\libs\orleans\test\TesterInternal\bin\$(Configuration)\$(TargetFramework)\TestVersionGrains.dll</HintPath>
+    </Reference>
+    <Reference Include="TestInterfaces">
+      <HintPath>..\libs\orleans\test\TesterInternal\bin\$(Configuration)\$(TargetFramework)\TestInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Orleans.GrainDirectory.AzureStorage">
+      <HintPath>..\libs\orleans\test\TesterInternal\bin\$(Configuration)\$(TargetFramework)\Orleans.GrainDirectory.AzureStorage.dll</HintPath>
+    </Reference>
+    <Reference Include="Orleans.Serialization.FSharp">
+      <HintPath>..\libs\orleans\test\TesterInternal\bin\$(Configuration)\$(TargetFramework)\Orleans.Serialization.FSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.Core">
+      <HintPath>..\libs\orleans\test\TesterInternal\bin\$(Configuration)\$(TargetFramework)\FSharp.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
 
+	
+  <Target Name="RestoreProjectDependencies">
+    <MSBuild Projects="@(ProjectDependency)" Targets="Restore" />
+  </Target>
+  <Target Name="BuildProjectDependencies">
+    <MSBuild Projects="@(ProjectDependency)" Properties="OutDir=$(OutputPath);Configuration=$(Configuration)" Targets="Build" />
+  </Target>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
+    <BuildDependsOn>
+      RestoreProjectDependencies;
+      BuildProjectDependencies;
+      $(BuildDependsOn)
+	</BuildDependsOn>
+  </PropertyGroup>
 </Project>

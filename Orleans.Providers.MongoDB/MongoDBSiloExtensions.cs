@@ -28,27 +28,9 @@ namespace Orleans.Hosting
         /// Configure silo to use MongoDb with a passed in connection string.
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
-        public static ISiloHostBuilder UseMongoDBClient(this ISiloHostBuilder builder, string connectionString)
-        {
-            return builder.ConfigureServices(services => services.AddMongoDBClient(connectionString));
-        }
-
-        /// <summary>
-        /// Configure silo to use MongoDb with a passed in connection string.
-        /// </summary>
-        /// <param name="connectionString">The connection string.</param>
         public static ISiloBuilder UseMongoDBClient(this ISiloBuilder builder, string connectionString)
         {
             return builder.ConfigureServices(services => services.AddMongoDBClient(connectionString));
-        }
-
-        /// <summary>
-        /// Configure ISiloHostBuilder to use MongoReminderTable.
-        /// </summary>
-        public static ISiloHostBuilder UseMongoDBReminders(this ISiloHostBuilder builder,
-            Action<MongoDBRemindersOptions> configurator = null)
-        {
-            return builder.ConfigureServices(services => services.AddMongoDBReminders(configurator));
         }
 
         /// <summary>
@@ -61,15 +43,6 @@ namespace Orleans.Hosting
         }
 
         /// <summary>
-        /// Configure ISiloHostBuilder to use MongoReminderTable
-        /// </summary>
-        public static ISiloHostBuilder UseMongoDBReminders(this ISiloHostBuilder builder,
-            IConfiguration configuration)
-        {
-            return builder.ConfigureServices(services => services.AddMongoDBReminders(configuration));
-        }
-
-        /// <summary>
         /// Configure ISiloBuilder to use MongoReminderTable
         /// </summary>
         public static ISiloBuilder UseMongoDBReminders(this ISiloBuilder builder,
@@ -79,30 +52,12 @@ namespace Orleans.Hosting
         }
 
         /// <summary>
-        /// Configure ISiloHostBuilder to use MongoBasedMembership
-        /// </summary>
-        public static ISiloHostBuilder UseMongoDBClustering(this ISiloHostBuilder builder,
-            Action<MongoDBMembershipTableOptions> configurator = null)
-        {
-            return builder.ConfigureServices(services => services.AddMongoDBMembershipTable(configurator));
-        }
-
-        /// <summary>
         /// Configure ISiloBuilder to use MongoBasedMembership
         /// </summary>
         public static ISiloBuilder UseMongoDBClustering(this ISiloBuilder builder,
             Action<MongoDBMembershipTableOptions> configurator = null)
         {
             return builder.ConfigureServices(services => services.AddMongoDBMembershipTable(configurator));
-        }
-
-        /// <summary>
-        /// Configure ISiloHostBuilder to use MongoMembershipTable
-        /// </summary>
-        public static ISiloHostBuilder UseMongoDBMembershipTable(this ISiloHostBuilder builder,
-            IConfiguration configuration)
-        {
-            return builder.ConfigureServices(services => services.AddMongoDBMembershipTable(configuration));
         }
 
         /// <summary>
@@ -167,24 +122,6 @@ namespace Orleans.Hosting
         }
 
         /// <summary>
-        /// Configure silo to use MongoDB as the default grain storage.
-        /// </summary>
-        public static ISiloHostBuilder AddMongoDBGrainStorageAsDefault(this ISiloHostBuilder builder,
-            Action<MongoDBGrainStorageOptions> configureOptions)
-        {
-            return builder.AddMongoDBGrainStorage(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME, configureOptions);
-        }
-
-        /// <summary>
-        /// Configure silo to use MongoDB for grain storage.
-        /// </summary>
-        public static ISiloHostBuilder AddMongoDBGrainStorage(this ISiloHostBuilder builder, string name,
-            Action<MongoDBGrainStorageOptions> configureOptions)
-        {
-            return builder.ConfigureServices(services => services.AddMongoDBGrainStorage(name, configureOptions));
-        }
-
-        /// <summary>
         /// Configure silo to use MongoDB for grain storage.
         /// </summary>
         public static ISiloBuilder AddMongoDBGrainStorage(this ISiloBuilder builder, string name,
@@ -196,8 +133,8 @@ namespace Orleans.Hosting
         /// <summary>
         /// Configure silo to use MongoDB as the default grain storage.
         /// </summary>
-        public static ISiloHostBuilder AddMongoDBGrainStorageAsDefault(this ISiloHostBuilder builder,
-            Action<OptionsBuilder<MongoDBGrainStorageOptions>> configureOptions = null)
+        public static ISiloBuilder AddMongoDBGrainStorageAsDefault(this ISiloBuilder builder,
+            Action<MongoDBGrainStorageOptions> configureOptions = null)
         {
             return builder.AddMongoDBGrainStorage(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME, configureOptions);
         }
@@ -209,15 +146,6 @@ namespace Orleans.Hosting
             Action<OptionsBuilder<MongoDBGrainStorageOptions>> configureOptions = null)
         {
             return builder.AddMongoDBGrainStorage(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME, configureOptions);
-        }
-
-        /// <summary>
-        /// Configure silo to use MongoDB for grain storage.
-        /// </summary>
-        public static ISiloHostBuilder AddMongoDBGrainStorage(this ISiloHostBuilder builder, string name,
-            Action<OptionsBuilder<MongoDBGrainStorageOptions>> configureOptions = null)
-        {
-            return builder.ConfigureServices(services => services.AddMongoDBGrainStorage(name, configureOptions));
         }
 
         /// <summary>
@@ -265,7 +193,7 @@ namespace Orleans.Hosting
             configureOptions?.Invoke(services.AddOptions<MongoDBGrainStorageOptions>(name));
 
             services.TryAddSingleton(sp => sp.GetServiceByName<IGrainStorage>(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME));
-            services.TryAddSingleton<IGrainStateSerializer>(sp => new JsonGrainStateSerializer(sp.GetService<ITypeResolver>(), sp.GetService<IGrainFactory>(), sp.GetService<IOptionsMonitor<MongoDBGrainStorageOptions>>().Get(name)));
+            services.TryAddSingleton<IGrainStateSerializer>(sp => new JsonGrainStateSerializer(sp, sp.GetService<IOptionsMonitor<MongoDBGrainStorageOptions>>().Get(name)));
 
             services.ConfigureNamedOptionForLogging<MongoDBGrainStorageOptions>(name);
 

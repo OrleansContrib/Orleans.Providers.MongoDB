@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <Version>3.8.0</Version>
+    <TargetFrameworks>net7.0</TargetFrameworks>
+    <Version>7.0.0</Version>
     <Authors>laredoza,sebastianstehle</Authors>
     <Company>Orleans.Providers.MongoDB</Company>
     <Description>A MongoDb implementation of the Orleans Providers. This includes custering (IMembershipTable and IGatewayListProvider), reminders (IReminderTable) and storage providers (IGrainStorage).</Description>
     <Copyright>MIT</Copyright>
     <PackageTags>Orleans OrleansProviders MongoDB</PackageTags>
-    <PackageReleaseNotes>Migration to Orleans 3.0 completed.</PackageReleaseNotes>
+    <PackageReleaseNotes>Migration to Orleans 7.0 completed.</PackageReleaseNotes>
     <PackageIcon>OrleansLogo.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/OrleansContrib/Orleans.Providers.MongoDB</PackageProjectUrl>
@@ -16,9 +16,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Orleans.OrleansProviders" Version="3.6.2" />
-    <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="3.6.2" />
-    <PackageReference Include="MongoDB.Driver" Version="2.17.1" />
+    <PackageReference Include="Microsoft.Orleans.Core" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Orleans.Reminders" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Orleans.Serialization.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Orleans.Serialization.NewtonsoftJson" Version="7.0.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.18.0" />
   </ItemGroup>
 
   <ItemGroup>

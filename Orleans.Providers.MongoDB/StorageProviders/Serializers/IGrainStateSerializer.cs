@@ -4,8 +4,8 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 {
     public interface IGrainStateSerializer
     {
-        JObject Serialize(IGrainState grainState);
+        JObject Serialize<T>(IGrainState<T> grainState);
 
-        void Deserialize(IGrainState grainState, JObject entityData);
+        void Deserialize<T>(IGrainState<T> grainState, JObject entityData);
     }
 }
