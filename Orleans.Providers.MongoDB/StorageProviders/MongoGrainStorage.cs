@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -48,34 +47,34 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             });
         }
 
-        public Task ReadStateAsync<T>(string grainType, GrainId grainId, IGrainState<T> grainState)
+        public Task ReadStateAsync<T>(string stateName, GrainId grainId, IGrainState<T> grainState)
         {
             return DoAndLog(nameof(ReadStateAsync), () =>
             {
-                return GetCollection(grainType, grainId).ReadAsync(grainId, grainState);
+                return GetCollection<T>(stateName, grainId).ReadAsync(grainId, grainState);
             });
         }
-        public Task WriteStateAsync<T>(string grainType, GrainId grainId, IGrainState<T> grainState)
+        public Task WriteStateAsync<T>(string stateName, GrainId grainId, IGrainState<T> grainState)
         {
             return DoAndLog(nameof(WriteStateAsync), () =>
             {
-                return GetCollection(grainType, grainId).WriteAsync(grainId, grainState);
+                return GetCollection<T>(stateName, grainId).WriteAsync(grainId, grainState);
             });
         }
 
-        public Task ClearStateAsync<T>(string grainType, GrainId grainId, IGrainState<T> grainState)
+        public Task ClearStateAsync<T>(string stateName, GrainId grainId, IGrainState<T> grainState)
         {
             return DoAndLog(nameof(ClearStateAsync), () =>
             {
-                return GetCollection(grainType, grainId).ClearAsync(grainId, grainState);
+                return GetCollection<T>(stateName, grainId).ClearAsync(grainId, grainState);
             });
         }
 
-        private MongoGrainStorageCollection GetCollection(string grainType, GrainId grainId)
+        private MongoGrainStorageCollection GetCollection<T>(string stateName, GrainId grainId)
         {
-            var collectionName = $"{options.CollectionPrefix}{ReturnGrainName(grainType, grainId)}";
+            var collectionName = $"{options.CollectionPrefix}{ReturnGrainName<T>(stateName, grainId)}";
 
-            return collections.GetOrAdd(grainType, x =>
+            return collections.GetOrAdd(stateName, x =>
                 new MongoGrainStorageCollection(
                     mongoClient,
                     options.DatabaseName,
@@ -107,9 +106,9 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             }
         }
 
-        protected virtual string ReturnGrainName(string grainType, GrainId grainId)
+        protected virtual string ReturnGrainName<T>(string stateName, GrainId grainId)
         {
-            return grainType.Split('.', '+').Last();
+            return stateName != "state" ? stateName : typeof(T).Name;
         }
     }
 }
