@@ -1,0 +1,4 @@
+[submodule "libs/orleans"]
+	path = libs/orleans
+	url = https://github.com/dotnet/orleans.git
+	branch = main

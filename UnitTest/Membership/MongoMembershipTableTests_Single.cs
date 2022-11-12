@@ -1,9 +1,10 @@
-﻿using Orleans.Messaging;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Providers.MongoDB.Membership;
+using Orleans.Messaging;
 using Orleans.Providers.MongoDB.Configuration;
+using Orleans.Providers.MongoDB.Membership;
+using Orleans.Providers.MongoDB.UnitTest.Fixtures;
 using TestExtensions;
 using UnitTests;
 using UnitTests.MembershipTests;
@@ -30,7 +31,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
             });
 
             return new MongoMembershipTable(
-                TestClients.Localhost.Value,
+                MongoDatabaseFixture.DatabaseFactory,
                 loggerFactory.CreateLogger<MongoMembershipTable>(),
                 clusterOptions,
                 options);
@@ -46,7 +47,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
             });
 
             return new MongoGatewayListProvider(
-                TestClients.Localhost.Value,
+                MongoDatabaseFixture.DatabaseFactory,
                 loggerFactory.CreateLogger<MongoGatewayListProvider>(),
                 clusterOptions,
                 gatewayOptions,
@@ -55,7 +56,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
 
         protected override Task<string> GetConnectionString()
         {
-            return Task.FromResult("mongodb://localhost/OrleansTest");
+            return Task.FromResult(MongoDatabaseFixture.DatabaseConnectionString);
         }
 
         [Fact, TestCategory("Functional")]

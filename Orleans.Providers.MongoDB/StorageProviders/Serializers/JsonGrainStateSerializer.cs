@@ -1,18 +1,18 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Orleans.Providers.MongoDB.Configuration;
-using Orleans.Runtime;
 using Orleans.Serialization;
 
 namespace Orleans.Providers.MongoDB.StorageProviders.Serializers
 {
     public class JsonGrainStateSerializer : IGrainStateSerializer
     {
-        private readonly JsonSerializerSettings jsonSettings;
+        private readonly JsonSerializer serializer;
 
-        public JsonGrainStateSerializer(ITypeResolver typeResolver, IGrainFactory grainFactory, MongoDBGrainStorageOptions options)
+        public JsonGrainStateSerializer(IServiceProvider serviceProvider, MongoDBGrainStorageOptions options)
         {
-            jsonSettings = OrleansJsonSerializer.GetDefaultSerializerSettings(typeResolver, grainFactory);           
+            var jsonSettings = OrleansJsonSerializerSettings.GetDefaultSerializerSettings(serviceProvider);
 
             options?.ConfigureJsonSerializerSettings?.Invoke(jsonSettings);
 
@@ -23,22 +23,21 @@ namespace Orleans.Providers.MongoDB.StorageProviders.Serializers
                 //// values that are not equal to the system defaults.
                 jsonSettings.NullValueHandling = NullValueHandling.Include;
                 jsonSettings.DefaultValueHandling = DefaultValueHandling.Populate;
-            }            
+            }
+
+            serializer = JsonSerializer.CreateDefault(jsonSettings);
         }
 
-        public void Deserialize(IGrainState grainState, JObject entityData)
+        public void Deserialize<T>(IGrainState<T> grainState, JObject entityData)
         {
             var jsonReader = new JTokenReader(entityData);
-            var jsonSerializer = JsonSerializer.CreateDefault(jsonSettings);
 
-            jsonSerializer.Populate(jsonReader, grainState.State);
+            serializer.Populate(jsonReader, grainState.State);
         }
 
-        public JObject Serialize(IGrainState grainState)
+        public JObject Serialize<T>(IGrainState<T> grainState)
         {
-            var jsonSerializer = JsonSerializer.CreateDefault(jsonSettings);
-
-            return JObject.FromObject(grainState.State, jsonSerializer);
+            return JObject.FromObject(grainState.State, serializer);
         }
     }
 }
