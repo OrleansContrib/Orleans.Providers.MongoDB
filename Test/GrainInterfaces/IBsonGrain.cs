@@ -2,7 +2,7 @@
 
 namespace Orleans.Providers.MongoDB.Test.GrainInterfaces
 {
-    public interface IBSonGrain : IGrainWithStringKey
+    public interface IBsonGrain : IGrainWithStringKey
     {
         Task PersistAsync(string name);
     }

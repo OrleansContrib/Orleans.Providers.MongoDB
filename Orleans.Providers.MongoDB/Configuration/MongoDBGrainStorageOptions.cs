@@ -1,7 +1,4 @@
-﻿// ReSharper disable InheritdocConsiderUsage
-
-using Orleans.Providers.MongoDB.StorageProviders.Serializers;
-using Orleans.Providers.MongoDB.StorageProviders.Serializers.Configuration;
+﻿using Orleans.Providers.MongoDB.StorageProviders.Serializers;
 using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Configuration
@@ -9,13 +6,16 @@ namespace Orleans.Providers.MongoDB.Configuration
     /// <summary>
     /// Option to configure MongoDB Storage.
     /// </summary>
-    public class MongoDBGrainStorageOptions : MongoDBOptions, IStateProviderSerializerOptions
+    public class MongoDBGrainStorageOptions : MongoDBOptions
     {
         public MongoDBGrainStorageOptions()
         {
             CollectionPrefix = "Grains";
         }
 
+        /// <summary>
+        /// Gets or sets grain state serializer for the storage provider.
+        /// </summary>
         public IGrainStateSerializer GrainStateSerializer { get; set; }
 
         /// <summary>

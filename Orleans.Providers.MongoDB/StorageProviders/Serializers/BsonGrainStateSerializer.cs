@@ -25,6 +25,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders.Serializers
             }
             else
             {
+                // A primitive types is not a valid BsonDocument, so it is wrapped here.
                 var document = new BsonDocument("value", value);
                 var wrapper = BsonSerializer.Deserialize<ValueWrapper<T>>(document);
                 return wrapper.Value;

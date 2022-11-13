@@ -1,12 +1,12 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Orleans.Providers.MongoDB.StorageProviders.Serializers;
 using Orleans.Runtime;
 
-namespace Orleans.Providers.MongoDB.StorageProviders.Serializers.Configuration
+namespace Orleans.Providers.MongoDB.Configuration
 {
-    public class DefaultStateProviderSerializerOptionsConfigurator<TOptions> : IPostConfigureOptions<TOptions>
-        where TOptions : class, IStateProviderSerializerOptions
+    internal class MongoDBGrainStorageConfigurator : IPostConfigureOptions<MongoDBGrainStorageOptions>
     {
         private readonly IServiceProvider _serviceProvider;
 
@@ -14,13 +14,13 @@ namespace Orleans.Providers.MongoDB.StorageProviders.Serializers.Configuration
         /// Initializes a new instance of the <see cref="DefaultStateProviderSerializerOptionsConfigurator{TOptions}"/> class.
         /// </summary>
         /// <param name="serviceProvider">The service provider.</param>
-        public DefaultStateProviderSerializerOptionsConfigurator(IServiceProvider serviceProvider)
+        public MongoDBGrainStorageConfigurator(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
 
         /// <inheritdoc/>
-        public void PostConfigure(string name, TOptions options)
+        public void PostConfigure(string name, MongoDBGrainStorageOptions options)
         {
             if (options.GrainStateSerializer == default)
             {

@@ -5,11 +5,11 @@ using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Test.Grains
 {
-    public sealed class BsonGrainGrain : IBSonGrain
+    public sealed class BsonGrain : IBsonGrain
     {
         private readonly IPersistentState<BsonGrainState> state;
 
-        public BsonGrainGrain([PersistentState(nameof(BsonGrainState), "MongoDBBsonStore")] IPersistentState<BsonGrainState> state)
+        public BsonGrain([PersistentState(nameof(BsonGrainState), "MongoDBBsonStore")] IPersistentState<BsonGrainState> state)
         {
             this.state = state;
         }

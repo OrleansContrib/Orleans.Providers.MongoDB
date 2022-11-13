@@ -6,7 +6,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders.Serializers
 {
     public sealed class BinaryGrainStateSerializer : IGrainStateSerializer
     {
-        private const string BinaryElementName = "statedata";
+        private const string BinaryElementName = "data";
 
         private readonly OrleansGrainStorageSerializer serializer;
 

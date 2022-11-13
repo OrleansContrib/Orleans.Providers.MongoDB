@@ -11,7 +11,6 @@ using Orleans.Providers.MongoDB.Membership;
 using Orleans.Providers.MongoDB.Reminders;
 using Orleans.Providers.MongoDB.StorageProviders;
 using Orleans.Providers.MongoDB.StorageProviders.Serializers;
-using Orleans.Providers.MongoDB.StorageProviders.Serializers.Configuration;
 using Orleans.Runtime;
 using Orleans.Storage;
 
@@ -192,7 +191,7 @@ namespace Orleans.Hosting
             Action<OptionsBuilder<MongoDBGrainStorageOptions>> configureOptions = null)
         {
             configureOptions?.Invoke(services.AddOptions<MongoDBGrainStorageOptions>(name));
-            services.AddTransient<IPostConfigureOptions<MongoDBGrainStorageOptions>, DefaultStateProviderSerializerOptionsConfigurator<MongoDBGrainStorageOptions>>();
+            services.AddTransient<IPostConfigureOptions<MongoDBGrainStorageOptions>, MongoDBGrainStorageConfigurator>();
 
             if (string.Equals(name, ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME, StringComparison.Ordinal))
             {

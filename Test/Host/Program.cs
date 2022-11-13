@@ -149,7 +149,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
         private static async Task TestBasic(IClusterClient client)
         {
             var helloWorldGrain = client.GetGrain<IHelloWorldGrain>(1);
-            var bsonGrain = client.GetGrain<IBSonGrain>("default");
+            var bsonGrain = client.GetGrain<IBsonGrain>("default");
 
             await helloWorldGrain.SayHello("World");
             await bsonGrain.PersistAsync("Name");
