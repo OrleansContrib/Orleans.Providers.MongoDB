@@ -1,26 +1,29 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using MongoDB.Bson;
+using Orleans.Serialization;
 using Orleans.Storage;
 
 namespace Orleans.Providers.MongoDB.StorageProviders.Serializers
 {
     public sealed class BinaryGrainStateSerializer : IGrainStateSerializer
     {
+        private const string BinaryElementName = "data";
+
         private readonly OrleansGrainStorageSerializer serializer;
 
-        public BinaryGrainStateSerializer(OrleansGrainStorageSerializer serializer)
+        public BinaryGrainStateSerializer(Serializer serializer)
         {
-            this.serializer = serializer;
+            this.serializer = new OrleansGrainStorageSerializer(serializer);
         }
 
-        public void Deserialize<T>(IGrainState<T> grainState, JObject entityData)
+        public T Deserialize<T>(BsonValue value)
         {
-            grainState.State = serializer.Deserialize<T>((byte[])entityData["statedata"]);
+            return serializer.Deserialize<T>(value[BinaryElementName].AsByteArray);
         }
 
-        public JObject Serialize<T>(IGrainState<T> grainState)
+        public BsonValue Serialize<T>(T state)
         {
-            var byteArray = serializer.Serialize<T>(grainState.State);
-            return new JObject(new JProperty("statedata", byteArray));
+            var binaryData = serializer.Serialize(state);
+            return new BsonDocument(BinaryElementName, new BsonBinaryData(binaryData.ToArray()));
         }
     }
 }

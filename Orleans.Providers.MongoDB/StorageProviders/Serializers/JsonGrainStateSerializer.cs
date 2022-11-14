@@ -1,4 +1,6 @@
 ﻿using System;
+using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Orleans.Providers.MongoDB.Configuration;
@@ -10,34 +12,22 @@ namespace Orleans.Providers.MongoDB.StorageProviders.Serializers
     {
         private readonly JsonSerializer serializer;
 
-        public JsonGrainStateSerializer(IServiceProvider serviceProvider, MongoDBGrainStorageOptions options)
+        public JsonGrainStateSerializer(IOptions<JsonGrainStateSerializerOptions> options, IServiceProvider serviceProvider)
         {
             var jsonSettings = OrleansJsonSerializerSettings.GetDefaultSerializerSettings(serviceProvider);
-
-            options?.ConfigureJsonSerializerSettings?.Invoke(jsonSettings);
-
-            if (options?.ConfigureJsonSerializerSettings == null)
-            {
-                //// https://github.com/OrleansContrib/Orleans.Providers.MongoDB/issues/44
-                //// Always include the default value, so that the deserialization process can overwrite default 
-                //// values that are not equal to the system defaults.
-                jsonSettings.NullValueHandling = NullValueHandling.Include;
-                jsonSettings.DefaultValueHandling = DefaultValueHandling.Populate;
-            }
-
+            options.Value.ConfigureJsonSerializerSettings(jsonSettings);
             serializer = JsonSerializer.CreateDefault(jsonSettings);
         }
 
-        public void Deserialize<T>(IGrainState<T> grainState, JObject entityData)
+        public T Deserialize<T>(BsonValue value)
         {
-            var jsonReader = new JTokenReader(entityData);
-
-            serializer.Populate(jsonReader, grainState.State);
+            using var jsonReader = new JTokenReader(value.ToJToken());
+            return serializer.Deserialize<T>(jsonReader);
         }
 
-        public JObject Serialize<T>(IGrainState<T> grainState)
+        public BsonValue Serialize<T>(T state)
         {
-            return JObject.FromObject(grainState.State, serializer);
+            return JObject.FromObject(state, serializer).ToBson();
         }
     }
 }

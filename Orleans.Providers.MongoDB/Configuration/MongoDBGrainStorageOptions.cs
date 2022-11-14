@@ -1,7 +1,4 @@
-﻿// ReSharper disable InheritdocConsiderUsage
-
-using System;
-using Newtonsoft.Json;
+﻿using Orleans.Providers.MongoDB.StorageProviders.Serializers;
 using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Configuration
@@ -16,7 +13,10 @@ namespace Orleans.Providers.MongoDB.Configuration
             CollectionPrefix = "Grains";
         }
 
-        public Action<JsonSerializerSettings> ConfigureJsonSerializerSettings { get; set; }
+        /// <summary>
+        /// Gets or sets grain state serializer for the storage provider.
+        /// </summary>
+        public IGrainStateSerializer GrainStateSerializer { get; set; }
 
         /// <summary>
         /// The key generation strategy used by the storage provider. It defaults to calling ToKeyString

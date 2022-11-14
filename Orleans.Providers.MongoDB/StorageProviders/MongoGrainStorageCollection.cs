@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Orleans.Providers.MongoDB.Configuration;
+using Orleans.Providers.MongoDB.StorageProviders.Serializers;
 using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
 using Orleans.Storage;
@@ -54,13 +55,13 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                 {
                     grainState.ETag = existing[FieldEtag].AsString;
 
-                    serializer.Deserialize(grainState, existing[FieldDoc].AsBsonDocument.ToJToken());
+                    grainState.State = serializer.Deserialize<T>(existing[FieldDoc]);
                 }
                 else
                 {
                     existing.Remove(FieldId);
 
-                    serializer.Deserialize(grainState, existing.ToJToken());
+                    grainState.State = serializer.Deserialize<T>(existing);
                 }
             }
         }
@@ -69,11 +70,10 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         {
             var grainKey = keyGenerator(grainId);
 
-            var grainData = serializer.Serialize(grainState);
+            var newData = serializer.Serialize(grainState.State);
 
             var etag = grainState.ETag;
 
-            var newData = grainData.ToBson();
             var newETag = Guid.NewGuid().ToString();
 
             grainState.RecordExists = true;

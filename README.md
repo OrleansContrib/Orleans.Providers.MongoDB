@@ -109,19 +109,46 @@ var silo = new SiloHostBuilder()
     {
         options.DatabaseName = dbName;
         options.CreateShardKeyForCosmos = createShardKey;
-
-        options.ConfigureJsonSerializerSettings = settings =>
-        {
-            settings.NullValueHandling = NullValueHandling.Include;
-            settings.ObjectCreationHandling = ObjectCreationHandling.Replace;
-            settings.DefaultValueHandling = DefaultValueHandling.Populate;
-        };
     })
     ...
     .Build();
 ```
 
-The provider uses Newtonsoft.JSON to serialize and deserialize MongoDB documents. In our benchmarks we have noticed that is slightly faster and has the benfit that you do not need to care about two serializers.
+### Storage Serializers
+Mongo provider supports the following serializers:
+* `JsonGrainStateSerializer (Default)`: uses Newtonsoft.JSON
+* `BinaryGrainStateSerializer`: uses Orleans binary serializer
+* `BsonGrainStateSerializer`: uses [BsonSerializer](https://mongodb.github.io/mongo-csharp-driver/2.18/reference/bson/serialization/)
+
+### How to configure `JsonGrainStateSerializer`
+```csharp
+services.Configure<JsonGrainStateSerializerOptions>(options =>
+{
+    options.ConfigureJsonSerializerSettings = settings =>
+    {
+        settings.NullValueHandling = NullValueHandling.Include;
+        settings.DefaultValueHandling = DefaultValueHandling.Populate;
+        settings.ObjectCreationHandling = ObjectCreationHandling.Replace;
+    });
+});
+```
+
+### How to change default serializer
+For example, in order to change the default from `JsonGrainStateSerializer` to `BsonGrainStateSerializer`
+```csharp
+services.AddSingleton<IGrainStateSerializer, BsonGrainStateSerializer>();
+```
+
+### How to configure serializer for a specific storage provider
+For example in order to use binary serializer for **PubSubStore**
+```csharp
+services.AddSingletonNamedService<IGrainStateSerializer, BinaryGrainStateSerializer>("PubSubStore");
+...
+var silo = new SiloHostBuilder()
+    .AddMongoDBGrainStorage("PubSubStore", options => options.DatabaseName = dbName)
+    ...
+    .Build();
+```
 
 ## Remarks
 
