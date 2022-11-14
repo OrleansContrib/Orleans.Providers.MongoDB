@@ -1,11 +1,26 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using MongoDB.Bson;
 
-namespace Orleans.Providers.MongoDB.StorageProviders
+namespace Orleans.Providers.MongoDB.StorageProviders.Serializers
 {
+    /// <summary>
+    /// Common interface for grain state serializers.
+    /// </summary>
     public interface IGrainStateSerializer
     {
-        JObject Serialize<T>(IGrainState<T> grainState);
+        /// <summary>
+        /// Serializes the state.
+        /// </summary>
+        /// <param name="input">The state to serialize.</param>
+        /// <typeparam name="T">The input type.</typeparam>
+        /// <returns>The serialized value.</returns>
+        BsonValue Serialize<T>(T state);
 
-        void Deserialize<T>(IGrainState<T> grainState, JObject entityData);
+        /// <summary>
+        /// Deserializes the provided value.
+        /// </summary>
+        /// <param name="value">The value to deserialize.</param>
+        /// <typeparam name="T">The output type.</typeparam>
+        /// <returns>The deserialized state.</returns>
+        T Deserialize<T>(BsonValue value);
     }
 }

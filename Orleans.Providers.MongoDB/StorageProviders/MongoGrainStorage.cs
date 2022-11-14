@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using Orleans.Providers.MongoDB.Configuration;
+using Orleans.Providers.MongoDB.StorageProviders.Serializers;
 using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
 using Orleans.Storage;
@@ -23,13 +24,12 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         public MongoGrainStorage(
             IMongoClientFactory mongoClientFactory,
             ILogger<MongoGrainStorage> logger,
-            IGrainStateSerializer serializer,
             MongoDBGrainStorageOptions options)
         {
             this.mongoClient = mongoClientFactory.Create(options, "Storage");
             this.logger = logger;
             this.options = options;
-            this.serializer = serializer;
+            this.serializer = options.GrainStateSerializer;
         }
 
         public void Participate(ISiloLifecycle lifecycle)
