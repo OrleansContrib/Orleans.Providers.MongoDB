@@ -1,21 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<Authors>laredoza,sebastianstehle,wassim-k</Authors>
-	<Company>Orleans.Providers.MongoDB</Company>
-	<Copyright>MIT</Copyright>
-	<Description>A MongoDb implementation of the Orleans Providers. This includes custering (IMembershipTable and IGatewayListProvider), reminders (IReminderTable) and storage providers (IGrainStorage).</Description>
-	<EmbedUntrackedSources>true</EmbedUntrackedSources>
-	<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Authors>laredoza,sebastianstehle,wassim-k</Authors>
+    <Company>Orleans.Providers.MongoDB</Company>
+    <Copyright>MIT</Copyright>
+    <Description>A MongoDb implementation of the Orleans Providers. This includes custering (IMembershipTable and IGatewayListProvider), reminders (IReminderTable) and storage providers (IGrainStorage).</Description>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
-	<PackageIcon>OrleansLogo.png</PackageIcon>
-	<PackageLicenseExpression>MIT</PackageLicenseExpression>
-	<PackageProjectUrl>https://github.com/OrleansContrib/Orleans.Providers.MongoDB</PackageProjectUrl>
-	<PackageReleaseNotes>Migration to Orleans 7.0 completed.</PackageReleaseNotes>
-	<PackageTags>Orleans OrleansProviders MongoDB</PackageTags>
-	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-	<TargetFrameworks>net7.0</TargetFrameworks>
-	<Version>7.0.0</Version>
+    <PackageIcon>OrleansLogo.png</PackageIcon>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/OrleansContrib/Orleans.Providers.MongoDB</PackageProjectUrl>
+    <PackageReleaseNotes>Migration to Orleans 7.0 completed.</PackageReleaseNotes>
+    <PackageTags>Orleans OrleansProviders MongoDB</PackageTags>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <TargetFrameworks>net7.0</TargetFrameworks>
+    <Version>7.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
