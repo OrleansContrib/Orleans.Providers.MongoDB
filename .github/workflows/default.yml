@@ -13,7 +13,7 @@ jobs:
         submodules: recursive
 
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v2
       with:
         dotnet-version: 7.0.x
 
@@ -24,5 +24,5 @@ jobs:
         
     - name: Publish
       run: |
-        dotnet nuget push **/*.nupkg --source 'https://api.nuget.org/v3/index.json' --skip-duplicate -k ${{ secrets.nuget }} --no-symbols 1 
+        dotnet nuget push **/*.nupkg --source 'https://api.nuget.org/v3/index.json' --skip-duplicate -k ${{ secrets.nuget }}
       if: github.ref == 'refs/heads/master'
