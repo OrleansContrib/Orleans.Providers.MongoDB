@@ -161,4 +161,4 @@ In order to make use of many tests already defined in [Orleans](https://github.c
 
 This comes with two caveats:
 * Depending on your git client, the submodules are sometimes not pulled automatically. If you find the ./libs subdirectory to be empty, execute ```git pull --recurse-submodules``` manually from the command shell
-* some of the projects in the ./libs subfolder need F# support to be installed in you VisualStudio installation, otherwise you will receive an error message about an unsupported language. This may apply to other IDEs as well
+* some of the projects in the ./libs subfolder need F# support to be present in your VisualStudio installation, otherwise you will receive an error message about an unsupported language. This may apply to other IDEs as well
