@@ -1,18 +1,20 @@
-﻿using System;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 using Orleans.Hosting;
 using Orleans.Messaging;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Membership;
+using System;
 
+// ReSharper disable InconsistentNaming
 // ReSharper disable AccessToStaticMemberViaDerivedType
 // ReSharper disable CheckNamespace
 
 namespace Orleans
 {
     /// <summary>
-    /// Extension methods for configuration classes specific to OrleansMongoUtils.dll 
+    /// Extension methods for configuration classes specific to Orleans.Providers.MongoDB.dll 
     /// </summary>
     public static class MongoDBClientExtensions
     {
@@ -26,10 +28,19 @@ namespace Orleans
         }
 
         /// <summary>
+        /// Configure silo to use MongoDb with a passed in connection string.
+        /// </summary>
+        /// <param name="configureClientSettings">The configuration delegate to configure the <see cref="MongoClientSettings"/>.</param>
+        public static IClientBuilder UseMongoDBClient(this IClientBuilder builder, ActionRef<MongoClientSettings> configureClientSettings)
+        {
+            return builder.ConfigureServices(services => services.AddMongoDBClient(configureClientSettings));
+        }
+
+        /// <summary>
         /// Configure client to use MongoGatewayListProvider
         /// </summary>
         public static IClientBuilder UseMongoDBClustering(this IClientBuilder builder,
-            Action<MongoDBGatewayListProviderOptions> configurator = null)
+                Action<MongoDBGatewayListProviderOptions> configurator = null)
         {
             return builder.ConfigureServices(services => services.AddMongoDBGatewayListProvider(configurator));
         }

@@ -49,6 +49,27 @@ var client = new ClientBuilder()
 
 as an alternative you can also implement the IMongoClientFactory interface and override the client names with options.
 
+There is also an overload of ```UseMongoDBClient()``` that takes a configuration delegate which gives you access to all MongoDB connection settings individually. This is especially useful, if you need to separate network settings and credentials into different configuration variables, as shown below.
+
+```csharp
+[...]
+  .UseMongoDBClient((ref MongoClientSettings settings) =>
+    {
+      var connectionString = config["Orleans:MongoDb:ConnectionString"];
+      var db = config["Orleans:MongoDb:AuthDatabase"];
+      var user = config["Orleans:MongoDb:User"];
+      var pw = config["Orleans:MongoDb:Password"];
+
+      settings = MongoClientSettings.FromConnectionString(connectionString);
+            
+      settings.Credential = MongoCredential.CreateCredential(db, user, pw);
+    })
+[...]
+```
+
+
+
+
 ### Membership
 
 Use the client builder to setup mongo db:
