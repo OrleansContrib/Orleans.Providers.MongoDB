@@ -153,3 +153,12 @@ var silo = new SiloHostBuilder()
 ## Remarks
 
 As you can see you have to pass in the connection string to each provider. But we will only create one MongoDB client for each unique connection string to keep the number of connections to your cluster or server as low as possible.
+
+
+## Building the unit tests
+
+In order to make use of many tests already defined in [Orleans](https://github.com/dotnet/orleans/), the [unit test project of this module](https://github.com/OrleansContrib/Orleans.Providers.MongoDB/tree/master/UnitTest) depends on [TesterInternal](https://github.com/dotnet/orleans/tree/main/test/TesterInternal), which is added as a project reference from the local path [./libs](https://github.com/OrleansContrib/Orleans.Providers.MongoDB/tree/master/libs) where the whole Orleans source code is mirrored as a [git submodule](https://git-scm.com/docs/git-submodule).
+
+This comes with two caveats:
+* Depending on your git client, the submodules are sometimes not pulled automatically. If you find the ./libs subdirectory to be empty, execute ```git pull --recurse-submodules``` manually from the command shell
+* some of the projects in the ./libs subfolder need F# support to be installed in you VisualStudio installation, otherwise you will receive an error message about an unsupported language. This may apply to other IDEs as well
