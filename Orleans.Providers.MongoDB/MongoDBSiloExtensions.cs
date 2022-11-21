@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Orleans.Configuration;
-using Orleans.Hosting;
 using Orleans.Providers;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Membership;
@@ -13,7 +13,7 @@ using Orleans.Providers.MongoDB.StorageProviders;
 using Orleans.Providers.MongoDB.StorageProviders.Serializers;
 using Orleans.Runtime;
 using Orleans.Storage;
-using System;
+
 // ReSharper disable AccessToStaticMemberViaDerivedType
 // ReSharper disable CheckNamespace
 // ReSharper disable InconsistentNaming

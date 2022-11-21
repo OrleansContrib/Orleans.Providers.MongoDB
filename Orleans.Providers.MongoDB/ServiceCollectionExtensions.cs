@@ -13,18 +13,15 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Configure silo to use MongoDb with a passed in connection string.
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
+        /// <returns></returns>
         public static IServiceCollection AddMongoDBClient(this IServiceCollection services, string connectionString)
         {
-            services.TryAddSingleton<IMongoClient>(c => new MongoClient(connectionString));
-            services.TryAddSingleton<IMongoClientFactory, DefaultMongoClientFactory>();
-
-            return services;
+            return services.AddMongoDBClient(provider => MongoClientSettings.FromConnectionString(connectionString));
         }
 
         /// <summary>
         /// Configure silo to use MongoDb with a passed in connection string.
         /// </summary>
-        /// <param name="services">The services.</param>
         /// <param name="settingsFactory">The settings factory.</param>
         /// <returns></returns>
         /// <exception cref="System.ArgumentNullException">settingsFactory</exception>
