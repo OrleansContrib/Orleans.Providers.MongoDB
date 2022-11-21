@@ -1,18 +1,21 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 using Orleans.Hosting;
 using Orleans.Messaging;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Membership;
 
+
+// ReSharper disable InconsistentNaming
 // ReSharper disable AccessToStaticMemberViaDerivedType
 // ReSharper disable CheckNamespace
 
 namespace Orleans
 {
     /// <summary>
-    /// Extension methods for configuration classes specific to OrleansMongoUtils.dll 
+    /// Extension methods for configuration classes specific to Orleans.Providers.MongoDB.dll 
     /// </summary>
     public static class MongoDBClientExtensions
     {
@@ -23,6 +26,17 @@ namespace Orleans
         public static IClientBuilder UseMongoDBClient(this IClientBuilder builder, string connectionString)
         {
             return builder.ConfigureServices(services => services.AddMongoDBClient(connectionString));
+        }
+
+        /// <summary>
+        /// Configure silo to use MongoDb with a passed in connection string.
+        /// </summary>
+        /// <param name="builder">The builder.</param>
+        /// <param name="settingsFactory">The settings factory.</param>
+        /// <returns></returns>
+        public static IClientBuilder UseMongoDBClient(this IClientBuilder builder, Func<IServiceProvider, MongoClientSettings> settingsFactory)
+        {
+            return builder.ConfigureServices(services => services.AddMongoDBClient(settingsFactory));
         }
 
         /// <summary>

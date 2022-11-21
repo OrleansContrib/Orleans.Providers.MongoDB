@@ -3,8 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 using Orleans.Configuration;
-using Orleans.Hosting;
 using Orleans.Providers;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Membership;
@@ -16,6 +16,7 @@ using Orleans.Storage;
 
 // ReSharper disable AccessToStaticMemberViaDerivedType
 // ReSharper disable CheckNamespace
+// ReSharper disable InconsistentNaming
 
 namespace Orleans.Hosting
 {
@@ -34,10 +35,21 @@ namespace Orleans.Hosting
         }
 
         /// <summary>
+        /// Configure silo to use MongoDb with a passed in connection string.
+        /// </summary>
+        /// <param name="builder">The builder.</param>
+        /// <param name="settingsFactory">The settings factory.</param>
+        /// <returns></returns>
+        public static ISiloBuilder UseMongoDBClient(this ISiloBuilder builder, Func<IServiceProvider, MongoClientSettings> settingsFactory)
+        {
+            return builder.ConfigureServices(services => services.AddMongoDBClient(settingsFactory));
+        }
+
+        /// <summary>
         /// Configure ISiloBuilder to use MongoReminderTable.
         /// </summary>
         public static ISiloBuilder UseMongoDBReminders(this ISiloBuilder builder,
-            Action<MongoDBRemindersOptions> configurator = null)
+                Action<MongoDBRemindersOptions> configurator = null)
         {
             return builder.ConfigureServices(services => services.AddMongoDBReminders(configurator));
         }
