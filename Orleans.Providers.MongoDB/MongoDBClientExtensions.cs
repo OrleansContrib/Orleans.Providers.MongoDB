@@ -30,17 +30,19 @@ namespace Orleans
         /// <summary>
         /// Configure silo to use MongoDb with a passed in connection string.
         /// </summary>
-        /// <param name="configureClientSettings">The configuration delegate to configure the <see cref="MongoClientSettings"/>.</param>
-        public static IClientBuilder UseMongoDBClient(this IClientBuilder builder, ActionRef<MongoClientSettings> configureClientSettings)
+        /// <param name="builder">The builder.</param>
+        /// <param name="settingsFactory">The settings factory.</param>
+        /// <returns></returns>
+        public static IClientBuilder UseMongoDBClient(this IClientBuilder builder, Func<IServiceProvider, MongoClientSettings> settingsFactory)
         {
-            return builder.ConfigureServices(services => services.AddMongoDBClient(configureClientSettings));
+            return builder.ConfigureServices(services => services.AddMongoDBClient(settingsFactory));
         }
 
         /// <summary>
         /// Configure client to use MongoGatewayListProvider
         /// </summary>
         public static IClientBuilder UseMongoDBClustering(this IClientBuilder builder,
-                Action<MongoDBGatewayListProviderOptions> configurator = null)
+            Action<MongoDBGatewayListProviderOptions> configurator = null)
         {
             return builder.ConfigureServices(services => services.AddMongoDBGatewayListProvider(configurator));
         }

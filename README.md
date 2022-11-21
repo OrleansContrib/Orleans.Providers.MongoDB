@@ -49,20 +49,18 @@ var client = new ClientBuilder()
 
 as an alternative you can also implement the IMongoClientFactory interface and override the client names with options.
 
-There is also an overload of ```UseMongoDBClient()``` that takes a configuration delegate which gives you access to all MongoDB connection settings individually. This is especially useful, if you need to separate network settings and credentials into different configuration variables, as shown below.
+There is also an overload of ```UseMongoDBClient()``` that takes a ```Func<IServiceProvider, MongoClientSettings>``` which allows you specify all MongoDB connection settings individually. This is especially useful, if you need to separate network settings and credentials into different configuration variables, or if you want to bind to an ```IOptions<T>``` configuration as shown below.
 
 ```csharp
 [...]
-  .UseMongoDBClient((ref MongoClientSettings settings) =>
+  .UseMongoDBClient(provider =>
     {
-      var connectionString = config["Orleans:MongoDb:ConnectionString"];
-      var db = config["Orleans:MongoDb:AuthDatabase"];
-      var user = config["Orleans:MongoDb:User"];
-      var pw = config["Orleans:MongoDb:Password"];
+      var cfg = provider.GetRequiredService<IOptions<MyMongoDbConfiguration>>();
 
-      settings = MongoClientSettings.FromConnectionString(connectionString);
-            
-      settings.Credential = MongoCredential.CreateCredential(db, user, pw);
+      var settings = MongoClientSettings.FromConnectionString(cfg.Value.ConnectionString);
+      settings.Credential = MongoCredential.CreateCredential(cfg.Value.AuthDatabase, cfg.Value.UserName, cfg.Value.Password);
+
+      return settings;
     })
 [...]
 ```
