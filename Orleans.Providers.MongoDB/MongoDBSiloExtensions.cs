@@ -51,7 +51,6 @@ namespace Orleans.Hosting
         public static ISiloBuilder UseMongoDBReminders(this ISiloBuilder builder,
                 Action<MongoDBRemindersOptions> configurator = null)
         {
-            builder.AddReminders();
             return builder.ConfigureServices(services => services.AddMongoDBReminders(configurator));
         }
 
@@ -61,7 +60,6 @@ namespace Orleans.Hosting
         public static ISiloBuilder UseMongoDBReminders(this ISiloBuilder builder,
             IConfiguration configuration)
         {
-            builder.AddReminders();
             return builder.ConfigureServices(services => services.AddMongoDBReminders(configuration));
         }
 
@@ -102,6 +100,7 @@ namespace Orleans.Hosting
         public static IServiceCollection AddMongoDBReminders(this IServiceCollection services,
             IConfiguration configuration)
         {
+            services.AddReminders();
             services.Configure<MongoDBRemindersOptions>(configuration);
             services.AddSingleton<IReminderTable, MongoReminderTable>();
             services.AddSingleton<IConfigurationValidator, MongoDBOptionsValidator<MongoDBRemindersOptions>>();
