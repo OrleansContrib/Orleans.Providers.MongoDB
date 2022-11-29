@@ -34,7 +34,6 @@ namespace Orleans.Providers.MongoDB.Test.Host
 
             var host = new HostBuilder()
                 .UseOrleans((ctx, siloBuilder) => siloBuilder
-                    .AddReminders()
                     .UseMongoDBClient(mongoRunner.ConnectionString)
                     .UseMongoDBClustering(options =>
                     {
