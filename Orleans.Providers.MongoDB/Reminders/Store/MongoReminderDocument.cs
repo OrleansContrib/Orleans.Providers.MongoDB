@@ -31,11 +31,16 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
         public bool IsDeleted { get; set; }
 
         [BsonRequired]
-        [BsonDateTimeOptions(Kind = DateTimeKind.Unspecified)]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime StartAt { get; set; }
 
         public static MongoReminderDocument Create(string id, string serviceId, ReminderEntry entry, string etag)
         {
+            if (entry.StartAt.Kind is DateTimeKind.Unspecified)
+            {
+                entry.StartAt = new DateTime(entry.StartAt.Ticks, DateTimeKind.Utc);
+            }
+
             return new MongoReminderDocument
             {
                 Id = id,
