@@ -77,7 +77,7 @@ var client = new ClientBuilder()
     .UseMongoDBClustering(options =>
     {
         options.DatabaseName = dbName;
-        options.Strategy = MongoDBMembershipStrategy.Muiltiple
+        options.Strategy = MongoDBMembershipStrategy.Multiple;
     })
     ...
     .Build();
@@ -90,7 +90,7 @@ var silo = new SiloHostBuilder()
      .UseMongoDBClustering(options =>
     {
         options.DatabaseName = dbName;
-        options.Strategy = MongoDBMembershipStrategy.Muiltiple
+        options.Strategy = MongoDBMembershipStrategy.Multiple;
     })
     ...
     .Build();
