@@ -3,7 +3,7 @@
     public enum MongoDBMembershipStrategy
     {
         SingleDocument,
-        Muiltiple,
+        Multiple,
         MultipleDeprecated
     }
 }
