@@ -27,7 +27,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
             {
                 CollectionPrefix = "Test_",
                 DatabaseName = "OrleansTest",
-                Strategy = MongoDBMembershipStrategy.Muiltiple
+                Strategy = MongoDBMembershipStrategy.Multiple
             });
 
             return new MongoMembershipTable(
@@ -43,7 +43,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
             {
                 CollectionPrefix = "Test_",
                 DatabaseName = "OrleansTest",
-                Strategy = MongoDBMembershipStrategy.Muiltiple
+                Strategy = MongoDBMembershipStrategy.Multiple
             });
 
             return new MongoGatewayListProvider(

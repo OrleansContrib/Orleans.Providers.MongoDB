@@ -20,7 +20,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store
                         options.CollectionPrefix,
                         options.CreateShardKeyForCosmos,
                         options.CollectionConfigurator);
-                case MongoDBMembershipStrategy.Muiltiple:
+                case MongoDBMembershipStrategy.Multiple:
                     return new MultipleMembershipCollection(
                         mongoClient,
                         options.DatabaseName,
