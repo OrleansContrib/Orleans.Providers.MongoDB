@@ -14,7 +14,7 @@
     <PackageReference Include="Microsoft.Orleans.Sdk" Version="7.0.0" />
     <PackageReference Include="Microsoft.Orleans.CodeGenerator" Version="7.0.0" />
     <PackageReference Include="Microsoft.Orleans.TestingHost" Version="7.0.0" />
-    <PackageReference Include="MongoDB.Driver" Version="2.18.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.19.0" />
     <PackageReference Include="xunit" Version="2.4.2" />
     <PackageReference Include="xunit.runner.console" Version="2.4.2">
       <PrivateAssets>all</PrivateAssets>
