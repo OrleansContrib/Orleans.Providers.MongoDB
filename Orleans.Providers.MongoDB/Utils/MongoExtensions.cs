@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using System;
+using MongoDB.Driver;
 using Orleans.Providers.MongoDB.Configuration;
 
 namespace Orleans.Providers.MongoDB.Utils
@@ -11,10 +12,14 @@ namespace Orleans.Providers.MongoDB.Utils
             {
                 return true;
             }
-            if (ex is MongoWriteException w && w.WriteError.Category == ServerErrorCategory.DuplicateKey)
+
+            if (ex is MongoWriteException w
+                && w.WriteError.Category == ServerErrorCategory.DuplicateKey
+                && w.WriteError.Message.Contains("index: _id_ ", StringComparison.Ordinal))
             {
                 return true;
             }
+
             return false;
         }
 
