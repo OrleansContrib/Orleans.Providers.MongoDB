@@ -169,6 +169,62 @@ var silo = new SiloHostBuilder()
     .Build();
 ```
 
+### Configuring a MongoDB Collection
+
+At times during storage setup, it may be necessary to configure a specific collection where a certain type of Orleans grains is stored. The most common scenario involves adding additional indexes to certain fields, which allows for traditional querying of the grain collection.
+
+**Note: For performance reasons, Orleans.Providers.MongoDB configures the default index (_id) to the Orleans grain Id.**
+
+#### Example
+In the example below, we're adding two additional indexes to the `EmailAddress` and `Username` fields of the Orleans grain state.
+
+**Note: The delegate `CollectionSetupConfigurator` is invoked for every collection in the defined storage.** As you can see in the example, `collection.CollectionNamespace.CollectionName` is used to filter which collection should receive the additional indexes.
+
+```csharp
+// UserGrain State Storage Setup
+.AddMongoDBGrainStorage(name: "UserStorage", options =>
+{
+    options.DatabaseName = "UsersDb";
+    options.CreateShardKeyForCosmos = false;
+    options.CollectionPrefix = string.Empty; // Don not add default 'Grains' prefix to collections
+    options.CollectionSetupConfigurator = (collection =>
+    {
+        // IMPORTANT!
+        // CollectionSetupConfigurator delegate will be called for each collection that is created by Orleans MongoDB storage provider
+        // Use CollectionNamespace.CollectionName to determine the collection name and apply indexing only on the collections that you need
+
+        // EXAMPLE --------------------------------------------------------------------------------
+        // Only apply indexing on the UserGrain collection
+        if(collection.CollectionNamespace.CollectionName == "UserModel")
+        { 
+            // Create additional indexes on a collection
+            // --------------------------------------------------------------------------------------
+            // Note: Orleans MongoDB storage provider will create index on the grain id automatically
+            // Note: Orleans MongoDB storage provider persists the grain state in a sub-document named '_doc' (see in Mongo Atlas)
+
+            // Create an index on the EmailAddress field
+            var indexOptions = new CreateIndexOptions
+            {
+                Name = "_emailAddress_",
+                Unique = true
+            };
+            var emailIndexModel = new CreateIndexModel<BsonDocument>(new BsonDocument("_doc.EmailAddress", 1), indexOptions);
+            collection.Indexes.CreateOne(emailIndexModel);
+
+            // Create an index on the Username field
+            var usernameIndexOptions = new CreateIndexOptions
+            {
+                Name = "_username_",
+                Unique = true
+            };
+            var usernameIndexModel = new CreateIndexModel<BsonDocument>(new BsonDocument("_doc.Username", 1), usernameIndexOptions);
+            collection.Indexes.CreateOne(usernameIndexModel);
+        }
+
+    });
+});
+```
+
 ## Remarks
 
 As you can see you have to pass in the connection string to each provider. But we will only create one MongoDB client for each unique connection string to keep the number of connections to your cluster or server as low as possible.
