@@ -82,7 +82,9 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                     options.CollectionConfigurator,
                     options.CreateShardKeyForCosmos,
                     serializer,
-                    options.KeyGenerator));
+                    options.KeyGenerator,
+                    options.CollectionSetupConfigurator
+                    ));
         }
 
         private Task DoAndLog(string actionName, Func<Task> action)

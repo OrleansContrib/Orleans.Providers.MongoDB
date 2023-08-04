@@ -1,5 +1,8 @@
-﻿using Orleans.Providers.MongoDB.StorageProviders.Serializers;
+﻿using MongoDB.Driver;
+using System;
+using Orleans.Providers.MongoDB.StorageProviders.Serializers;
 using Orleans.Runtime;
+using MongoDB.Bson;
 
 namespace Orleans.Providers.MongoDB.Configuration
 {
@@ -23,6 +26,13 @@ namespace Orleans.Providers.MongoDB.Configuration
         /// in the grain reference.
         /// </summary>
         public GrainStorageKeyGenerator KeyGenerator { get; set; } = x => x.ToString();
+
+        /// <summary>
+        /// This delegate is called when the collection is created. It can be used for additional setup
+        /// of collection; for example to add additional indexes.
+        /// </summary>
+        public Action<IMongoCollection<BsonDocument>> CollectionSetupConfigurator { get; set; }
+
 
         internal override void Validate(string name = null)
         {

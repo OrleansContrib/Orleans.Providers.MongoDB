@@ -18,6 +18,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         private readonly string collectionName;
         private readonly IGrainStateSerializer serializer;
         private readonly GrainStorageKeyGenerator keyGenerator;
+        private readonly Action<IMongoCollection<BsonDocument>> collectionSetupDelegate;
 
         public MongoGrainStorageCollection(
             IMongoClient mongoClient,
@@ -26,12 +27,15 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             Action<MongoCollectionSettings> collectionConfigurator,
             bool createShardKey,
             IGrainStateSerializer serializer,
-            GrainStorageKeyGenerator keyGenerator)
+            GrainStorageKeyGenerator keyGenerator,
+            Action<IMongoCollection<BsonDocument>> collectionSetupDelegate = null
+          )
             : base(mongoClient, databaseName, collectionConfigurator, createShardKey)
         {
             this.collectionName = collectionName;
             this.serializer = serializer;
             this.keyGenerator = keyGenerator;
+            this.collectionSetupDelegate = collectionSetupDelegate;
         }
 
         protected override string CollectionName()
@@ -147,5 +151,10 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                 throw new InconsistentStateException(existingEtag[FieldEtag].AsString, etag, ex);
             }
         }
-    }
+
+        protected override void SetupCollection(IMongoCollection<BsonDocument> collection)
+        {
+            collectionSetupDelegate?.Invoke(collection);
+        }
+  }
 }
