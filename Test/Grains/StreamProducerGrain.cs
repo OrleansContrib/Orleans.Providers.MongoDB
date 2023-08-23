@@ -12,13 +12,10 @@ namespace Orleans.Providers.MongoDB.Test.Grains
             var streamProvider = this.GetStreamProvider("OrleansTestStream");
             var streamOfNumbers = streamProvider.GetStream<int>("MyNamespace", Guid.Empty);
 
-            var i = 0;
-
-            while (true)
+            for (var i = 0; i < 5; ++i)
             {
-                await streamOfNumbers.OnNextAsync(++i);
-
-                await Task.Delay(100);
+                await streamOfNumbers.OnNextAsync(i);
+                await Task.Delay(500);
             }
         }
     }

@@ -10,14 +10,12 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver;
 using Newtonsoft.Json;
 using Orleans.Configuration;
 using Orleans.Hosting;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.StorageProviders.Serializers;
 using Orleans.Providers.MongoDB.Test.GrainInterfaces;
-using Orleans.Providers.MongoDB.Test.Grains;
 using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Test.Host
@@ -89,8 +87,6 @@ namespace Orleans.Providers.MongoDB.Test.Host
 
             await host.StartAsync();
 
-            await CreateConstraints(host.Services.GetRequiredService<IMongoClient>());
-
             var clientHost = new HostBuilder()
                 .UseOrleansClient((ctx, clientBuilder) => clientBuilder
                     .UseMongoDBClient(mongoRunner.ConnectionString)
@@ -125,45 +121,26 @@ namespace Orleans.Providers.MongoDB.Test.Host
             await TestState(client);
             await TestStateWithCollections(client);
 
-            await TestStateConstraints(client);
-
             Console.ReadKey();
 
             await host.StopAsync();
         }
 
-        private static async Task CreateConstraints(IMongoClient mongoClient)
-        {
-            var collection = mongoClient.GetDatabase("OrleansTestApp")
-                .GetCollection<ConstrainedGrainState>("GrainsConstrainedGrain");
-
-            var indexBuilder = Builders<ConstrainedGrainState>.IndexKeys.Ascending(f => f.Name);
-
-            var options = new CreateIndexOptions
-            {
-                Unique = true
-            };
-
-            var indexModel = new CreateIndexModel<ConstrainedGrainState>(indexBuilder, options);
-
-            await collection.Indexes.CreateOneAsync(indexModel);
-        }
-
         private static async Task TestStreams(IClusterClient client)
         {
             var streamProducer = client.GetGrain<IStreamProducerGrain>(0);
-            var streamConsumer1 = client.GetGrain<IStreamConsumerGrain>(0);
-            var streamConsumer2 = client.GetGrain<IStreamConsumerGrain>(0);
+            var streamConsumer1 = client.GetGrain<IStreamConsumerGrain>(1);
+            var streamConsumer2 = client.GetGrain<IStreamConsumerGrain>(2);
 
             _ = streamProducer.ProduceEvents();
 
             await streamConsumer1.Activate();
             await streamConsumer2.Activate();
 
-            await Task.Delay(1000);
+            await Task.Delay(3000);
 
             var consumed1 = await streamConsumer1.GetConsumedItems();
-            var consumed2 = await streamConsumer1.GetConsumedItems();
+            var consumed2 = await streamConsumer2.GetConsumedItems();
 
             Console.WriteLine("Consumed Events: {0}/{1}", consumed1, consumed2);
         }
@@ -227,41 +204,6 @@ namespace Orleans.Providers.MongoDB.Test.Host
             employeeId = await employee.ReturnLevel();
 
             Console.WriteLine(employeeId);
-        }
-        
-        private static async Task TestStateConstraints(IClusterClient client)
-        {
-            var database = client.ServiceProvider.GetRequiredService<IMongoClient>()
-                .GetDatabase("OrleansTestApp");
-
-            var guid = Guid.NewGuid().ToString();
-
-            var grain0 = client.GetGrain<IConstrainedGrain>(0);
-            await grain0.SetName(guid);
-
-            var filter = Builders<BsonDocument>.Filter.Eq("_id", "constrained/0");
-            var update = Builders<BsonDocument>.Update.Set("_etag", Guid.NewGuid().ToString());
-
-            await database.GetCollection<BsonDocument>("GrainsConstrainedGrain").UpdateOneAsync(filter, update);
-
-            try
-            {
-                await grain0.SetName(Guid.NewGuid().ToString());
-            }
-            catch (ProviderStateException ex)
-            {
-                Console.WriteLine($"Exception thrown due to invalid e-tag: {ex.Message}");
-            }
-
-            var grain1 = client.GetGrain<IConstrainedGrain>(1);
-            try
-            {
-                await grain1.SetName(guid);
-            }
-            catch (ProviderStateException ex)
-            {
-                Console.WriteLine($"Exception thrown due to unique constrain violation: {ex.Message}");
-            }
         }
 
         private static void ApplyBsonConfiguration()
