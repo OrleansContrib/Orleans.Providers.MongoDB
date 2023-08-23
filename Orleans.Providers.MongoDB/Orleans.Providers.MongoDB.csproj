@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Authors>laredoza,sebastianstehle,wassim-k</Authors>
@@ -15,16 +15,16 @@
     <PackageTags>Orleans OrleansProviders MongoDB</PackageTags>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <TargetFrameworks>net7.0</TargetFrameworks>
-    <Version>7.5.0</Version>
+    <Version>7.6.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Orleans.Reminders" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Orleans.Reminders" Version="7.2.1" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="MongoDB.Driver" Version="2.19.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.21.0" />
   </ItemGroup>
 
   <ItemGroup>
