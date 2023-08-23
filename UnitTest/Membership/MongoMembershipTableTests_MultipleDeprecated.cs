@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Orleans.Messaging;
@@ -33,7 +34,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
             return new MongoMembershipTable(
                 MongoDatabaseFixture.DatabaseFactory,
                 loggerFactory.CreateLogger<MongoMembershipTable>(),
-                clusterOptions,
+                _clusterOptions,
                 options);
         }
 
@@ -49,8 +50,8 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
             return new MongoGatewayListProvider(
                 MongoDatabaseFixture.DatabaseFactory,
                 loggerFactory.CreateLogger<MongoGatewayListProvider>(),
-                clusterOptions,
-                gatewayOptions,
+                _clusterOptions,
+                _gatewayOptions,
                 options);
         }
 

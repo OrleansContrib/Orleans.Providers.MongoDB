@@ -33,7 +33,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
             return new MongoMembershipTable(
                 MongoDatabaseFixture.ReplicaSetFactory,
                 loggerFactory.CreateLogger<MongoMembershipTable>(),
-                clusterOptions,
+                _clusterOptions,
                 options);
         }
 
@@ -49,8 +49,8 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
             return new MongoGatewayListProvider(
                 MongoDatabaseFixture.ReplicaSetFactory,
                 loggerFactory.CreateLogger<MongoGatewayListProvider>(),
-                clusterOptions,
-                gatewayOptions,
+                _clusterOptions,
+                _gatewayOptions,
                 options);
         }
 
