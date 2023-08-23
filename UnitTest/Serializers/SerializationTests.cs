@@ -41,6 +41,35 @@ namespace Orleans.Providers.MongoDB.UnitTest.Serializers
         }
 
         [Fact]
+        public void CanCustomizeJsonSerializerSettings()
+        {
+            var host = new HostBuilder()
+                .UseOrleans((ctx, siloBuilder) =>
+                {
+                    siloBuilder
+                        .UseLocalhostClustering()
+                        .AddMongoDBGrainStorage(
+                            "JsonProvider",
+                            options => options.Configure<IServiceProvider>((options, sp) =>
+                            {
+                                options.GrainStateSerializer = new JsonGrainStateSerializer(
+                                    Options.Create(new JsonGrainStateSerializerOptions
+                                    {
+                                        ConfigureJsonSerializerSettings = settings =>
+                                        {
+                                            settings.Formatting = Newtonsoft.Json.Formatting.Indented;
+                                        }
+                                    }),
+                                    sp);
+                            }));
+                })
+                .Build();
+
+            var optionsMonitor = host.Services.GetRequiredService<IOptionsMonitor<MongoDBGrainStorageOptions>>();
+            Assert.IsType<JsonGrainStateSerializer>(optionsMonitor.Get("JsonProvider").GrainStateSerializer);
+        }
+
+        [Fact]
         public async void BsonSerializerForPubSubStore_Throws()
         {
             var host = new HostBuilder()
