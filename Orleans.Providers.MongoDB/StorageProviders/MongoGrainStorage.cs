@@ -74,7 +74,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         {
             var collectionName = $"{options.CollectionPrefix}{ReturnGrainName<T>(stateName, grainId)}";
 
-            return collections.GetOrAdd(stateName, x =>
+            return collections.GetOrAdd(collectionName, x =>
                 new MongoGrainStorageCollection(
                     mongoClient,
                     options.DatabaseName,
