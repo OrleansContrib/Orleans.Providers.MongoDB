@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -11,8 +10,8 @@ using Orleans.Providers.MongoDB.Membership;
 using Orleans.Providers.MongoDB.Reminders;
 using Orleans.Providers.MongoDB.StorageProviders;
 using Orleans.Providers.MongoDB.StorageProviders.Serializers;
-using Orleans.Runtime;
-using Orleans.Storage;
+using Orleans.Runtime.Hosting;
+using System;
 
 // ReSharper disable AccessToStaticMemberViaDerivedType
 // ReSharper disable CheckNamespace
@@ -205,22 +204,11 @@ namespace Orleans.Hosting
             Action<OptionsBuilder<MongoDBGrainStorageOptions>> configureOptions = null)
         {
             configureOptions?.Invoke(services.AddOptions<MongoDBGrainStorageOptions>(name));
-            services.AddTransient<IPostConfigureOptions<MongoDBGrainStorageOptions>, MongoDBGrainStorageConfigurator>();
-
-            if (string.Equals(name, ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME, StringComparison.Ordinal))
-            {
-                services.TryAddSingleton(sp => sp.GetServiceByName<IGrainStorage>(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME));
-            }
-
             services.TryAddSingleton<IGrainStateSerializer, JsonGrainStateSerializer>();
-
-            services.ConfigureNamedOptionForLogging<MongoDBGrainStorageOptions>(name);
-
             services.AddTransient<IConfigurationValidator>(sp => new MongoDBGrainStorageOptionsValidator(sp.GetRequiredService<IOptionsMonitor<MongoDBGrainStorageOptions>>().Get(name), name));
-            services.AddSingletonNamedService(name, MongoGrainStorageFactory.Create);
-            services.AddSingletonNamedService(name, (s, n) => (ILifecycleParticipant<ISiloLifecycle>)s.GetRequiredServiceByName<IGrainStorage>(n));
-
-            return services;
+            services.ConfigureNamedOptionForLogging<MongoDBGrainStorageOptions>(name);
+            services.AddTransient<IPostConfigureOptions<MongoDBGrainStorageOptions>, MongoDBGrainStorageConfigurator>();
+            return services.AddGrainStorage(name, MongoGrainStorageFactory.Create);
         }
     }
 }

@@ -1,13 +1,12 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Orleans.Hosting;
 using Orleans.Providers.MongoDB.StorageProviders.Serializers;
 using Orleans.Providers.MongoDB.UnitTest.Fixtures;
-using Orleans.Runtime;
+using System;
+using System.Threading.Tasks;
 using TestExtensions;
 using Xunit;
 using static Orleans.Providers.MongoDB.UnitTest.Storage.TestGrains.StorageTests;
@@ -24,7 +23,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Storage
                 .UseOrleans((ctx, siloBuilder) =>
                 {
                     siloBuilder.Services
-                        .AddSingletonNamedService<IGrainStateSerializer, BsonGrainStateSerializer>(ProviderConstants.DEFAULT_PUBSUB_PROVIDER_NAME);
+                        .AddKeyedSingleton<IGrainStateSerializer, BsonGrainStateSerializer>(ProviderConstants.DEFAULT_PUBSUB_PROVIDER_NAME);
 
                     siloBuilder
                         .AddMemoryStreams<DefaultMemoryMessageBodySerializer>("OrleansTestStream")

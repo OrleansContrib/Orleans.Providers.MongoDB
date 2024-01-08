@@ -1,8 +1,7 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Orleans.Providers.MongoDB.StorageProviders.Serializers;
-using Orleans.Runtime;
+using System;
 
 namespace Orleans.Providers.MongoDB.Configuration
 {
@@ -26,7 +25,7 @@ namespace Orleans.Providers.MongoDB.Configuration
             {
                 // First, try to get a IGrainStateSerializer that was registered with the same name as the State provider
                 // If none is found, fallback to system wide default
-                options.GrainStateSerializer = _serviceProvider.GetServiceByName<IGrainStateSerializer>(name) ?? _serviceProvider.GetRequiredService<IGrainStateSerializer>();
+                options.GrainStateSerializer = _serviceProvider.GetKeyedService<IGrainStateSerializer>(name) ?? _serviceProvider.GetRequiredService<IGrainStateSerializer>();
             }
         }
     }
