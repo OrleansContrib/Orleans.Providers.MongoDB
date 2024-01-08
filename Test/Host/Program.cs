@@ -1,7 +1,3 @@
-using System;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
 using EphemeralMongo;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,7 +12,10 @@ using Orleans.Hosting;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.StorageProviders.Serializers;
 using Orleans.Providers.MongoDB.Test.GrainInterfaces;
-using Orleans.Runtime;
+using System;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Orleans.Providers.MongoDB.Test.Host
 {
@@ -59,8 +58,8 @@ namespace Orleans.Providers.MongoDB.Test.Host
                             settings.DefaultValueHandling = DefaultValueHandling.Populate;
                         })
                     .ConfigureServices(services => services
-                        .AddSingletonNamedService<IGrainStateSerializer, BinaryGrainStateSerializer>(ProviderConstants.DEFAULT_PUBSUB_PROVIDER_NAME)
-                        .AddSingletonNamedService<IGrainStateSerializer, BsonGrainStateSerializer>("MongoDBBsonStore"))
+                        .AddKeyedSingleton<IGrainStateSerializer, BinaryGrainStateSerializer>(ProviderConstants.DEFAULT_PUBSUB_PROVIDER_NAME)
+                        .AddKeyedSingleton<IGrainStateSerializer, BsonGrainStateSerializer>("MongoDBBsonStore"))
                     .AddMongoDBGrainStorage(ProviderConstants.DEFAULT_PUBSUB_PROVIDER_NAME, options =>
                     {
                         options.DatabaseName = "OrleansTestAppPubSubStore";

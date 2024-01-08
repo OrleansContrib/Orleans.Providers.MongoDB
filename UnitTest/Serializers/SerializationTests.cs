@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Orleans.Hosting;
@@ -9,6 +7,8 @@ using Orleans.Providers.MongoDB.StorageProviders.Serializers;
 using Orleans.Providers.MongoDB.UnitTest.Fixtures;
 using Orleans.Runtime;
 using Orleans.Streams;
+using System;
+using System.Threading.Tasks;
 using TestExtensions;
 using Xunit;
 
@@ -24,8 +24,8 @@ namespace Orleans.Providers.MongoDB.UnitTest.Serializers
                 .UseOrleans((ctx, siloBuilder) =>
                 {
                     siloBuilder.Services
-                        .AddSingletonNamedService<IGrainStateSerializer, BsonGrainStateSerializer>("BsonProvider")
-                        .AddSingletonNamedService<IGrainStateSerializer, BinaryGrainStateSerializer>("BinaryProvider");
+                        .AddKeyedSingleton<IGrainStateSerializer, BsonGrainStateSerializer>("BsonProvider")
+                        .AddKeyedSingleton<IGrainStateSerializer, BinaryGrainStateSerializer>("BinaryProvider");
 
                     siloBuilder
                         .UseLocalhostClustering()
@@ -76,7 +76,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Serializers
                 .UseOrleans((ctx, siloBuilder) =>
                 {
                     siloBuilder.Services
-                        .AddSingletonNamedService<IGrainStateSerializer, BsonGrainStateSerializer>(ProviderConstants.DEFAULT_PUBSUB_PROVIDER_NAME);
+                        .AddKeyedSingleton<IGrainStateSerializer, BsonGrainStateSerializer>(ProviderConstants.DEFAULT_PUBSUB_PROVIDER_NAME);
 
                     siloBuilder
                         .AddMemoryStreams<DefaultMemoryMessageBodySerializer>("OrleansTestStream")

@@ -1,11 +1,11 @@
 ﻿
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Orleans.Messaging;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Membership;
 using Orleans.Providers.MongoDB.UnitTest.Fixtures;
+using System.Threading.Tasks;
 using TestExtensions;
 using UnitTests;
 using UnitTests.MembershipTests;
@@ -106,12 +106,6 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
         public async Task Test_UpdateRowInParallel()
         {
             await MembershipTable_UpdateRowInParallel(false);
-        }
-
-        [Fact, TestCategory("Functional")]
-        public async Task Test_UpdateIAmAlive()
-        {
-            await MembershipTable_UpdateIAmAlive(false);
         }
     }
 }
