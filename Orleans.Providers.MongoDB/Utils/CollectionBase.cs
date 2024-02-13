@@ -22,12 +22,25 @@ namespace Orleans.Providers.MongoDB.Utils
 
         private readonly IMongoDatabase mongoDatabase;
         private readonly IMongoClient mongoClient;
-        private readonly Lazy<IMongoCollection<TEntity>> mongoCollection;
+        private readonly Action<MongoCollectionSettings> collectionConfigurator;
+        private IMongoCollection<TEntity> mongoCollection;
+        private readonly object mongoCollectionInitializerLock = new();
         private readonly bool createShardKey;
 
         protected IMongoCollection<TEntity> Collection
         {
-            get { return mongoCollection.Value; }
+            get
+            {
+                if (mongoCollection == null)
+                {
+                    lock (mongoCollectionInitializerLock)
+                    {
+                        mongoCollection ??= CreateCollection(collectionConfigurator);
+                    }
+                }
+
+                return mongoCollection;
+            }
         }
 
         protected IMongoDatabase Database
@@ -44,9 +57,9 @@ namespace Orleans.Providers.MongoDB.Utils
             Action<MongoCollectionSettings> collectionConfigurator, bool createShardKey)
         {
             this.mongoClient = mongoClient;
+            this.collectionConfigurator = collectionConfigurator;
 
             mongoDatabase = mongoClient.GetDatabase(databaseName);
-            mongoCollection = CreateCollection(collectionConfigurator);
 
             this.createShardKey = createShardKey;
         }
@@ -65,51 +78,40 @@ namespace Orleans.Providers.MongoDB.Utils
         {
         }
 
-        private Lazy<IMongoCollection<TEntity>> CreateCollection(Action<MongoCollectionSettings> collectionConfigurator)
+        private IMongoCollection<TEntity> CreateCollection(Action<MongoCollectionSettings> collectionConfigurator)
         {
-            return new Lazy<IMongoCollection<TEntity>>(() =>
+            var collectionName = CollectionName();
+
+            var collectionSettings = CollectionSettings() ?? new MongoCollectionSettings();
+
+            collectionConfigurator?.Invoke(collectionSettings);
+
+            var databaseCollection = mongoDatabase.GetCollection<TEntity>(
+                collectionName,
+                collectionSettings);
+
+            if (createShardKey)
             {
-                var collectionFilter = new ListCollectionNamesOptions
+                try
                 {
-                    Filter = Builders<BsonDocument>.Filter.Eq("name", CollectionName())
-                };
-
-                if (!mongoDatabase.ListCollectionNames(collectionFilter).Any())
-                {
-                    mongoDatabase.CreateCollection(CollectionName());
-                }
-
-                var collectionSettings = CollectionSettings() ?? new MongoCollectionSettings();
-
-                collectionConfigurator?.Invoke(collectionSettings);
-
-                var databaseCollection = mongoDatabase.GetCollection<TEntity>(
-                    CollectionName(),
-                    collectionSettings);
-
-                if (this.createShardKey)
-                {
-                    try
+                    mongoClient.GetDatabase("admin").RunCommand<BsonDocument>(new BsonDocument
                     {
-                        Database.RunCommand<BsonDocument>(new BsonDocument
+                        ["shardCollection"] = $"{mongoDatabase.DatabaseNamespace.DatabaseName}.{collectionName}",
+                        ["key"] = new BsonDocument
                         {
-                            ["key"] = new BsonDocument
-                            {
-                                ["_id"] = "hashed"
-                            },
-                            ["shardCollection"] = $"{mongoDatabase.DatabaseNamespace.DatabaseName}.{CollectionName()}"
-                        });
-                    }
-                    catch (MongoException)
-                    {
-                        // Shared key probably created already.
-                    }
+                            ["_id"] = "hashed"
+                        }
+                    });
                 }
+                catch (MongoException)
+                {
+                    // Shared key probably created already.
+                }
+            }
 
-                SetupCollection(databaseCollection);
+            SetupCollection(databaseCollection);
 
-                return databaseCollection;
-            });
+            return databaseCollection;
         }
     }
 }
