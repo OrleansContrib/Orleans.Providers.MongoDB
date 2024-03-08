@@ -92,8 +92,11 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Single
 
         public async Task UpdateIAmAlive(string deploymentId, SiloAddress address, DateTime iAmAliveTime)
         {
-            await Collection.UpdateOneAsync(x => x.DeploymentId == deploymentId,
-                Update
+            var filter = Builders<DeploymentDocument>.Filter.And(
+                Builders<DeploymentDocument>.Filter.Eq(x => x.DeploymentId, deploymentId),
+                Builders<DeploymentDocument>.Filter.Exists($"Members.{BuildKey(address)}", true));
+
+            await Collection.UpdateOneAsync(filter, Update
                     .Set($"Members.{BuildKey(address)}.IAmAliveTime", LogFormatter.PrintDate(iAmAliveTime)));
         }
 
