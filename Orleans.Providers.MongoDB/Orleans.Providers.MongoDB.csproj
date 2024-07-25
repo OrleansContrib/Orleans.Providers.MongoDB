@@ -15,7 +15,7 @@
     <PackageTags>Orleans OrleansProviders MongoDB</PackageTags>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <TargetFrameworks>net8.0</TargetFrameworks>
-    <Version>8.0.3</Version>
+    <Version>8.0.4</Version>
   </PropertyGroup>
 
   <ItemGroup>
