@@ -1,3 +1,7 @@
+using System;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
 using EphemeralMongo;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -12,10 +16,6 @@ using Orleans.Hosting;
 using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.StorageProviders.Serializers;
 using Orleans.Providers.MongoDB.Test.GrainInterfaces;
-using System;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
 
 namespace Orleans.Providers.MongoDB.Test.Host
 {
