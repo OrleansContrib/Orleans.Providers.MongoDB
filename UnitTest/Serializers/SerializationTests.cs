@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Orleans.Hosting;
@@ -7,8 +9,6 @@ using Orleans.Providers.MongoDB.StorageProviders.Serializers;
 using Orleans.Providers.MongoDB.UnitTest.Fixtures;
 using Orleans.Runtime;
 using Orleans.Streams;
-using System;
-using System.Threading.Tasks;
 using TestExtensions;
 using Xunit;
 
@@ -70,7 +70,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Serializers
         }
 
         [Fact]
-        public async void BsonSerializerForPubSubStore_Throws()
+        public async Task BsonSerializerForPubSubStore_Throws()
         {
             var host = new HostBuilder()
                 .UseOrleans((ctx, siloBuilder) =>
