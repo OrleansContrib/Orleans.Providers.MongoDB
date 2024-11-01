@@ -215,9 +215,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
                     new IgnoreExtraElementsConvention(true)
                 },
                 t => true);
-
-            // http://mongodb.github.io/mongo-csharp-driver/2.11/reference/bson/guidserialization/guidrepresentationmode/guidrepresentationmode/
-            BsonDefaults.GuidRepresentationMode = GuidRepresentationMode.V3;
+            
             BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
         }
     }
