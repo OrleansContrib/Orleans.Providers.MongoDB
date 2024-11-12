@@ -1,6 +1,6 @@
 ﻿using System;
-using EphemeralMongo;
 using MongoDB.Driver;
+using MongoSandbox;
 using Orleans.Providers.MongoDB.Utils;
 
 namespace Orleans.Providers.MongoDB.UnitTest.Fixtures

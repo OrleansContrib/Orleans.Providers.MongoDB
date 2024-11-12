@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using EphemeralMongo;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -10,6 +9,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.Serializers;
+using MongoSandbox;
 using Newtonsoft.Json;
 using Orleans.Configuration;
 using Orleans.Hosting;
@@ -25,7 +25,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
         {
             var createShardKey = false;
 
-            using var mongoRunner = MongoRunner.Run();
+            using var mongoRunner = MongoRunner.Run(new MongoRunnerOptions { KillMongoProcessesWhenCurrentProcessExits = true });
 
             Console.WriteLine("MongoDB ConnectionString: {0}", mongoRunner.ConnectionString);
 
@@ -216,8 +216,6 @@ namespace Orleans.Providers.MongoDB.Test.Host
                 },
                 t => true);
 
-            // http://mongodb.github.io/mongo-csharp-driver/2.11/reference/bson/guidserialization/guidrepresentationmode/guidrepresentationmode/
-            BsonDefaults.GuidRepresentationMode = GuidRepresentationMode.V3;
             BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
         }
     }
