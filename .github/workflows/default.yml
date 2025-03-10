@@ -35,31 +35,31 @@ jobs:
         cd UnitTest
         dotnet test Orleans.Providers.MongoDB.UnitTest.csproj --configuration Release
 
-#   publish:
-#     needs: build
-#     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-#     runs-on: ubuntu-latest
-#
-#     steps:
-#     - uses: actions/checkout@v4
-#       with:
-#         submodules: recursive
-#         fetch-depth: 0
-#
-#     - name: Get version from tag
-#       id: get_version
-#       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-#
-#     - name: Setup .NET Core
-#       uses: actions/setup-dotnet@v4
-#       with:
-#         dotnet-version: 8.0.x
-#
-#     - name: Pack
-#       run: |
-#         cd Orleans.Providers.MongoDB
-#         dotnet pack  --configuration Release /p:Version=${{ steps.get_version.outputs.VERSION }}
-#
-#     - name: Publish
-#       run: |
-#         dotnet nuget push **/*.nupkg --source 'https://api.nuget.org/v3/index.json' --skip-duplicate -k ${{ secrets.nuget }}
+  publish:
+    needs: build
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Get version from tag
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Pack
+      run: |
+        cd Orleans.Providers.MongoDB
+        dotnet pack  --configuration Release /p:Version=${{ steps.get_version.outputs.VERSION }}
+
+    - name: Publish
+      run: |
+        dotnet nuget push **/*.nupkg --source 'https://api.nuget.org/v3/index.json' --skip-duplicate -k ${{ secrets.nuget }}
