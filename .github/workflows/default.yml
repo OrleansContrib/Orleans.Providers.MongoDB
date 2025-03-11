@@ -59,7 +59,7 @@ jobs:
       run: |
         cd Orleans.Providers.MongoDB
         dotnet pack  --configuration Release /p:Version=${{ steps.get_version.outputs.VERSION }}
-        
+
     - name: Publish
       run: |
         dotnet nuget push **/*.nupkg --source 'https://api.nuget.org/v3/index.json' --skip-duplicate -k ${{ secrets.nuget }}
