@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
@@ -12,14 +11,13 @@ using Orleans.Storage;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
 {
-    public class MongoGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLifecycle>
+    public class MongoGrainStorage : IGrainStorage
     {
         private readonly ConcurrentDictionary<string, MongoGrainStorageCollection> collections = new ConcurrentDictionary<string, MongoGrainStorageCollection>();
         private readonly MongoDBGrainStorageOptions options;
         private readonly IMongoClient mongoClient;
         private readonly ILogger<MongoGrainStorage> logger;
         private readonly IGrainStateSerializer serializer;
-        private IMongoDatabase database;
 
         public MongoGrainStorage(
             IMongoClientFactory mongoClientFactory,
@@ -30,21 +28,6 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             this.logger = logger;
             this.options = options;
             this.serializer = options.GrainStateSerializer;
-        }
-
-        public void Participate(ISiloLifecycle lifecycle)
-        {
-            lifecycle.Subscribe<MongoGrainStorage>(ServiceLifecycleStage.ApplicationServices, Init);
-        }
-
-        private Task Init(CancellationToken ct)
-        {
-            return DoAndLog(nameof(Init), () =>
-            {
-                database = mongoClient.GetDatabase(options.DatabaseName);
-
-                return Task.CompletedTask;
-            });
         }
 
         public Task ReadStateAsync<T>(string stateName, GrainId grainId, IGrainState<T> grainState)

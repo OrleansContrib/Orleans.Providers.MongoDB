@@ -26,14 +26,14 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
             return $"{collectionPrefix}OrleansMembershipV3_TableVersion";
         }
 
-        public Task DeleteAsync(string deploymentId)
+        public Task DeleteAsync(IClientSessionHandle session, string deploymentId)
         {
-            return Collection.DeleteOneAsync(x => x.DeploymentId == deploymentId);
+            return Collection.DeleteOneAsync(session, x => x.DeploymentId == deploymentId);
         }
 
-        public async Task<TableVersion> GetTableVersionAsync(string deploymentId)
+        public async Task<TableVersion> GetTableVersionAsync(IClientSessionHandle session, string deploymentId)
         {
-            var deployment = await Collection.Find(x => x.DeploymentId == deploymentId).FirstOrDefaultAsync();
+            var deployment = await Collection.Find(session, x => x.DeploymentId == deploymentId).FirstOrDefaultAsync();
 
             if (deployment == null)
             {
@@ -50,7 +50,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
             try
             {
                 await Collection.ReplaceOneAsync(session,
-                    x => x.DeploymentId == deploymentId && x.VersionEtag == tableVersion.VersionEtag, 
+                    x => x.DeploymentId == deploymentId && x.VersionEtag == tableVersion.VersionEtag,
                     update,
                     UpsertReplace);
 

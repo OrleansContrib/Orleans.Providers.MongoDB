@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,7 +8,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.2" />
-    <PackageReference Include="MongoSandbox8" Version="1.0.1" />
+    <PackageReference Include="MongoSandbox.Core" Version="2.0.0" />
+    <PackageReference Include="MongoSandbox8.runtime.linux-x64" Version="2.0.0" Condition="$([MSBuild]::IsOSPlatform('Linux'))" />
+    <PackageReference Include="MongoSandbox8.runtime.osx-arm64" Version="2.0.0" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
+    <PackageReference Include="MongoSandbox8.runtime.win-x64" Version="2.0.0" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
   </ItemGroup>
 
   <ItemGroup>

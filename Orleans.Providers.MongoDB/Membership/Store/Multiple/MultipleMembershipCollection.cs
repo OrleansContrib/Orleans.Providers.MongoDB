@@ -49,7 +49,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
             using var session = await Client.StartSessionAsync();
             return await session.WithTransactionAsync(async (sessionHandle, ct) =>
             {
-                var hasUpsertedTable = await tableVersionCollection.UpsertAsync(session, tableVersion, deploymentId);
+                var hasUpsertedTable = await tableVersionCollection.UpsertAsync(sessionHandle, tableVersion, deploymentId);
 
                 if (!hasUpsertedTable)
                 {
@@ -106,10 +106,10 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
             using var session = await Client.StartSessionAsync();
             return await session.WithTransactionAsync(async (sessionHandle, ct) =>
             {
-                var tableVersion = tableVersionCollection.GetTableVersionAsync(deploymentId);
+                var tableVersion = tableVersionCollection.GetTableVersionAsync(sessionHandle, deploymentId);
 
                 var entries =
-                    Collection.Find(x => x.DeploymentId == deploymentId)
+                    Collection.Find(sessionHandle, x => x.DeploymentId == deploymentId)
                         .ToListAsync(cancellationToken: ct);
 
                 await Task.WhenAll(tableVersion, entries);
@@ -123,12 +123,12 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
             using var session = await Client.StartSessionAsync();
             return await session.WithTransactionAsync(async (sessionHandle, ct) =>
             {
-                var tableVersion = tableVersionCollection.GetTableVersionAsync(deploymentId);
+                var tableVersion = tableVersionCollection.GetTableVersionAsync(sessionHandle, deploymentId);
 
                 var id = ReturnId(deploymentId, address);
 
                 var entries =
-                    Collection.Find(x => x.Id == id)
+                    Collection.Find(sessionHandle, x => x.Id == id)
                         .ToListAsync(cancellationToken: ct);
 
                 await Task.WhenAll(tableVersion, entries);
@@ -151,12 +151,19 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
             return Collection.DeleteManyAsync(x => x.DeploymentId == deploymentId && x.Status != (int)SiloStatus.Active && x.Timestamp < beforeUtc);
         }
 
-        public Task DeleteMembershipTableEntries(string deploymentId)
+        public async Task DeleteMembershipTableEntries(string deploymentId)
         {
-            return Task.WhenAll(
-                Collection.DeleteManyAsync(x => x.DeploymentId == deploymentId),
-                tableVersionCollection.DeleteAsync(deploymentId)
-            );
+            using var session = await Client.StartSessionAsync();
+
+            await session.WithTransactionAsync(async (sessionHandle, ct) =>
+            {
+                await Task.WhenAll(
+                    Collection.DeleteManyAsync(sessionHandle, x => x.DeploymentId == deploymentId),
+                    tableVersionCollection.DeleteAsync(sessionHandle, deploymentId)
+                );
+
+                return true;
+            });
         }
 
         private static MembershipTableData ReturnMembershipTableData(IEnumerable<MongoMembershipDocument> membershipList, TableVersion tableVersion)

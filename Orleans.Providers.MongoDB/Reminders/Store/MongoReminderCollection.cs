@@ -200,6 +200,14 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
 
         private static string ReturnId(string serviceId, GrainId grainId, string reminderName)
         {
+            var grainType = grainId.Type.ToString();
+            var grainKey = grainId.Key.ToString();
+
+            if (grainType is null || grainKey is null)
+            {
+                throw new ArgumentNullException(nameof(grainId));
+            }
+
             return $"{serviceId}_{grainId}_{reminderName}";
         }
     }
