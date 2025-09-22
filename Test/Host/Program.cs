@@ -25,7 +25,7 @@ namespace Orleans.Providers.MongoDB.Test.Host
         {
             var createShardKey = false;
 
-            using var mongoRunner = MongoRunner.Run(new MongoRunnerOptions { KillMongoProcessesWhenCurrentProcessExits = true });
+            using var mongoRunner = MongoRunner.Run();
 
             Console.WriteLine("MongoDB ConnectionString: {0}", mongoRunner.ConnectionString);
 
