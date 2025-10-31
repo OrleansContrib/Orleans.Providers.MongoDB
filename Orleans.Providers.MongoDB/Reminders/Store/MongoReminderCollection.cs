@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Driver;
@@ -40,22 +40,8 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
                     .Ascending(x => x.IsDeleted)
                     .Ascending(x => x.ServiceId)
                     .Ascending(x => x.GrainHash);
-            try
-            {
-                collection.Indexes.CreateOne(
-                    new CreateIndexModel<MongoReminderDocument>(byHashDefinition,
-                        new CreateIndexOptions
-                        {
-                            Name = "ByHash"
-                        }));
-            }
-            catch (MongoCommandException ex)
-            {
-                if (ex.CodeName == "IndexOptionsConflict")
-                {
-                    collection.Indexes.CreateOne(new CreateIndexModel<MongoReminderDocument>(byHashDefinition));
-                }
-            }
+
+            CreateIndex("ByHash", collection, byHashDefinition);
 
             var byNameDefinition =
                 Index
@@ -63,20 +49,28 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
                     .Ascending(x => x.ServiceId)
                     .Ascending(x => x.GrainId)
                     .Ascending(x => x.ReminderName);
+
+            CreateIndex("ByName", collection, byNameDefinition);
+
+            var byGrainIdDefinition =
+                Index
+                    .Ascending(x => x.GrainId)
+                    .Ascending(x => x.ServiceId);
+
+            CreateIndex("ByGrainId", collection, byGrainIdDefinition);
+        }
+
+        private static void CreateIndex(string name, IMongoCollection<MongoReminderDocument> collection, IndexKeysDefinition<MongoReminderDocument> definition)
+        {
             try
             {
-                collection.Indexes.CreateOne(
-                   new CreateIndexModel<MongoReminderDocument>(byNameDefinition,
-                        new CreateIndexOptions
-                        {
-                            Name = "ByName"
-                        }));
+                collection.Indexes.CreateOne(new CreateIndexModel<MongoReminderDocument>(definition, new CreateIndexOptions { Name = name }));
             }
             catch (MongoCommandException ex)
             {
                 if (ex.CodeName == "IndexOptionsConflict")
                 {
-                    collection.Indexes.CreateOne(new CreateIndexModel<MongoReminderDocument>(byNameDefinition));
+                    collection.Indexes.CreateOne(new CreateIndexModel<MongoReminderDocument>(definition));
                 }
             }
         }
