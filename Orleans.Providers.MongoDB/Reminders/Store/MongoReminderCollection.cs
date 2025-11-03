@@ -96,12 +96,9 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
 
         public virtual async Task<ReminderEntry> ReadRow(GrainId grainId, string reminderName)
         {
+            var id = ReturnId(serviceId, grainId, reminderName);
             var reminder =
-                await Collection.Find(x =>
-                        x.IsDeleted == false &&
-                        x.ServiceId == serviceId &&
-                        x.GrainId == grainId.ToString() &&
-                        x.ReminderName == reminderName)
+                await Collection.Find(x => x.Id == id && x.IsDeleted == false)
                     .FirstOrDefaultAsync();
 
             return reminder?.ToEntry();
