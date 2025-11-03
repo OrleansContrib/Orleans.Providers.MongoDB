@@ -170,7 +170,11 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
 
         public virtual Task RemoveRows()
         {
-            return Collection.DeleteManyAsync(r => r.ServiceId == serviceId);
+            return Collection.DeleteManyAsync(r =>
+                // note: the query is to align to the indexes (ByHash being the primary guideline)
+                (r.IsDeleted == false && r.ServiceId == serviceId) ||
+                (r.IsDeleted == true && r.ServiceId == serviceId)
+            );
         }
 
         public virtual async Task<string> UpsertRow(ReminderEntry entry)
