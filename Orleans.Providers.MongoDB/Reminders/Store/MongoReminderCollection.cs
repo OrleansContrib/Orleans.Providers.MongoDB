@@ -135,6 +135,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
         {
             var reminders =
                 await Collection.Find(r =>
+                        r.IsDeleted == false &&
                         r.ServiceId == serviceId &&
                         r.GrainId == grainId.ToString())
                     .ToListAsync();
