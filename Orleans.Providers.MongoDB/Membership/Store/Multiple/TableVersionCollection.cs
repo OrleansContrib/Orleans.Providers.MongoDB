@@ -31,9 +31,9 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
             return Collection.DeleteOneAsync(session, x => x.DeploymentId == deploymentId);
         }
 
-        public async Task<TableVersion> GetTableVersionAsync(IClientSessionHandle session, string deploymentId)
+        public async Task<TableVersion> GetTableVersionAsync(string deploymentId)
         {
-            var deployment = await Collection.Find(session, x => x.DeploymentId == deploymentId).FirstOrDefaultAsync();
+            var deployment = await Collection.Find(x => x.DeploymentId == deploymentId).FirstOrDefaultAsync();
 
             if (deployment == null)
             {
