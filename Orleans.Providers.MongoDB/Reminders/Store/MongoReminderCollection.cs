@@ -96,12 +96,9 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
 
         public virtual async Task<ReminderEntry> ReadRow(GrainId grainId, string reminderName)
         {
+            var id = ReturnId(serviceId, grainId, reminderName);
             var reminder =
-                await Collection.Find(x =>
-                        x.IsDeleted == false &&
-                        x.ServiceId == serviceId &&
-                        x.GrainId == grainId.ToString() &&
-                        x.ReminderName == reminderName)
+                await Collection.Find(x => x.Id == id && x.IsDeleted == false)
                     .FirstOrDefaultAsync();
 
             return reminder?.ToEntry();
@@ -135,6 +132,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
         {
             var reminders =
                 await Collection.Find(r =>
+                        r.IsDeleted == false &&
                         r.ServiceId == serviceId &&
                         r.GrainId == grainId.ToString())
                     .ToListAsync();
@@ -169,7 +167,11 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
 
         public virtual Task RemoveRows()
         {
-            return Collection.DeleteManyAsync(r => r.ServiceId == serviceId);
+            return Collection.DeleteManyAsync(r =>
+                // note: the query is to align to the indexes (ByHash being the primary guideline)
+                (r.IsDeleted == false && r.ServiceId == serviceId) ||
+                (r.IsDeleted == true && r.ServiceId == serviceId)
+            );
         }
 
         public virtual async Task<string> UpsertRow(ReminderEntry entry)
