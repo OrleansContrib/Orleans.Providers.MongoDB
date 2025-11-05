@@ -104,33 +104,28 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
         public async Task<MembershipTableData> ReadAll(string deploymentId)
         {
             using var session = await Client.StartSessionAsync();
-            return await session.WithTransactionAsync(async (sessionHandle, ct) =>
-            {
-                var tableVersion = await tableVersionCollection.GetTableVersionAsync(sessionHandle, deploymentId);
+            
+            var tableVersion = await tableVersionCollection.GetTableVersionAsync(session, deploymentId);
 
-                var entries =
-                    await Collection.Find(sessionHandle, x => x.DeploymentId == deploymentId)
-                        .ToListAsync(cancellationToken: ct);
+            var entries =
+                await Collection.Find(session, x => x.DeploymentId == deploymentId).ToListAsync();
 
-                return ReturnMembershipTableData(entries, tableVersion);
-            });
+            return ReturnMembershipTableData(entries, tableVersion);
         }
 
         public async Task<MembershipTableData> ReadRow(string deploymentId, SiloAddress address)
         {
             using var session = await Client.StartSessionAsync();
-            return await session.WithTransactionAsync(async (sessionHandle, ct) =>
-            {
-                var tableVersion = await tableVersionCollection.GetTableVersionAsync(sessionHandle, deploymentId);
+            
+            var tableVersion = await tableVersionCollection.GetTableVersionAsync(session, deploymentId);
 
-                var id = ReturnId(deploymentId, address);
+            var id = ReturnId(deploymentId, address);
 
-                var entries =
-                    await Collection.Find(sessionHandle, x => x.Id == id)
-                        .ToListAsync(cancellationToken: ct);
+            var entries =
+                await Collection.Find(session, x => x.Id == id).ToListAsync();
 
-                return ReturnMembershipTableData(entries, tableVersion);
-            });
+            return ReturnMembershipTableData(entries, tableVersion);
+            
         }
 
         public Task UpdateIAmAlive(string deploymentId, SiloAddress address, DateTime iAmAliveTime)
