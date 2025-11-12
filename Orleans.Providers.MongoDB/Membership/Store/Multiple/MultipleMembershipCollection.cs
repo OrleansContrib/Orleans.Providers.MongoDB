@@ -103,30 +103,29 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
 
         public async Task<MembershipTableData> ReadAll(string deploymentId)
         {
-            var tableVersion = tableVersionCollection.GetTableVersionAsync(deploymentId);
+            using var session = await Client.StartSessionAsync();
+            
+            var tableVersion = await tableVersionCollection.GetTableVersionAsync(session, deploymentId);
 
             var entries =
-                Collection.Find(x => x.DeploymentId == deploymentId)
-                    .ToListAsync();
+                await Collection.Find(session, x => x.DeploymentId == deploymentId).ToListAsync();
 
-            await Task.WhenAll(tableVersion, entries);
-
-            return ReturnMembershipTableData(entries.Result, tableVersion.Result);
+            return ReturnMembershipTableData(entries, tableVersion);
         }
 
         public async Task<MembershipTableData> ReadRow(string deploymentId, SiloAddress address)
         {
-            var tableVersion = tableVersionCollection.GetTableVersionAsync(deploymentId);
+            using var session = await Client.StartSessionAsync();
+            
+            var tableVersion = await tableVersionCollection.GetTableVersionAsync(session, deploymentId);
 
             var id = ReturnId(deploymentId, address);
 
             var entries =
-                Collection.Find(x => x.Id == id)
-                    .ToListAsync();
+                await Collection.Find(session, x => x.Id == id).ToListAsync();
 
-            await Task.WhenAll(tableVersion, entries);
-
-            return ReturnMembershipTableData(entries.Result, tableVersion.Result);
+            return ReturnMembershipTableData(entries, tableVersion);
+            
         }
 
         public Task UpdateIAmAlive(string deploymentId, SiloAddress address, DateTime iAmAliveTime)
@@ -149,11 +148,8 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
 
             await session.WithTransactionAsync(async (sessionHandle, ct) =>
             {
-                await Task.WhenAll(
-                    Collection.DeleteManyAsync(sessionHandle, x => x.DeploymentId == deploymentId),
-                    tableVersionCollection.DeleteAsync(sessionHandle, deploymentId)
-                );
-
+                await Collection.DeleteManyAsync(sessionHandle, x => x.DeploymentId == deploymentId);
+                await tableVersionCollection.DeleteAsync(sessionHandle, deploymentId);
                 return true;
             });
         }
