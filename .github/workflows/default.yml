@@ -13,7 +13,12 @@ on:
 
 jobs:
   build:
+    name: CI with Mongo ${{ matrix.mongo-version }}
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        mongo-version: [ "6", "7", "8" ]
 
     steps:
     - uses: actions/checkout@v4
@@ -33,7 +38,9 @@ jobs:
     - name: Test
       run: |
         cd UnitTest
-        dotnet test Orleans.Providers.MongoDB.UnitTest.csproj --configuration Release
+        dotnet test Orleans.Providers.MongoDB.UnitTest.csproj \
+          --configuration Release \
+          -p:MongoVersion=${{ matrix.mongo-version }}
 
   publish:
     needs: build
