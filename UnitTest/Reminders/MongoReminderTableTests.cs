@@ -15,6 +15,8 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
     [TestCategory("Mongo")]
     public class MongoReminderTableTests : ReminderTableTestsBase
     {
+        private MongoClientJig mongoClientFixture;
+
         public MongoReminderTableTests(ConnectionStringFixture fixture, TestEnvironmentFixture clusterFixture)
             : base(fixture, clusterFixture, new LoggerFilterOptions())
         {
@@ -22,6 +24,8 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
 
         protected override IReminderTable CreateRemindersTable()
         {
+            mongoClientFixture ??= new MongoClientJig();
+            
             var options = Options.Create(new MongoDBRemindersOptions
             {
                 CollectionPrefix = "Test_",
@@ -29,7 +33,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
             });
 
             return new MongoReminderTable(
-                MongoDatabaseFixture.DatabaseFactory,
+                mongoClientFixture.CreateDatabaseFactory(),
                 loggerFactory.CreateLogger<MongoReminderTable>(),
                 options,
                 clusterOptions);
@@ -44,18 +48,21 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
         public async Task Test_RemindersRange()
         {
             await RemindersRange(50);
+            await mongoClientFixture.AssertQualityChecksAsync();
         }
 
         [Fact]
         public async Task Test_RemindersParallelUpsert()
         {
             await RemindersParallelUpsert();
+            await mongoClientFixture.AssertQualityChecksAsync();
         }
 
         [Fact]
         public async Task Test_ReminderSimple()
         {
             await ReminderSimple();
+            await mongoClientFixture.AssertQualityChecksAsync();
         }
     }
 }
