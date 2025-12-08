@@ -104,18 +104,6 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
             return reminder?.ToEntry();
         }
 
-        public virtual async Task<ReminderTableData> ReadReminderRowsAsync(GrainId grainId)
-        {
-            var reminders =
-                await Collection.Find(x =>
-                        x.IsDeleted == false &&
-                        x.ServiceId == serviceId &&
-                        x.GrainId == grainId.ToString())
-                    .ToListAsync();
-
-            return new ReminderTableData(reminders.Select(x => x.ToEntry()));
-        }
-
         public virtual async Task<ReminderTableData> ReadRowsOutRange(uint beginHash, uint endHash)
         {
             var reminders =
