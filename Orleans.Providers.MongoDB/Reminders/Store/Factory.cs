@@ -19,6 +19,15 @@ internal static class Factory
                     options.CreateShardKeyForCosmos,
                     serviceId
                 ),
+            MongoDBReminderStrategy.HashedLookupStorage =>
+                new MongoReminderHashedCollection(
+                    mongoClient,
+                    options.DatabaseName,
+                    options.CollectionPrefix,
+                    options.CollectionConfigurator,
+                    options.CreateShardKeyForCosmos,
+                    serviceId
+                ),
             _ => throw new ArgumentException("Invalid strategy.", nameof(options.Strategy))
         };
     }
