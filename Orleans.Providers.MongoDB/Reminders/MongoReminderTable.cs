@@ -101,14 +101,7 @@ namespace Orleans.Providers.MongoDB.Reminders
         {
             return DoAndLog(nameof(ReadRows), () =>
             {
-                if (begin < end)
-                {
-                    return collection.ReadRowsInRange(begin, end);
-                }
-                else
-                {
-                    return collection.ReadRowsOutRange(begin, end);
-                }
+                return collection.ReadRows(begin, end);
             });
         }
 
