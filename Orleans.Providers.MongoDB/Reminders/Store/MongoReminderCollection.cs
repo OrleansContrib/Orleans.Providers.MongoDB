@@ -9,7 +9,7 @@ using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Reminders.Store
 {
-    public class MongoReminderCollection : CollectionBase<MongoReminderDocument>
+    public class MongoReminderCollection : CollectionBase<MongoReminderDocument>, IMongoReminderCollection
     {
         private static readonly FindOneAndUpdateOptions<MongoReminderDocument> FindAndUpsert = new FindOneAndUpdateOptions<MongoReminderDocument> { IsUpsert = true };
         private readonly string serviceId;
