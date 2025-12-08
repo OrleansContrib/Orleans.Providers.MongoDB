@@ -81,15 +81,24 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
             }
         }
 
-        public virtual async Task<ReminderTableData> ReadRowsInRange(uint beginHash, uint endHash)
+        public virtual async Task<ReminderTableData> ReadRows(uint beginHash, uint endHash)
         {
-            var reminders =
-                await Collection.Find(x =>
-                        x.IsDeleted == false &&
-                        x.ServiceId == serviceId &&
-                        x.GrainHash > beginHash &&
-                        x.GrainHash <= endHash)
-                    .ToListAsync();
+            // (begin) is beginning exclusive of hash
+            // [end] is the stop point, inclusive of hash
+            var filter = beginHash < endHash
+                ? Builders<MongoReminderDocument>.Filter.Where(x =>
+                    x.IsDeleted == false &&
+                    x.ServiceId == serviceId &&
+                    //       (begin)>>>>>>[end]
+                    x.GrainHash > beginHash && x.GrainHash <= endHash
+                )
+                : Builders<MongoReminderDocument>.Filter.Where(x =>
+                    x.IsDeleted == false &&
+                    x.ServiceId == serviceId &&
+                    // >>>>>>[end]         (begin)>>>>>>>
+                    (x.GrainHash <= endHash || x.GrainHash > beginHash)
+                );
+            var reminders = await Collection.Find(filter).ToListAsync();
 
             return new ReminderTableData(reminders.Select(x => x.ToEntry()));
         }
@@ -102,18 +111,6 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
                     .FirstOrDefaultAsync();
 
             return reminder?.ToEntry();
-        }
-
-        public virtual async Task<ReminderTableData> ReadRowsOutRange(uint beginHash, uint endHash)
-        {
-            var reminders =
-                await Collection.Find(x =>
-                        (x.IsDeleted == false) &&
-                        (x.ServiceId == serviceId) &&
-                        (x.GrainHash > beginHash || x.GrainHash <= endHash))
-                    .ToListAsync();
-
-            return new ReminderTableData(reminders.Select(x => x.ToEntry()));
         }
 
         public virtual async Task<ReminderTableData> ReadRow(GrainId grainId)
