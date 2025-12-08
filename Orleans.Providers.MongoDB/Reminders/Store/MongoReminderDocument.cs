@@ -27,8 +27,9 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
         [BsonRequired]
         public long GrainHash { get; set; }
 
-        [BsonRequired]
-        public bool IsDeleted { get; set; }
+        [BsonIgnoreIfNull]
+        [Obsolete("IsDeleted will be removed in future", UrlFormat = "https://github.com/OrleansContrib/Orleans.Providers.MongoDB/pull/154")]
+        public bool? IsDeleted { get; set; }
 
         [BsonRequired]
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]

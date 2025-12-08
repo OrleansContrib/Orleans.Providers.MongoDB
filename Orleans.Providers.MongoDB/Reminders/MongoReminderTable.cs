@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -37,7 +39,7 @@ namespace Orleans.Providers.MongoDB.Reminders
         }
 
         /// <inheritdoc />
-        public Task Init()
+        public Task StartAsync(CancellationToken cancellationToken = default)
         {
             collection =
                 new MongoReminderCollection(

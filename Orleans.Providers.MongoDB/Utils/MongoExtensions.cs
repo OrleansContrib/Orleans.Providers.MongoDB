@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq.Expressions;
 using MongoDB.Driver;
 using Orleans.Providers.MongoDB.Configuration;
 
@@ -21,6 +22,15 @@ namespace Orleans.Providers.MongoDB.Utils
             }
 
             return false;
+        }
+        
+        public static bool IsDuplicateIndex(this MongoCommandException ex) => ex.Code == 85;
+
+        internal static string GetFieldName<T>(this IMongoCollection<T> collection, Expression<Func<T, object>> expression)
+        {
+            return new ExpressionFieldDefinition<T>(expression)
+                .Render(new RenderArgs<T>(collection.DocumentSerializer, collection.Settings.SerializerRegistry))
+                .FieldName;
         }
 
         public static IMongoClient Create(this IMongoClientFactory mongoClientFactory, MongoDBOptions options, string defaultName)
