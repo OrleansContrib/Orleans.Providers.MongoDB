@@ -30,7 +30,7 @@ namespace Orleans.Providers.MongoDB.Reminders
             IOptions<MongoDBRemindersOptions> options,
             IOptions<ClusterOptions> clusterOptions)
         {
-            this.mongoClient = mongoClientFactory.Create(options.Value, "Membership");
+            this.mongoClient = mongoClientFactory.Create(options.Value, "Reminder");
             this.logger = logger;
             this.options = options.Value;
             this.serviceId = clusterOptions.Value.ServiceId ?? string.Empty;
