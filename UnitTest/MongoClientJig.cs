@@ -57,6 +57,7 @@ internal class MongoClientJig
     {
         List<InspectQueryPlan> inspections = [
             CheckNoCollectionScans,
+            CheckEfficientIndexSeeks,
         ];
         
         return Task.WhenAll(
@@ -118,8 +119,26 @@ internal class MongoClientJig
             }
         );
     }
+
+    private static void CheckEfficientIndexSeeks(BsonDocument explainedResult, BsonDocument sampledQuery)
+    {
+        InspectAllStages(
+            GetExecutionStages(explainedResult),
+            plan =>
+            {
+                // only look for index scans (exit early)
+                if (!plan.TryGetElement("stage", out var value) || value.Value.AsString != "IXSCAN") return;
+                
+                // seeks should be limited to being no more than 1
+                if (plan.TryGetElement("seeks", out var seeks) && seeks.Value.AsInt32 > 1)
+                    throw new InspectionException("Indexes was seeked too many times", explainedResult);
+            }
+        );
+    }
     
     private static BsonDocument GetWinningPlan(BsonDocument explainedPlan) => explainedPlan["queryPlanner"]["winningPlan"].AsBsonDocument;
+    
+    private static BsonDocument GetExecutionStages(BsonDocument explainedPlan) => explainedPlan["executionStats"]["executionStages"].AsBsonDocument;
 
     private static void InspectAllStages(BsonDocument rootPlan, Action<BsonDocument> action)
     {
