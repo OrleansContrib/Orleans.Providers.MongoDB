@@ -10,6 +10,7 @@ using TestExtensions;
 using UnitTests;
 using UnitTests.MembershipTests;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Orleans.Providers.MongoDB.UnitTest.Membership
 {
@@ -17,11 +18,13 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
     [TestCategory("Mongo")]
     public class MongoMembershipTableTests_Single : MembershipTableTestsBase
     {
+        private readonly ITestOutputHelper testOutputHelper;
         private MongoClientJig mongoClientFixture;
 
-        public MongoMembershipTableTests_Single(ConnectionStringFixture fixture, TestEnvironmentFixture environment)
+        public MongoMembershipTableTests_Single(ConnectionStringFixture fixture, TestEnvironmentFixture environment, ITestOutputHelper testOutputHelper)
             : base(fixture, environment, new LoggerFilterOptions())
         {
+            this.testOutputHelper = testOutputHelper;
         }
 
         protected override IMembershipTable CreateMembershipTable(ILogger logger)
@@ -74,63 +77,63 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
         public async Task Test_CleanupDefunctSiloEntries()
         {
             await MembershipTable_CleanupDefunctSiloEntries();
-            await mongoClientFixture.AssertQualityChecksAsync();
+            await mongoClientFixture.AssertQualityChecksAsync(testOutputHelper);
         }
 
         [Fact, TestCategory("Functional")]
         public async Task Test_GetGateways()
         {
             await MembershipTable_GetGateways();
-            await mongoClientFixture.AssertQualityChecksAsync();
+            await mongoClientFixture.AssertQualityChecksAsync(testOutputHelper);
         }
 
         [Fact, TestCategory("Functional")]
         public async Task Test_ReadAll_EmptyTable()
         {
             await MembershipTable_ReadAll_EmptyTable();
-            await mongoClientFixture.AssertQualityChecksAsync();
+            await mongoClientFixture.AssertQualityChecksAsync(testOutputHelper);
         }
 
         [Fact, TestCategory("Functional")]
         public async Task Test_InsertRow()
         {
             await MembershipTable_InsertRow(true);
-            await mongoClientFixture.AssertQualityChecksAsync();
+            await mongoClientFixture.AssertQualityChecksAsync(testOutputHelper);
         }
 
         [Fact, TestCategory("Functional")]
         public async Task Test_ReadRow_Insert_Read()
         {
             await MembershipTable_ReadRow_Insert_Read(true);
-            await mongoClientFixture.AssertQualityChecksAsync();
+            await mongoClientFixture.AssertQualityChecksAsync(testOutputHelper);
         }
 
         [Fact, TestCategory("Functional")]
         public async Task Test_ReadAll_Insert_ReadAll()
         {
             await MembershipTable_ReadAll_Insert_ReadAll(true);
-            await mongoClientFixture.AssertQualityChecksAsync();
+            await mongoClientFixture.AssertQualityChecksAsync(testOutputHelper);
         }
 
         [Fact, TestCategory("Functional")]
         public async Task Test_UpdateRow()
         {
             await MembershipTable_UpdateRow(true);
-            await mongoClientFixture.AssertQualityChecksAsync();
+            await mongoClientFixture.AssertQualityChecksAsync(testOutputHelper);
         }
 
         [Fact, TestCategory("Functional")]
         public async Task Test_UpdateRowInParallel()
         {
             await MembershipTable_UpdateRowInParallel(true);
-            await mongoClientFixture.AssertQualityChecksAsync();
+            await mongoClientFixture.AssertQualityChecksAsync(testOutputHelper);
         }
 
         [Fact, TestCategory("Functional")]
         public async Task Test_UpdateIAmAlive()
         {
             await MembershipTable_UpdateIAmAlive(true);
-            await mongoClientFixture.AssertQualityChecksAsync();
+            await mongoClientFixture.AssertQualityChecksAsync(testOutputHelper);
         }
     }
 }

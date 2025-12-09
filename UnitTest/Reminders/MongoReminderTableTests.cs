@@ -8,6 +8,7 @@ using TestExtensions;
 using UnitTests;
 using UnitTests.RemindersTest;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Orleans.Providers.MongoDB.UnitTest.Reminders
 {
@@ -15,11 +16,13 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
     [TestCategory("Mongo")]
     public class MongoReminderTableTests : ReminderTableTestsBase
     {
+        private readonly ITestOutputHelper testOutputHelper;
         private MongoClientJig mongoClientFixture;
 
-        public MongoReminderTableTests(ConnectionStringFixture fixture, TestEnvironmentFixture clusterFixture)
+        public MongoReminderTableTests(ConnectionStringFixture fixture, TestEnvironmentFixture clusterFixture, ITestOutputHelper testOutputHelper)
             : base(fixture, clusterFixture, new LoggerFilterOptions())
         {
+            this.testOutputHelper = testOutputHelper;
         }
 
         protected override IReminderTable CreateRemindersTable()
@@ -48,21 +51,21 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
         public async Task Test_RemindersRange()
         {
             await RemindersRange(50);
-            await mongoClientFixture.AssertQualityChecksAsync();
+            await mongoClientFixture.AssertQualityChecksAsync(testOutputHelper);
         }
 
         [Fact]
         public async Task Test_RemindersParallelUpsert()
         {
             await RemindersParallelUpsert();
-            await mongoClientFixture.AssertQualityChecksAsync();
+            await mongoClientFixture.AssertQualityChecksAsync(testOutputHelper);
         }
 
         [Fact]
         public async Task Test_ReminderSimple()
         {
             await ReminderSimple();
-            await mongoClientFixture.AssertQualityChecksAsync();
+            await mongoClientFixture.AssertQualityChecksAsync(testOutputHelper);
         }
     }
 }

@@ -26,16 +26,28 @@ internal static class MongoQueryPlanFingerprint
     ];
 
     /// <summary>
+    /// Retrieves the type of the MongoDB command represented in the given document.
+    /// </summary>
+    /// <param name="commandDocument">A <see cref="BsonDocument"/> representing the MongoDB command for which the type will be determined.</param>
+    /// <returns>
+    /// A string representing the command type if it is present in the document; otherwise, null.
+    /// </returns>
+    public static string GetCommandType(BsonDocument commandDocument)
+    {
+        return Walkers.FirstOrDefault(walker => commandDocument.Contains(walker.CommandType)).CommandType;
+    }
+
+    /// <summary>
     /// Creates a unique fingerprint representation of a MongoDB query.
     /// </summary>
-    /// <param name="query">The MongoDB query as a <see cref="BsonDocument"/> to generate a fingerprint for.</param>
+    /// <param name="commandDocument">The MongoDB query as a <see cref="BsonDocument"/> to generate a fingerprint for.</param>
     /// <returns>
     /// A string representing the fingerprint of the MongoDB query, or null if no matching fingerprint is generated.
     /// </returns>
-    public static string CreateFingerprint(BsonDocument query)
+    public static string CreateFingerprint(BsonDocument commandDocument)
     {
-        return Walkers.Where(walker => query.Contains(walker.CommandType))
-            .Select(walker => $"{walker.CommandType}={query[walker.CommandType].AsString}:{walker.Generator(query)}")
+        return Walkers.Where(walker => commandDocument.Contains(walker.CommandType))
+            .Select(walker => $"{walker.CommandType}={commandDocument[walker.CommandType].AsString}:{walker.Generator(commandDocument)}")
             .FirstOrDefault();
     }
 
