@@ -58,6 +58,7 @@ internal class MongoClientJig
         List<InspectQueryPlan> inspections = [
             CheckNoCollectionScans,
             CheckEfficientIndexSeeks,
+            CheckNoDiskUsage
         ];
         
         return Task.WhenAll(
@@ -107,6 +108,18 @@ internal class MongoClientJig
 
     public class InspectionException(string message, BsonDocument explainedResult)
         : Exception($"{message}; plan: {explainedResult}");
+
+    private void CheckNoDiskUsage(BsonDocument explainedResult, BsonDocument sampledQuery)
+    {
+        InspectAllStages(
+            GetWinningPlan(explainedResult),
+            plan =>
+            {
+                if (plan.TryGetElement("stage", out var value) && value.Value.AsString is "GROUP" or "SORT")
+                    throw new InspectionException("Potential disk usage", explainedResult);
+            }
+        );
+    }
 
     private static void CheckNoCollectionScans(BsonDocument explainedResult, BsonDocument originalQuery)
     {
