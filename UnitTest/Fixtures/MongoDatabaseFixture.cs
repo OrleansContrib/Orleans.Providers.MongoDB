@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using MongoDB.Driver;
 using MongoSandbox;
 using Orleans.Providers.MongoDB.Utils;
@@ -9,16 +10,18 @@ namespace Orleans.Providers.MongoDB.UnitTest.Fixtures
     {
         private bool disposedValue;
 
-        private static readonly Lazy<IMongoRunner> _databaseRunner = new(() => MongoRunner.Run());
-        private static readonly Lazy<IMongoRunner> _replicaSetRunner = new(() => MongoRunner.Run(new MongoRunnerOptions { UseSingleNodeReplicaSet = true }));
+        private static readonly Lazy<IMongoRunner> _databaseRunner = new(
+            () => MongoRunner.Run(),
+            LazyThreadSafetyMode.ExecutionAndPublication
+        );
+        private static readonly Lazy<IMongoRunner> _replicaSetRunner = new(
+            () => MongoRunner.Run(new MongoRunnerOptions { UseSingleNodeReplicaSet = true }),
+            LazyThreadSafetyMode.ExecutionAndPublication
+        );
 
         public static string DatabaseConnectionString => _databaseRunner.Value.ConnectionString;
 
         public static string ReplicaSetConnectionString => _replicaSetRunner.Value.ConnectionString;
-
-        public static IMongoClientFactory DatabaseFactory => new DefaultMongoClientFactory(new MongoClient(DatabaseConnectionString));
-
-        public static IMongoClientFactory ReplicaSetFactory => new DefaultMongoClientFactory(new MongoClient(ReplicaSetConnectionString));
 
         protected virtual void Dispose(bool disposing)
         {
