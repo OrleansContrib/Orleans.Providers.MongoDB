@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <MongoVersion Condition="'$(MongoVersion)' == ''">8</MongoVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="NBomber" Version="6.1.2" />
+        <PackageReference Include="MongoSandbox.Core" Version="2.0.0" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(MongoVersion)' == '6'">
+        <PackageReference Include="MongoSandbox6.runtime.linux-x64" Version="2.0.0" Condition="$([MSBuild]::IsOSPlatform('Linux'))" />
+        <PackageReference Include="MongoSandbox6.runtime.osx-arm64" Version="2.0.0" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
+        <PackageReference Include="MongoSandbox6.runtime.win-x64" Version="2.0.0" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(MongoVersion)' == '7'">
+        <PackageReference Include="MongoSandbox7.runtime.linux-x64" Version="2.0.0" Condition="$([MSBuild]::IsOSPlatform('Linux'))" />
+        <PackageReference Include="MongoSandbox7.runtime.osx-arm64" Version="2.0.0" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
+        <PackageReference Include="MongoSandbox7.runtime.win-x64" Version="2.0.0" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(MongoVersion)' == '8'">
+        <PackageReference Include="MongoSandbox8.runtime.linux-x64" Version="2.0.0" Condition="$([MSBuild]::IsOSPlatform('Linux'))" />
+        <PackageReference Include="MongoSandbox8.runtime.osx-arm64" Version="2.0.0" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
+        <PackageReference Include="MongoSandbox8.runtime.win-x64" Version="2.0.0" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\Orleans.Providers.MongoDB\Orleans.Providers.MongoDB.csproj" />
+    </ItemGroup>
+
+</Project>
