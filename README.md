@@ -104,7 +104,7 @@ The provider supports three different strategies for membership management:
 
 ### Reminders
 
-Just use the silo builder:
+The default reminder strategy could be employed with:
 
 ```csharp
 var silo = new SiloHostBuilder()
@@ -115,6 +115,16 @@ var silo = new SiloHostBuilder()
     })
     ...
     .Build();
+```
+
+An alternative storage access strategy may be selected with:
+
+```csharp
+var silo = new SiloHostBuilder().UseMongoDBReminders(options =>
+    {
+        // ... trimmed for read
+        options.Strategy = MongoDBReminderStrategy.HashedLookupStorage; // default: DefaultStorage
+    }).Build();
 ```
 
 ### Storage
