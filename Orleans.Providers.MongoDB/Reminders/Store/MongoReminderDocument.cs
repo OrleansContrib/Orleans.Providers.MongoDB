@@ -28,9 +28,6 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
         public long GrainHash { get; set; }
 
         [BsonRequired]
-        public bool IsDeleted { get; set; }
-
-        [BsonRequired]
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime StartAt { get; set; }
 

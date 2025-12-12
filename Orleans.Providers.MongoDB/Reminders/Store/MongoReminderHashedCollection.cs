@@ -23,7 +23,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
     ///         A low cardinality of reminders per grain has been assumed.
     ///     </p>
     /// </summary>
-    public class MongoReminderHashedCollection : CollectionBase<MongoReminderDocument>, IMongoReminderCollection
+    public class MongoReminderHashedCollection : CollectionBase<MongoReminderDocument>
     {
         private readonly string serviceId;
         private readonly string collectionPrefix;

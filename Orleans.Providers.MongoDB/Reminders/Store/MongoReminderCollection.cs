@@ -11,7 +11,6 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
 {
     public class MongoReminderCollection : CollectionBase<MongoReminderDocument>
     {
-        private static readonly FindOneAndUpdateOptions<MongoReminderDocument> FindAndUpsert = new FindOneAndUpdateOptions<MongoReminderDocument> { IsUpsert = true };
         private readonly string serviceId;
         private readonly string collectionPrefix;
 
@@ -35,48 +34,42 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
 
         protected override void SetupCollection(IMongoCollection<MongoReminderDocument> collection)
         {
-            var byHashDefinition =
+            var byGrainHashDefinition =
                 Index
-                    .Ascending(x => x.IsDeleted)
                     .Ascending(x => x.ServiceId)
                     .Ascending(x => x.GrainHash);
             try
             {
                 collection.Indexes.CreateOne(
-                    new CreateIndexModel<MongoReminderDocument>(byHashDefinition,
+                    new CreateIndexModel<MongoReminderDocument>(byGrainHashDefinition,
                         new CreateIndexOptions
                         {
-                            Name = "ByHash"
+                            Name = "ByGrainHash"
                         }));
             }
             catch (MongoCommandException ex)
             {
                 if (ex.CodeName == "IndexOptionsConflict")
                 {
-                    collection.Indexes.CreateOne(new CreateIndexModel<MongoReminderDocument>(byHashDefinition));
+                    collection.Indexes.CreateOne(new CreateIndexModel<MongoReminderDocument>(byGrainHashDefinition));
                 }
             }
-
-            var byNameDefinition =
-                Index
-                    .Ascending(x => x.IsDeleted)
-                    .Ascending(x => x.ServiceId)
-                    .Ascending(x => x.GrainId)
-                    .Ascending(x => x.ReminderName);
+            
+            // best effort: remove indexes from previous releases
             try
             {
-                collection.Indexes.CreateOne(
-                   new CreateIndexModel<MongoReminderDocument>(byNameDefinition,
-                        new CreateIndexOptions
-                        {
-                            Name = "ByName"
-                        }));
+                collection.Indexes.DropOne("ByHash");
             }
-            catch (MongoCommandException ex)
+            catch (Exception)
             {
-                if (ex.CodeName == "IndexOptionsConflict")
+                try
                 {
-                    collection.Indexes.CreateOne(new CreateIndexModel<MongoReminderDocument>(byNameDefinition));
+                    // by convention, the definition would have auto-generated this naming by convention
+                    collection.Indexes.DropOne("IsDeleted_1_ServiceId_1_GrainHash_1");
+                }
+                catch (Exception)
+                {
+                    // ignored
                 }
             }
         }
@@ -87,13 +80,11 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
             // [end] is the stop point, inclusive of hash
             var filter = beginHash < endHash
                 ? Builders<MongoReminderDocument>.Filter.Where(x =>
-                    x.IsDeleted == false &&
                     x.ServiceId == serviceId &&
                     //       (begin)>>>>>>[end]
                     x.GrainHash > beginHash && x.GrainHash <= endHash
                 )
                 : Builders<MongoReminderDocument>.Filter.Where(x =>
-                    x.IsDeleted == false &&
                     x.ServiceId == serviceId &&
                     // >>>>>>[end]         (begin)>>>>>>>
                     (x.GrainHash <= endHash || x.GrainHash > beginHash)
@@ -107,7 +98,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
         {
             var id = ReturnId(serviceId, grainId, reminderName);
             var reminder =
-                await Collection.Find(x => x.Id == id && x.IsDeleted == false)
+                await Collection.Find(x => x.Id == id)
                     .FirstOrDefaultAsync();
 
             return reminder?.ToEntry();
@@ -117,8 +108,8 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
         {
             var reminders =
                 await Collection.Find(r =>
-                        r.IsDeleted == false &&
                         r.ServiceId == serviceId &&
+                        r.GrainHash == grainId.GetUniformHashCode() &&
                         r.GrainId == grainId.ToString())
                     .ToListAsync();
 
@@ -129,72 +120,59 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
         {
             var id = ReturnId(serviceId, grainId, reminderName);
 
-            try
-            {
-                var existingDocument =
-                    await Collection.FindOneAndUpdateAsync<MongoReminderDocument, MongoReminderDocument>(x => x.Id == id && x.Etag == eTag,
-                        Update.Set(x => x.IsDeleted, true),
-                        FindAndUpsert);
-
-                await Collection.DeleteManyAsync(x => x.IsDeleted);
-
-                return string.Equals(existingDocument?.ReminderName, reminderName, StringComparison.Ordinal);
-            }
-            catch (MongoException ex)
-            {
-                if (ex.IsDuplicateKey())
-                {
-                    return false;
-                }
-                throw;
-            }
+            var deleteResult = await Collection.DeleteOneAsync(x => x.Id == id && x.Etag == eTag);
+            return deleteResult.DeletedCount > 0;
         }
 
         public virtual Task RemoveRows()
         {
-            return Collection.DeleteManyAsync(r =>
-                // note: the query is to align to the indexes (ByHash being the primary guideline)
-                (r.IsDeleted == false && r.ServiceId == serviceId) ||
-                (r.IsDeleted == true && r.ServiceId == serviceId)
-            );
+            // note: only used and called by the test harness
+            return Collection.DeleteManyAsync(r => r.ServiceId == serviceId);
         }
 
         public virtual async Task<string> UpsertRow(ReminderEntry entry)
         {
             var id = ReturnId(serviceId, entry.GrainId, entry.ReminderName);
+            var document = MongoReminderDocument.Create(id, serviceId, entry, Guid.NewGuid().ToString());
 
-            var updatedEtag = Guid.NewGuid().ToString();
-            var updateDocument = MongoReminderDocument.Create(id, serviceId, entry, updatedEtag);
+            var useUpsert = entry.ETag != null || !await TryEmployInsertionStrategyAsync();
 
-            try
+            if (useUpsert)
             {
-                await Collection.ReplaceOneAsync(x => x.Id == id,
-                    updateDocument,
-                    UpsertReplace);
+                // see comments in TryEmployInsertionStrategyAsync to determine when selecting the upsert.
+                await Collection.ReplaceOneAsync(x => x.Id == id, document, UpsertReplace);
             }
-            catch (MongoException ex)
+
+            return entry.ETag = document.Etag;
+
+            async Task<bool> TryEmployInsertionStrategyAsync()
             {
-                if (!ex.IsDuplicateKey())
+                // when the etag is null, it is a strong indicator that an insertion is only necessary
+                // as it is brand new.
+                // In the unlikely event that this assumption is incorrect, mongo will throw a conflict.
+                try
                 {
+                    // insertion is a lot faster than doing a search in Mongo
+                    await Collection.InsertOneAsync(document);
+                    return true;
+                }
+                catch (MongoCommandException ex)
+                {
+                    if (ex.IsDuplicateKey())
+                    {
+                        // we got a conflict, so some other thread inserted with no etag.
+                        // this is highly improbable in production workloads, but is a guard on the standard
+                        // test suites from Orleans to assert contract behavior.
+                        return false;
+                    }
+
                     throw;
                 }
             }
-
-            entry.ETag = updatedEtag;
-
-            return entry.ETag;
         }
 
         private static string ReturnId(string serviceId, GrainId grainId, string reminderName)
         {
-            var grainType = grainId.Type.ToString();
-            var grainKey = grainId.Key.ToString();
-
-            if (grainType is null || grainKey is null)
-            {
-                throw new ArgumentNullException(nameof(grainId));
-            }
-
             return $"{serviceId}_{grainId}_{reminderName}";
         }
     }
