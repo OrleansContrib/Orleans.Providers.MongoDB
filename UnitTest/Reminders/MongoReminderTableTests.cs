@@ -25,8 +25,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
             var options = Options.Create(new MongoDBRemindersOptions
             {
                 CollectionPrefix = "Test_",
-                DatabaseName = "OrleansTest",
-                Strategy = MongoDBReminderStrategy.DefaultStorage
+                DatabaseName = "OrleansTest"
             });
 
             return new MongoReminderTable(

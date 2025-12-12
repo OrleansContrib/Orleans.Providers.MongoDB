@@ -22,7 +22,7 @@ namespace Orleans.Providers.MongoDB.Reminders
         private readonly ILogger logger;
         private readonly MongoDBRemindersOptions options;
         private readonly string serviceId;
-        private IMongoReminderCollection collection;
+        private MongoReminderCollection collection;
 
         public MongoReminderTable(
             IMongoClientFactory mongoClientFactory,
@@ -39,7 +39,15 @@ namespace Orleans.Providers.MongoDB.Reminders
         /// <inheritdoc />
         public Task Init()
         {
-            collection = Factory.Create(mongoClient, options, serviceId);
+            collection =
+                new MongoReminderCollection(
+                    mongoClient,
+                    options.DatabaseName,
+                    options.CollectionPrefix,
+                    options.CollectionConfigurator,
+                    options.CreateShardKeyForCosmos,
+                    serviceId);
+
             return Task.CompletedTask;
         }
 
