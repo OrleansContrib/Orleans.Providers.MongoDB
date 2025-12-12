@@ -36,13 +36,10 @@ internal static class Program
 
                 var scenarios = new List<Func<int, IEnumerable<ScenarioProps>>>();
 
-                if (benchOptions.ReminderStrategy.HasValue)
+                if (!benchOptions.SkipReminders)
                 {
                     scenarios.Add(
-                        GenerateReminderScenarios(
-                            mongoClientFactory,
-                            benchOptions.ReminderStrategy.Value
-                        )
+                        GenerateReminderScenarios(mongoClientFactory)
                     );
                 }
 
@@ -69,13 +66,12 @@ internal static class Program
             ClusterId = "OrleansTest",
         });
 
-    private static Func<int, IEnumerable<ScenarioProps>> GenerateReminderScenarios(IMongoClientFactory mongoClientFactory, MongoDBReminderStrategy strategy)
+    private static Func<int, IEnumerable<ScenarioProps>> GenerateReminderScenarios(IMongoClientFactory mongoClientFactory)
     {
         var reminderOptions = Options.Create(new MongoDBRemindersOptions
         {
             CollectionPrefix = "Test_",
-            DatabaseName = "OrleansTest",
-            Strategy = strategy
+            DatabaseName = "OrleansTest"
         });
 
         var nullLogger = NullLogger<MongoReminderTable>.Instance;
@@ -92,7 +88,7 @@ internal static class Program
         [Option(shortName: 'c', longName: "concurrency-factor", Required = true)]
         public int ConcurrencyFactor { get; init; } = 1;
         
-        [Option(longName: "reminder-strategy", Required = false)]
-        public MongoDBReminderStrategy? ReminderStrategy { get; init; }
+        [Option(longName: "skip-reminders", Default = false)]
+        public bool SkipReminders { get; init; } = false;
     }
 }
