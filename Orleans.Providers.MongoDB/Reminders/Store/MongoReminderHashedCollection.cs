@@ -9,12 +9,26 @@ using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Reminders.Store
 {
-    public class MongoReminderCollection : CollectionBase<MongoReminderDocument>
+    /// <summary>
+    ///     <p>
+    ///         Represents a MongoDB-based implementation of a reminder collection utilizing hashed key retrieval strategy.
+    ///         This class is responsible for managing reminder data by reading, writing, and removing rows, as well
+    ///         as setting up the collection schema and indexes for efficient querying.
+    ///     </p>
+    ///     <p>
+    ///         Removal of the reminder is a single delete operation, unlike the <see cref="MongoReminderCollection"/> which
+    ///         will perform a two-stage removal.
+    ///     </p>
+    ///     <p>
+    ///         A low cardinality of reminders per grain has been assumed.
+    ///     </p>
+    /// </summary>
+    public class MongoReminderHashedCollection : CollectionBase<MongoReminderDocument>
     {
         private readonly string serviceId;
         private readonly string collectionPrefix;
 
-        public MongoReminderCollection(
+        public MongoReminderHashedCollection(
             IMongoClient mongoClient,
             string databaseName,
             string collectionPrefix,
@@ -29,19 +43,19 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
 
         protected override string CollectionName()
         {
-            return collectionPrefix + "OrleansReminderV2";
+            return collectionPrefix + "OrleansReminderV3";
         }
 
         protected override void SetupCollection(IMongoCollection<MongoReminderDocument> collection)
         {
-            var byGrainHashDefinition =
+            var byHashDefinition =
                 Index
                     .Ascending(x => x.ServiceId)
                     .Ascending(x => x.GrainHash);
             try
             {
                 collection.Indexes.CreateOne(
-                    new CreateIndexModel<MongoReminderDocument>(byGrainHashDefinition,
+                    new CreateIndexModel<MongoReminderDocument>(byHashDefinition,
                         new CreateIndexOptions
                         {
                             Name = "ByGrainHash"
@@ -51,25 +65,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
             {
                 if (ex.CodeName == "IndexOptionsConflict")
                 {
-                    collection.Indexes.CreateOne(new CreateIndexModel<MongoReminderDocument>(byGrainHashDefinition));
-                }
-            }
-            
-            // best effort: remove indexes from previous releases
-            try
-            {
-                collection.Indexes.DropOne("ByHash");
-            }
-            catch (Exception)
-            {
-                try
-                {
-                    // by convention, the definition would have auto-generated this naming by convention
-                    collection.Indexes.DropOne("IsDeleted_1_ServiceId_1_GrainHash_1");
-                }
-                catch (Exception)
-                {
-                    // ignored
+                    collection.Indexes.CreateOne(new CreateIndexModel<MongoReminderDocument>(byHashDefinition));
                 }
             }
         }
@@ -90,7 +86,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
                     (x.GrainHash <= endHash || x.GrainHash > beginHash)
                 );
             var reminders = await Collection.Find(filter).ToListAsync();
-
+            
             return new ReminderTableData(reminders.Select(x => x.ToEntry()));
         }
 
@@ -120,14 +116,25 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
         {
             var id = ReturnId(serviceId, grainId, reminderName);
 
-            var deleteResult = await Collection.DeleteOneAsync(x => x.Id == id && x.Etag == eTag);
-            return deleteResult.DeletedCount > 0;
+            try
+            {
+                var deleteResult = await Collection.DeleteOneAsync(x => x.Id == id && x.Etag == eTag);
+                return deleteResult.DeletedCount > 0;
+            }
+            catch (MongoException ex)
+            {
+                if (ex.IsDuplicateKey())
+                {
+                    return false;
+                }
+                throw;
+            }
         }
 
         public virtual Task RemoveRows()
         {
             // note: only used and called by the test harness
-            return Collection.DeleteManyAsync(r => r.ServiceId == serviceId);
+            return Collection.DeleteManyAsync(r => true);
         }
 
         public virtual async Task<string> UpsertRow(ReminderEntry entry)

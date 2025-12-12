@@ -117,6 +117,21 @@ var silo = new SiloHostBuilder()
     .Build();
 ```
 
+> [!TIP]
+> The only index required by reminders is the `ByGrainHash`. Post deployment, manually remove the `ByName` prefix
+> from the reminder collection with the following sample command:
+> 
+> ```
+> // prior versions would have attempted to create this index
+> db.your_prefix_OrleansReminderV2.dropIndex("ByName")
+> // alternatively, find by definition
+> db.your_prefix_OrleansReminderV2.dropIndex({IsDeleted: 1, ServiceId: 1, GrainId: 1, ReminderName: 1})
+> 
+> // verify only that the index `ByHash` was automatically dropped during deployment
+> db.your_prefix_OrleansReminderV2.dropIndex("ByHash")
+> db.your_prefix_OrleansReminderV2.dropIndex({IsDeleted: 1, ServiceId: 1, GrainHash: 1})
+> ```
+
 ### Storage
 
 Just use the silo builder:
