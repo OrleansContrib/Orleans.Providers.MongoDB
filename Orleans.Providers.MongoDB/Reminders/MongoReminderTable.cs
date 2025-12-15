@@ -48,6 +48,7 @@ namespace Orleans.Providers.MongoDB.Reminders
                     options.CollectionPrefix,
                     options.CollectionConfigurator,
                     options.CreateShardKeyForCosmos,
+                    options.PurgeLegacyIndexes,
                     serviceId);
 
             return Task.CompletedTask;

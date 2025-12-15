@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Driver;
@@ -13,18 +14,20 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
     {
         private readonly string serviceId;
         private readonly string collectionPrefix;
+        private readonly bool removeAllLegacyIndexes;
 
-        public MongoReminderCollection(
-            IMongoClient mongoClient,
+        public MongoReminderCollection(IMongoClient mongoClient,
             string databaseName,
             string collectionPrefix,
             Action<MongoCollectionSettings> collectionConfigurator,
             bool createShardKey,
+            bool removeAllLegacyIndexes,
             string serviceId)
             : base(mongoClient, databaseName, collectionConfigurator, createShardKey)
         {
             this.serviceId = serviceId;
             this.collectionPrefix = collectionPrefix;
+            this.removeAllLegacyIndexes = removeAllLegacyIndexes;
         }
 
         protected override string CollectionName()
@@ -59,24 +62,34 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
                 // in the future, if need to be culled, only try collect library generated indexes.
             }
 
-            var indexesToRemove = new[]
-            {
+            List<string> indexesToRemove =
+            [
                 // ByHash definitions.
                 "ByHash",
 #pragma warning disable CS0618 // Type or member is obsolete
                 $"{collection.GetFieldName(r => r.IsDeleted)}_1"
                 + $"_{collection.GetFieldName(r => r.ServiceId)}_1"
-                + $"_{collection.GetFieldName(r => r.GrainHash)}_1",
+                + $"_{collection.GetFieldName(r => r.GrainHash)}_1"
 #pragma warning restore CS0618 // Type or member is obsolete
-                // ByName definition
-                "ByName",
+            ];
+
+            if (removeAllLegacyIndexes)
+            {
+                // these indexes are safe to keep and redundant.
+                // However, if a rolling deployment is made with silos with Orleans.Providers.MongoDB on version <=9.3.0,
+                // there is a high chance of collection scans impacting the full cluster. 
+                // See: https://github.com/OrleansContrib/Orleans.Providers.MongoDB/pull/154
+                indexesToRemove.AddRange([
+                    // ByName definition
+                    "ByName",
 #pragma warning disable CS0618 // Type or member is obsolete
-                $"{collection.GetFieldName(r => r.IsDeleted)}_1"
-                + $"_{collection.GetFieldName(r => r.ServiceId)}_1"
-                + $"_{collection.GetFieldName(r => r.GrainId)}_1"
-                + $"_{collection.GetFieldName(r => r.ReminderName)}_1",
+                    $"{collection.GetFieldName(r => r.IsDeleted)}_1"
+                    + $"_{collection.GetFieldName(r => r.ServiceId)}_1"
+                    + $"_{collection.GetFieldName(r => r.GrainId)}_1"
+                    + $"_{collection.GetFieldName(r => r.ReminderName)}_1",
 #pragma warning restore CS0618 // Type or member is obsolete
-            };
+                ]);
+            }
 
             foreach (var indexToRemove in indexesToRemove)
             {
