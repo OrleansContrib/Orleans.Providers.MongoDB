@@ -65,6 +65,8 @@ namespace Orleans.Providers.MongoDB.Reminders
         /// <inheritdoc />
         public Task<bool> RemoveRow(GrainId grainId, string reminderName, string eTag)
         {
+            CheckGrainId(grainId);
+            
             return DoAndLog(nameof(RemoveRow), () =>
             {
                 return collection.RemoveRow(grainId, reminderName, eTag);
@@ -74,6 +76,8 @@ namespace Orleans.Providers.MongoDB.Reminders
         /// <inheritdoc />
         public Task<ReminderEntry> ReadRow(GrainId grainId, string reminderName)
         {
+            CheckGrainId(grainId);
+            
             return DoAndLog(nameof(ReadRow), () =>
             {
                 return collection.ReadRow(grainId, reminderName);
@@ -92,6 +96,8 @@ namespace Orleans.Providers.MongoDB.Reminders
         /// <inheritdoc />
         public Task<string> UpsertRow(ReminderEntry entry)
         {
+            CheckGrainId(entry.GrainId);
+            
             return DoAndLog(nameof(UpsertRow), () =>
             {
                 return collection.UpsertRow(entry);
@@ -126,6 +132,14 @@ namespace Orleans.Providers.MongoDB.Reminders
 
                 throw;
             }
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void CheckGrainId(GrainId grainId)
+        {
+            if (grainId.IsDefault)
+                throw new InvalidOperationException(
+                    "Grain identifier is default. Was the reminder registry called from a client application?");
         }
     }
 }
