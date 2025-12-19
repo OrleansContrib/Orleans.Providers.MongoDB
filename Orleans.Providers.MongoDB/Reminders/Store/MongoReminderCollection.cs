@@ -167,40 +167,40 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
             var id = ReturnId(serviceId, entry.GrainId, entry.ReminderName);
             var document = MongoReminderDocument.Create(id, serviceId, entry, Guid.NewGuid().ToString());
 
-            var useUpsert = entry.ETag != null || !await TryInsertOneAsync();
-
-            if (useUpsert)
+            try
             {
-                // see comments in TryInsertOneAsync to determine when selecting the upsert.
-                await Collection.ReplaceOneAsync(x => x.Id == id, document, UpsertReplace);
+                // optimization - we will only upsert the fields which will change on an update to avoid IO cost for static.
+                // if there isn't a record matching the filter, a new record will be created with all fields set with the
+                // values specified in the filter.
+                await Collection.UpdateOneAsync(
+                    Filter.And(
+                        Filter.Eq(x => x.Id, id),
+                        Filter.Eq(x => x.ServiceId, document.ServiceId),
+                        Filter.Eq(x => x.GrainId, document.GrainId),
+                        Filter.Eq(x => x.ReminderName, document.ReminderName),
+                        Filter.Eq(x => x.GrainHash, document.GrainHash)
+                    ),
+                    Update
+                        .Set(x => x.Etag, document.Etag)
+                        .Set(x => x.Period, document.Period)
+                        .Set(x => x.StartAt, document.StartAt),
+                    Upsert
+                );
             }
+            catch (MongoException ex)
+            {
+                if (ex.IsDuplicateKey())
+                {
+                    // in the very unlikely future event that grain hashing (or similar) is computed differently in
+                    // future Orleans versions, we will have a duplicate key on the id. We will do a full classic upsert
+                    // as a fallback. This will prevent upgrade and timing of multiple releases for MongoDB provider developers
+                    await Collection.ReplaceOneAsync(r => r.Id == id, document, UpsertReplace);
+                }
 
+                throw;
+            }
+ 
             return entry.ETag = document.Etag;
-
-            async Task<bool> TryInsertOneAsync()
-            {
-                // when the etag is null, it is a strong indicator that an insertion is only necessary
-                // as it is brand new.
-                // In the unlikely event that this assumption is incorrect, mongo will throw a conflict.
-                try
-                {
-                    // insertion is a lot faster than doing a search in Mongo
-                    await Collection.InsertOneAsync(document);
-                    return true;
-                }
-                catch (MongoException ex)
-                {
-                    if (ex.IsDuplicateKey())
-                    {
-                        // we got a conflict, so some other thread inserted with no etag.
-                        // this is highly improbable in production workloads, but is a guard on the standard
-                        // test suites from Orleans to assert contract behavior.
-                        return false;
-                    }
-
-                    throw;
-                }
-            }
         }
 
         private static string ReturnId(string serviceId, GrainId grainId, string reminderName)
