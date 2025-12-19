@@ -1,5 +1,8 @@
-﻿using CommandLine;
+﻿using System.Net;
+using CommandLine;
 using CommandLine.Text;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -21,7 +24,7 @@ internal static class Program
         var parser = new Parser(settings => settings.HelpWriter = Console.Out);
 
         var parserResult = parser.ParseArguments<BenchCommandOptions>(args);
-        
+
         parserResult
             .WithParsed(benchOptions =>
             {
@@ -30,17 +33,14 @@ internal static class Program
                 mongoClientSettings.MaxConnectionPoolSize = benchOptions.ConcurrencyFactor * 50;
                 mongoClientSettings.MaxConnecting =
                     Math.Max(benchOptions.ConcurrencyFactor / 5, mongoClientSettings.MaxConnecting);
-                
-                IMongoClientFactory mongoClientFactory =
-                    new DefaultMongoClientFactory(new MongoClient(mongoClientSettings));
 
+                using var siloHost = CreateOrleansSilo(mongoClientSettings);
+                
                 var scenarios = new List<Func<int, IEnumerable<ScenarioProps>>>();
 
                 if (!benchOptions.SkipReminders)
                 {
-                    scenarios.Add(
-                        GenerateReminderScenarios(mongoClientFactory)
-                    );
+                    scenarios.Add(GenerateReminderScenarios(siloHost));
                 }
 
                 NBomberRunner.RegisterScenarios(
@@ -59,6 +59,29 @@ internal static class Program
             });
     }
 
+    static IHost CreateOrleansSilo(MongoClientSettings mongoClientSettings)
+    {
+        var host = new HostBuilder()
+            .UseOrleans((_, siloBuilder) =>
+                siloBuilder
+                    .UseMongoDBClient(_ => mongoClientSettings)
+                    .UseMongoDBClustering(options =>
+                    {
+                        options.DatabaseName = "OrleansTestApp";
+                        options.CreateShardKeyForCosmos = false;
+                    })
+                    .UseMongoDBReminders(options =>
+                    {
+                        options.DatabaseName = "OrleansTestApp";
+                        options.CreateShardKeyForCosmos = false;
+                    })
+                    .ConfigureEndpoints(IPAddress.Loopback, 11111, 30000))
+            .Build();
+        
+        host.Start();
+        return host;
+    }
+
     private static readonly IOptions<ClusterOptions> ClusterOptions = Options.Create(
         new ClusterOptions
         {
@@ -66,18 +89,9 @@ internal static class Program
             ClusterId = "OrleansTest",
         });
 
-    private static Func<int, IEnumerable<ScenarioProps>> GenerateReminderScenarios(IMongoClientFactory mongoClientFactory)
+    private static Func<int, IEnumerable<ScenarioProps>> GenerateReminderScenarios(IHost siloHost)
     {
-        var reminderOptions = Options.Create(new MongoDBRemindersOptions
-        {
-            CollectionPrefix = "Test_",
-            DatabaseName = "OrleansTest"
-        });
-
-        var nullLogger = NullLogger<MongoReminderTable>.Instance;
-        var reminderTable = new MongoReminderTable(mongoClientFactory, nullLogger, reminderOptions, ClusterOptions);
-        var mongoReminderBench = new MongoReminderBench(reminderTable);
-        
+        var mongoReminderBench = new MongoReminderBench(siloHost);
         return mongoReminderBench.GenerateBomberScenarios;
     }
 
