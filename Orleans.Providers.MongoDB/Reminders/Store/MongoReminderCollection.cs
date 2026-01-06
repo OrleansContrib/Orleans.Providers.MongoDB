@@ -111,15 +111,18 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
             // (begin) is beginning exclusive of hash
             // [end] is the stop point, inclusive of hash
             var filter = beginHash < endHash
-                ? Builders<MongoReminderDocument>.Filter.Where(x =>
-                    x.ServiceId == serviceId &&
+                ? Filter.And(
+                    Filter.Eq(x => x.ServiceId, serviceId),
                     //       (begin)>>>>>>[end]
-                    x.GrainHash > beginHash && x.GrainHash <= endHash
+                    Filter.Gt(x => x.GrainHash, beginHash),
+                    Filter.Lte(x => x.GrainHash, endHash)
                 )
-                : Builders<MongoReminderDocument>.Filter.Where(x =>
-                    x.ServiceId == serviceId &&
-                    // >>>>>>[end]         (begin)>>>>>>>
-                    (x.GrainHash <= endHash || x.GrainHash > beginHash)
+                : Filter.And(
+                    Filter.Eq(x => x.ServiceId, serviceId),
+                    Filter.Or( // >>>>>>[end]         (begin)>>>>>>>
+                        Filter.Lte(x => x.GrainHash, endHash),
+                        Filter.Gt(x => x.GrainHash, beginHash)
+                    )
                 );
             var reminders = await Collection.Find(filter).ToListAsync();
 
