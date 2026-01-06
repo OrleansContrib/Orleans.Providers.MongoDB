@@ -152,7 +152,12 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
         {
             var id = ReturnId(serviceId, grainId, reminderName);
 
-            var deleteResult = await Collection.DeleteOneAsync(x => x.Id == id && x.Etag == eTag);
+            // optimization - we use expression builders over linq
+            var deleteResult = await Collection.DeleteOneAsync(
+                Filter.And(
+                    Filter.Eq(x => x.Id, id),
+                    Filter.Eq(x => x.Etag, eTag))
+            );
             return deleteResult.DeletedCount > 0;
         }
 
