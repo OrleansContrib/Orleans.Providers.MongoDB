@@ -130,7 +130,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
         {
             var id = ReturnId(serviceId, grainId, reminderName);
             var reminder =
-                await Collection.Find(x => x.Id == id)
+                await Collection.Find(Filter.Eq(x => x.Id, id))
                     .FirstOrDefaultAsync();
 
             return reminder?.ToEntry();
@@ -139,11 +139,13 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
         public virtual async Task<ReminderTableData> ReadRow(GrainId grainId)
         {
             var reminders =
-                await Collection.Find(r =>
-                        r.ServiceId == serviceId &&
-                        r.GrainHash == grainId.GetUniformHashCode() &&
-                        r.GrainId == grainId.ToString())
-                    .ToListAsync();
+                await Collection.Find(
+                    Filter.And(
+                        Filter.Eq(x => x.ServiceId, serviceId),
+                        Filter.Eq(x => x.GrainHash, grainId.GetUniformHashCode()),
+                        Filter.Eq(x => x.GrainId, grainId.ToString())
+                    )
+                ).ToListAsync();
 
             return new ReminderTableData(reminders.Select(x => x.ToEntry()));
         }
