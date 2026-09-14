@@ -4,29 +4,26 @@ using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.UnitTest.Storage.TestGrains
 {
-    public partial class StorageTests
+    public class ConstrainedGrain : Grain, IConstrainedGrain
     {
-        public class ConstrainedGrain : Grain, IConstrainedGrain
+        private readonly IPersistentState<ConstrainedGrainState> state;
+
+        public ConstrainedGrain([PersistentState(nameof(ConstrainedGrain))] IPersistentState<ConstrainedGrainState> state)
         {
-            private readonly IPersistentState<ConstrainedGrainState> state;
+            this.state = state;
+        }
 
-            public ConstrainedGrain([PersistentState(nameof(ConstrainedGrain))] IPersistentState<ConstrainedGrainState> state)
+        public async Task SetName(string name)
+        {
+            state.State.Name = name;
+
+            try
             {
-                this.state = state;
+                await state.WriteStateAsync();
             }
-
-            public async Task SetName(string name)
+            catch (Exception ex)
             {
-                state.State.Name = name;
-
-                try
-                {
-                    await state.WriteStateAsync();
-                }
-                catch (Exception ex)
-                {
-                    throw new ProviderStateException(ex.Message);
-                }
+                throw new ProviderStateException(ex.Message);
             }
         }
     }

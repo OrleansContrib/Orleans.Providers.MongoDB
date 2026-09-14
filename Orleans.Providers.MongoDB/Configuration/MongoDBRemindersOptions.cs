@@ -24,5 +24,14 @@ namespace Orleans.Providers.MongoDB.Configuration
         /// </remarks>
         [Obsolete("This will be removed in future version")]
         public bool PurgeLegacyIndexes { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the provider should create and manage reminder indexes.
+        /// </summary>
+        /// <remarks>
+        /// Set this to <c>false</c> when indexes are managed externally, or when the connection does not have
+        /// permission to manage indexes.
+        /// </remarks>
+        public bool CreateIndexes { get; set; } = true;
     }
 }
