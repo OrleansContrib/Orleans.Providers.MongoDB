@@ -48,7 +48,9 @@ namespace Orleans.Providers.MongoDB.Reminders
                     options.CollectionPrefix,
                     options.CollectionConfigurator,
                     options.CreateShardKeyForCosmos,
+#pragma warning disable CS0618 // PurgeLegacyIndexes is retained for backwards compatibility.
                     options.PurgeLegacyIndexes,
+#pragma warning restore CS0618
                     serviceId);
 
             return Task.CompletedTask;
