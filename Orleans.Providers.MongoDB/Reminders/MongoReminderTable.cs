@@ -51,7 +51,8 @@ namespace Orleans.Providers.MongoDB.Reminders
 #pragma warning disable CS0618 // PurgeLegacyIndexes is retained for backwards compatibility.
                     options.PurgeLegacyIndexes,
 #pragma warning restore CS0618
-                    serviceId);
+                    serviceId,
+                    options.CreateIndexes);
 
             return Task.CompletedTask;
         }

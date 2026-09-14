@@ -112,9 +112,16 @@ var silo = new SiloHostBuilder()
     {
         options.DatabaseName = dbName;
         options.CreateShardKeyForCosmos = createShardKey;
+        options.CreateIndexes = false;
     })
     ...
     .Build();
+```
+
+By default, the provider creates and manages the `ByGrainHash` index for the `OrleansReminderV2` collection. Set `CreateIndexes` to `false` when indexes are provisioned and managed externally, or when the connection string does not have permission to manage indexes. In that case, ensure that an index named `ByGrainHash` with the following definition exists to avoid inefficient reminder range queries:
+
+```text
+{ ServiceId: 1, GrainHash: 1 }
 ```
 
 ### Storage

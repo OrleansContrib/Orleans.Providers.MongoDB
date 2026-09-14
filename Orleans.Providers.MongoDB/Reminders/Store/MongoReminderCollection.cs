@@ -15,6 +15,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
         private readonly string serviceId;
         private readonly string collectionPrefix;
         private readonly bool removeAllLegacyIndexes;
+        private readonly bool createIndexes;
 
         public MongoReminderCollection(IMongoClient mongoClient,
             string databaseName,
@@ -22,12 +23,14 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
             Action<MongoCollectionSettings> collectionConfigurator,
             bool createShardKey,
             bool removeAllLegacyIndexes,
-            string serviceId)
+            string serviceId,
+            bool createIndexes = true)
             : base(mongoClient, databaseName, collectionConfigurator, createShardKey)
         {
             this.serviceId = serviceId;
             this.collectionPrefix = collectionPrefix;
             this.removeAllLegacyIndexes = removeAllLegacyIndexes;
+            this.createIndexes = createIndexes;
         }
 
         protected override string CollectionName()
@@ -37,6 +40,11 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
 
         protected override void SetupCollection(IMongoCollection<MongoReminderDocument> collection)
         {
+            if (!createIndexes)
+            {
+                return;
+            }
+
             var byGrainHashDefinition =
                 Index
                     .Ascending(x => x.ServiceId)
