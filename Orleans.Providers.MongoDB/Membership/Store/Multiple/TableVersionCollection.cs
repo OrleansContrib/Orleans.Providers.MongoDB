@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using Orleans.Providers.MongoDB.Utils;
@@ -26,14 +27,14 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
             return $"{collectionPrefix}OrleansMembershipV3_TableVersion";
         }
 
-        public Task DeleteAsync(IClientSessionHandle session, string deploymentId)
+        public Task DeleteAsync(IClientSessionHandle session, string deploymentId, CancellationToken cancellationToken = default)
         {
-            return Collection.DeleteOneAsync(session, x => x.DeploymentId == deploymentId);
+            return Collection.DeleteOneAsync(session, x => x.DeploymentId == deploymentId, cancellationToken: cancellationToken);
         }
 
-        public async Task<TableVersion> GetTableVersionAsync(IClientSessionHandle session, string deploymentId)
+        public async Task<TableVersion> GetTableVersionAsync(IClientSessionHandle session, string deploymentId, CancellationToken cancellationToken = default)
         {
-            var deployment = await Collection.Find(session, x => x.DeploymentId == deploymentId).FirstOrDefaultAsync();
+            var deployment = await Collection.Find(session, x => x.DeploymentId == deploymentId).FirstOrDefaultAsync(cancellationToken);
 
             if (deployment == null)
             {
@@ -43,7 +44,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
             return deployment.ToTableVersion();
         }
 
-        public async Task<bool> UpsertAsync(IClientSessionHandle session, TableVersion tableVersion, string deploymentId)
+        public async Task<bool> UpsertAsync(IClientSessionHandle session, TableVersion tableVersion, string deploymentId, CancellationToken cancellationToken = default)
         {
             var update = TableVersionDocument.Create(deploymentId, tableVersion);
 
@@ -52,7 +53,8 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
                 await Collection.ReplaceOneAsync(session,
                     x => x.DeploymentId == deploymentId && x.VersionEtag == tableVersion.VersionEtag,
                     update,
-                    UpsertReplace);
+                    UpsertReplace,
+                    cancellationToken);
 
                 return true;
             }

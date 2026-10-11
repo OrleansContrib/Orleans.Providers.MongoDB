@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using Orleans.Providers.MongoDB.Utils;
@@ -11,6 +12,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
 {
     public sealed class MultipleMembershipCollection : CollectionBase<MongoMembershipDocument>, IMongoMembershipCollection
     {
+        private const int MaxConsistentReadAttempts = 10;
         private readonly TableVersionCollection tableVersionCollection;
         private readonly string collectionPrefix;
 
@@ -44,12 +46,12 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
                     }));
         }
 
-        public async Task<bool> UpsertRow(string deploymentId, MembershipEntry entry, string etag, TableVersion tableVersion)
+        public async Task<bool> UpsertRow(string deploymentId, MembershipEntry entry, string etag, TableVersion tableVersion, CancellationToken cancellationToken = default)
         {
-            using var session = await Client.StartSessionAsync();
+            using var session = await Client.StartSessionAsync(cancellationToken: cancellationToken);
             return await session.WithTransactionAsync(async (sessionHandle, ct) =>
             {
-                var hasUpsertedTable = await tableVersionCollection.UpsertAsync(sessionHandle, tableVersion, deploymentId);
+                var hasUpsertedTable = await tableVersionCollection.UpsertAsync(sessionHandle, tableVersion, deploymentId, ct);
 
                 if (!hasUpsertedTable)
                 {
@@ -57,7 +59,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
                     return false;
                 }
 
-                var hasUpsertedMember = await UpsertRowAsync(sessionHandle, deploymentId, entry, etag);
+                var hasUpsertedMember = await UpsertRowAsync(sessionHandle, deploymentId, entry, etag, ct);
 
                 var isOkay = hasUpsertedMember && hasUpsertedTable;
 
@@ -67,10 +69,10 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
                 }
 
                 return isOkay;
-            });
+            }, cancellationToken: cancellationToken);
         }
 
-        private async Task<bool> UpsertRowAsync(IClientSessionHandle session, string deploymentId, MembershipEntry entry, string etag)
+        private async Task<bool> UpsertRowAsync(IClientSessionHandle session, string deploymentId, MembershipEntry entry, string etag, CancellationToken cancellationToken)
         {
             var id = ReturnId(deploymentId, entry.SiloAddress);
 
@@ -78,9 +80,16 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
 
             try
             {
-                await Collection.ReplaceOneAsync(session, x => x.Id == id && x.Etag == etag, document, UpsertReplace);
+                if (etag == null)
+                {
+                    await Collection.InsertOneAsync(session, document, cancellationToken: cancellationToken);
 
-                return true;
+                    return true;
+                }
+
+                var result = await Collection.ReplaceOneAsync(session, x => x.Id == id && x.Etag == etag, document, cancellationToken: cancellationToken);
+
+                return result.MatchedCount == 1;
             }
             catch (MongoException ex)
             {
@@ -92,66 +101,81 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
             }
         }
 
-        public async Task<IList<Uri>> GetGateways(string deploymentId)
+        public async Task<IList<Uri>> GetGateways(string deploymentId, CancellationToken cancellationToken = default)
         {
             var entries =
                 await Collection.Find(x => x.DeploymentId == deploymentId && x.Status == (int)SiloStatus.Active && x.ProxyPort > 0)
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
 
             return entries.Select(x => x.ToGatewayUri()).ToList();
         }
 
-        public async Task<MembershipTableData> ReadAll(string deploymentId)
+        public Task<MembershipTableData> ReadAll(string deploymentId, CancellationToken cancellationToken = default)
         {
-            using var session = await Client.StartSessionAsync();
-            
-            var tableVersion = await tableVersionCollection.GetTableVersionAsync(session, deploymentId);
-
-            var entries =
-                await Collection.Find(session, x => x.DeploymentId == deploymentId).ToListAsync();
-
-            return ReturnMembershipTableData(entries, tableVersion);
+            return ReadConsistentAsync(deploymentId, session =>
+                Collection.Find(session, x => x.DeploymentId == deploymentId).ToListAsync(cancellationToken), cancellationToken);
         }
 
-        public async Task<MembershipTableData> ReadRow(string deploymentId, SiloAddress address)
-        {
-            using var session = await Client.StartSessionAsync();
-            
-            var tableVersion = await tableVersionCollection.GetTableVersionAsync(session, deploymentId);
-
-            var id = ReturnId(deploymentId, address);
-
-            var entries =
-                await Collection.Find(session, x => x.Id == id).ToListAsync();
-
-            return ReturnMembershipTableData(entries, tableVersion);
-            
-        }
-
-        public Task UpdateIAmAlive(string deploymentId, SiloAddress address, DateTime iAmAliveTime)
+        public Task<MembershipTableData> ReadRow(string deploymentId, SiloAddress address, CancellationToken cancellationToken = default)
         {
             var id = ReturnId(deploymentId, address);
 
-            return Collection.UpdateOneAsync(x => x.Id == id, Update.Set(x => x.IAmAliveTime, LogFormatter.PrintDate(iAmAliveTime)));
+            return ReadConsistentAsync(deploymentId, session =>
+                Collection.Find(session, x => x.Id == id).ToListAsync(cancellationToken), cancellationToken);
         }
 
-        public Task CleanupDefunctSiloEntries(string deploymentId, DateTimeOffset beforeDate)
+        // The rows and the table version are stored in different documents, but every write updates both in one transaction
+        // and assigns a new version etag. The rows therefore belong to the table version if it did not change while they were read.
+        private async Task<MembershipTableData> ReadConsistentAsync(
+            string deploymentId,
+            Func<IClientSessionHandle, Task<List<MongoMembershipDocument>>> readEntries,
+            CancellationToken cancellationToken)
         {
-            var beforeUtc = beforeDate.UtcDateTime;
+            using var session = await Client.StartSessionAsync(cancellationToken: cancellationToken);
 
-            return Collection.DeleteManyAsync(x => x.DeploymentId == deploymentId && x.Status != (int)SiloStatus.Active && x.Timestamp < beforeUtc);
+            for (var attempt = 1; ; attempt++)
+            {
+                var tableVersion = await tableVersionCollection.GetTableVersionAsync(session, deploymentId, cancellationToken);
+
+                var entries = await readEntries(session);
+
+                var tableVersionAfterRead = await tableVersionCollection.GetTableVersionAsync(session, deploymentId, cancellationToken);
+
+                if (tableVersion.Equals(tableVersionAfterRead))
+                {
+                    return ReturnMembershipTableData(entries, tableVersion);
+                }
+
+                if (attempt == MaxConsistentReadAttempts)
+                {
+                    throw new InvalidOperationException(
+                        $"Membership table for deployment {deploymentId} changed during {MaxConsistentReadAttempts} consecutive reads.");
+                }
+            }
         }
 
-        public async Task DeleteMembershipTableEntries(string deploymentId)
+        public Task UpdateIAmAlive(string deploymentId, SiloAddress address, DateTime iAmAliveTime, CancellationToken cancellationToken = default)
         {
-            using var session = await Client.StartSessionAsync();
+            var id = ReturnId(deploymentId, address);
+
+            return Collection.UpdateOneAsync(x => x.Id == id, Update.Set(x => x.IAmAliveTime, LogFormatter.PrintDate(iAmAliveTime)), cancellationToken: cancellationToken);
+        }
+
+        public Task CleanupDefunctSiloEntries(string deploymentId, DateTimeOffset beforeDate, CancellationToken cancellationToken = default)
+        {
+            return MembershipCleanup.DeleteDefunctSiloEntriesAsync(Collection, deploymentId, beforeDate, cancellationToken);
+        }
+
+        public async Task DeleteMembershipTableEntries(string deploymentId, CancellationToken cancellationToken = default)
+        {
+            using var session = await Client.StartSessionAsync(cancellationToken: cancellationToken);
 
             await session.WithTransactionAsync(async (sessionHandle, ct) =>
             {
-                await Collection.DeleteManyAsync(sessionHandle, x => x.DeploymentId == deploymentId);
-                await tableVersionCollection.DeleteAsync(sessionHandle, deploymentId);
+                await Collection.DeleteManyAsync(sessionHandle, x => x.DeploymentId == deploymentId, cancellationToken: ct);
+                await tableVersionCollection.DeleteAsync(sessionHandle, deploymentId, ct);
                 return true;
-            });
+            }, cancellationToken: cancellationToken);
         }
 
         private static MembershipTableData ReturnMembershipTableData(IEnumerable<MongoMembershipDocument> membershipList, TableVersion tableVersion)

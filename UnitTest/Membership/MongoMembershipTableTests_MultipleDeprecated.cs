@@ -1,63 +1,57 @@
-﻿
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Orleans.Messaging;
-using Orleans.Providers.MongoDB.Configuration;
-using Orleans.Providers.MongoDB.Membership;
-using Orleans.Providers.MongoDB.UnitTest.Fixtures;
+﻿using System;
+using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
+using Orleans.Clustering.TestKit;
+using Orleans.Providers.MongoDB.Configuration;
+using Orleans.Providers.MongoDB.UnitTest.Fixtures;
+using Orleans.Providers.MongoDB.Utils;
+using Orleans.Runtime;
 using TestExtensions;
 using UnitTests;
 using UnitTests.MembershipTests;
 using Xunit;
+using Xunit.v3;
 
 namespace Orleans.Providers.MongoDB.UnitTest.Membership
 {
-    [TestCategory("Membership")]
-    [TestCategory("Mongo")]
-    public class MongoMembershipTableTests_MultipleDeprecated : MembershipTableTestsBase
+    public class MongoMembershipTableTests_MultipleDeprecated : MongoMembershipTableTestsBase, IAsyncLifetime
     {
+        private const string SkipReason = "MultipleDeprecated does not support the extended membership protocol.";
+        private static int generation;
+
         public MongoMembershipTableTests_MultipleDeprecated(ConnectionStringFixture fixture, TestEnvironmentFixture environment)
-            : base(fixture, environment, new LoggerFilterOptions())
+            : base(fixture, environment)
         {
         }
 
-        protected override IMembershipTable CreateMembershipTable(ILogger logger)
-        {
-            var options = Options.Create(new MongoDBMembershipTableOptions
-            {
-                CollectionPrefix = "Test_",
-                DatabaseName = "OrleansTest",
-                Strategy = MongoDBMembershipStrategy.MultipleDeprecated
-            });
+        protected override MongoDBMembershipStrategy Strategy => MongoDBMembershipStrategy.MultipleDeprecated;
 
-            return new MongoMembershipTable(
-                MongoDatabaseFixture.DatabaseFactory,
-                loggerFactory.CreateLogger<MongoMembershipTable>(),
-                _clusterOptions,
-                options);
-        }
-
-        protected override IGatewayListProvider CreateGatewayListProvider(ILogger logger)
-        {
-            var options = Options.Create(new MongoDBGatewayListProviderOptions
-            {
-                CollectionPrefix = "Test_",
-                DatabaseName = "OrleansTest",
-                Strategy = MongoDBMembershipStrategy.MultipleDeprecated
-            });
-
-            return new MongoGatewayListProvider(
-                MongoDatabaseFixture.DatabaseFactory,
-                loggerFactory.CreateLogger<MongoGatewayListProvider>(),
-                _clusterOptions,
-                _gatewayOptions,
-                options);
-        }
+        protected override IMongoClientFactory ClientFactory => MongoDatabaseFixture.DatabaseFactory;
 
         protected override Task<string> GetConnectionString()
         {
             return Task.FromResult(MongoDatabaseFixture.DatabaseConnectionString);
+        }
+
+        // The conformance suite verifies the extended membership protocol (table versions),
+        // which this strategy intentionally does not implement.
+        ValueTask IAsyncLifetime.InitializeAsync()
+        {
+            var declaringType = (TestContext.Current.TestMethod as IXunitTestMethod)?.Method.DeclaringType;
+
+            if (declaringType == typeof(MembershipTableConformanceTestsBase) ||
+                declaringType == typeof(MembershipTableFullConformanceTestsBase))
+            {
+                Assert.Skip(SkipReason);
+            }
+
+            return InitializeAsync();
+        }
+
+        protected override MembershipTableTestFixture CreateConformanceFixture()
+        {
+            throw Xunit.Sdk.SkipException.ForSkip(SkipReason);
         }
 
         [Fact, TestCategory("Functional")]
@@ -79,33 +73,89 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
         }
 
         [Fact, TestCategory("Functional")]
-        public async Task Test_InsertRow()
+        public async Task Test_InsertRow_DuplicateFails()
         {
-            await MembershipTable_InsertRow(false);
+            var ct = TestContext.Current.CancellationToken;
+            var table = await GetLegacyMembershipTableAsync(ct);
+            var entry = CreateEntry();
+
+            Assert.True(await table.InsertRowAsync(entry, (await table.ReadAllAsync(ct)).Version.Next(), ct));
+            Assert.False(await table.InsertRowAsync(entry, (await table.ReadAllAsync(ct)).Version.Next(), ct));
+
+            var data = await table.ReadRowAsync(entry.SiloAddress, ct);
+            Assert.Equal(entry.SiloName, Assert.Single(data.Members).Item1.SiloName);
         }
 
         [Fact, TestCategory("Functional")]
-        public async Task Test_ReadRow_Insert_Read()
+        public async Task Test_UpdateRow_RequiresCurrentEtag()
         {
-            await MembershipTable_ReadRow_Insert_Read(false);
+            var ct = TestContext.Current.CancellationToken;
+            var table = await GetLegacyMembershipTableAsync(ct);
+            var entry = CreateEntry();
+
+            Assert.True(await table.InsertRowAsync(entry, (await table.ReadAllAsync(ct)).Version.Next(), ct));
+
+            var etag = Assert.Single((await table.ReadRowAsync(entry.SiloAddress, ct)).Members).Item2;
+
+            entry.Status = SiloStatus.Active;
+            Assert.True(await table.UpdateRowAsync(entry, etag, (await table.ReadAllAsync(ct)).Version.Next(), ct));
+
+            entry.Status = SiloStatus.Dead;
+            Assert.False(await table.UpdateRowAsync(entry, etag, (await table.ReadAllAsync(ct)).Version.Next(), ct));
+
+            var row = Assert.Single((await table.ReadRowAsync(entry.SiloAddress, ct)).Members);
+            Assert.Equal(SiloStatus.Active, row.Item1.Status);
+            Assert.NotEqual(etag, row.Item2);
         }
 
         [Fact, TestCategory("Functional")]
-        public async Task Test_ReadAll_Insert_ReadAll()
+        public async Task Test_UpdateRow_MissingRowFails()
         {
-            await MembershipTable_ReadAll_Insert_ReadAll(false);
+            var ct = TestContext.Current.CancellationToken;
+            var table = await GetLegacyMembershipTableAsync(ct);
+            var entry = CreateEntry();
+
+            Assert.True(await table.InsertRowAsync(entry, (await table.ReadAllAsync(ct)).Version.Next(), ct));
+
+            var etag = Assert.Single((await table.ReadRowAsync(entry.SiloAddress, ct)).Members).Item2;
+
+            Assert.False(await table.UpdateRowAsync(CreateEntry(), etag, (await table.ReadAllAsync(ct)).Version.Next(), ct));
+            Assert.Single((await table.ReadAllAsync(ct)).Members);
         }
 
         [Fact, TestCategory("Functional")]
-        public async Task Test_UpdateRow()
+        public async Task Test_UpdateIAmAlive()
         {
-            await MembershipTable_UpdateRow(false);
+            var ct = TestContext.Current.CancellationToken;
+            var table = await GetLegacyMembershipTableAsync(ct);
+            var entry = CreateEntry();
+
+            Assert.True(await table.InsertRowAsync(entry, (await table.ReadAllAsync(ct)).Version.Next(), ct));
+
+            var heartbeat = entry.IAmAliveTime.AddSeconds(5);
+            await table.UpdateIAmAliveAsync(new MembershipEntry { SiloAddress = entry.SiloAddress, IAmAliveTime = heartbeat }, ct);
+
+            var row = Assert.Single((await table.ReadAllAsync(ct)).Members, x => x.Item1.SiloAddress.Equals(entry.SiloAddress));
+            Assert.Equal(heartbeat, row.Item1.IAmAliveTime);
+            Assert.Equal(entry.Status, row.Item1.Status);
         }
 
-        [Fact, TestCategory("Functional")]
-        public async Task Test_UpdateRowInParallel()
+        private static MembershipEntry CreateEntry()
         {
-            await MembershipTable_UpdateRowInParallel(false);
+            var now = DateTime.UtcNow;
+            var time = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, DateTimeKind.Utc);
+            var siloAddress = SiloAddress.New(IPAddress.Loopback, 12345, Interlocked.Increment(ref generation));
+
+            return new MembershipEntry
+            {
+                SiloAddress = siloAddress,
+                HostName = "host",
+                SiloName = $"silo-{siloAddress.Generation}",
+                Status = SiloStatus.Joining,
+                ProxyPort = siloAddress.Endpoint.Port,
+                StartTime = time,
+                IAmAliveTime = time
+            };
         }
     }
 }

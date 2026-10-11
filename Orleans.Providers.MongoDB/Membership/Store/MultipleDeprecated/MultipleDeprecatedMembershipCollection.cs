@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using Orleans.Providers.MongoDB.Utils;
@@ -52,7 +53,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store.MultipleDeprecated
             }
         }
 
-        public async Task<bool> UpsertRow(string deploymentId, MembershipEntry entry, string etag, TableVersion tableVersion)
+        public async Task<bool> UpsertRow(string deploymentId, MembershipEntry entry, string etag, TableVersion tableVersion, CancellationToken cancellationToken = default)
         {
             var id = ReturnId(deploymentId, entry.SiloAddress);
 
@@ -60,9 +61,16 @@ namespace Orleans.Providers.MongoDB.Membership.Store.MultipleDeprecated
 
             try
             {
-                await Collection.ReplaceOneAsync(x => x.Id == id && x.Etag == etag, document, UpsertReplace);
+                if (etag == null)
+                {
+                    await Collection.InsertOneAsync(document, cancellationToken: cancellationToken);
 
-                return true;
+                    return true;
+                }
+
+                var result = await Collection.ReplaceOneAsync(x => x.Id == id && x.Etag == etag, document, cancellationToken: cancellationToken);
+
+                return result.MatchedCount == 1;
             }
             catch (MongoException ex)
             {
@@ -74,52 +82,50 @@ namespace Orleans.Providers.MongoDB.Membership.Store.MultipleDeprecated
             }
         }
 
-        public async Task<IList<Uri>> GetGateways(string deploymentId)
+        public async Task<IList<Uri>> GetGateways(string deploymentId, CancellationToken cancellationToken = default)
         {
             var entries =
                 await Collection.Find(x => x.DeploymentId == deploymentId && x.Status == (int)SiloStatus.Active && x.ProxyPort > 0)
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
 
             return entries.Select(x => x.ToGatewayUri()).ToList();
         }
 
-        public async Task<MembershipTableData> ReadAll(string deploymentId)
+        public async Task<MembershipTableData> ReadAll(string deploymentId, CancellationToken cancellationToken = default)
         {
             var entries =
                 await Collection.Find(x => x.DeploymentId == deploymentId)
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
 
             return ReturnMembershipTableData(entries);
         }
 
-        public async Task<MembershipTableData> ReadRow(string deploymentId, SiloAddress address)
+        public async Task<MembershipTableData> ReadRow(string deploymentId, SiloAddress address, CancellationToken cancellationToken = default)
         {
             var id = ReturnId(deploymentId, address);
 
             var entries =
                 await Collection.Find(x => x.Id == id)
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
 
             return ReturnMembershipTableData(entries);
         }
 
-        public Task UpdateIAmAlive(string deploymentId, SiloAddress address, DateTime iAmAliveTime)
+        public Task UpdateIAmAlive(string deploymentId, SiloAddress address, DateTime iAmAliveTime, CancellationToken cancellationToken = default)
         {
             var id = ReturnId(deploymentId, address);
 
-            return Collection.UpdateOneAsync(x => x.Id == id, Update.Set(x => x.IAmAliveTime, LogFormatter.PrintDate(iAmAliveTime)));
+            return Collection.UpdateOneAsync(x => x.Id == id, Update.Set(x => x.IAmAliveTime, LogFormatter.PrintDate(iAmAliveTime)), cancellationToken: cancellationToken);
         }
 
-        public Task CleanupDefunctSiloEntries(string deploymentId, DateTimeOffset beforeDate)
+        public Task CleanupDefunctSiloEntries(string deploymentId, DateTimeOffset beforeDate, CancellationToken cancellationToken = default)
         {
-            var beforeUtc = beforeDate.UtcDateTime;
-
-            return Collection.DeleteManyAsync(x => x.DeploymentId == deploymentId && x.Status != (int)SiloStatus.Active && x.Timestamp < beforeUtc);
+            return MembershipCleanup.DeleteDefunctSiloEntriesAsync(Collection, deploymentId, beforeDate, cancellationToken);
         }
 
-        public Task DeleteMembershipTableEntries(string deploymentId)
+        public Task DeleteMembershipTableEntries(string deploymentId, CancellationToken cancellationToken = default)
         {
-            return Collection.DeleteManyAsync(x => x.DeploymentId == deploymentId);
+            return Collection.DeleteManyAsync(x => x.DeploymentId == deploymentId, cancellationToken);
         }
 
         private static MembershipTableData ReturnMembershipTableData(IEnumerable<MongoMembershipDocument> membershipList)

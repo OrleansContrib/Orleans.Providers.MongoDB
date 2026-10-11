@@ -7,6 +7,7 @@ using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.StorageProviders.Serializers;
 using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
+using Orleans.Serialization.Serializers;
 using Orleans.Storage;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
@@ -18,14 +19,17 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         private readonly IMongoClient mongoClient;
         private readonly ILogger<MongoGrainStorage> logger;
         private readonly IGrainStateSerializer serializer;
+        private readonly IActivatorProvider activatorProvider;
 
         public MongoGrainStorage(
             IMongoClientFactory mongoClientFactory,
             ILogger<MongoGrainStorage> logger,
+            IActivatorProvider activatorProvider,
             MongoDBGrainStorageOptions options)
         {
             this.mongoClient = mongoClientFactory.Create(options, "Storage");
             this.logger = logger;
+            this.activatorProvider = activatorProvider;
             this.options = options;
             this.serializer = options.GrainStateSerializer;
         }
@@ -65,6 +69,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                     options.CollectionConfigurator,
                     options.CreateShardKeyForCosmos,
                     serializer,
+                    activatorProvider,
                     options.KeyGenerator));
         }
 

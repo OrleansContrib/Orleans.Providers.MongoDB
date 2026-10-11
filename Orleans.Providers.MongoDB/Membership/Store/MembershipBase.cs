@@ -94,6 +94,35 @@ namespace Orleans.Providers.MongoDB.Membership.Store
             };
         }
 
+        /// <summary>
+        /// Determines whether this entry can be removed by <c>CleanupDefunctSiloEntries</c>: only dead silos
+        /// whose latest known update (start, heartbeat or suspicion vote) is strictly before the cutoff qualify.
+        /// </summary>
+        public bool IsDefunct(DateTime beforeUtc)
+        {
+            if (Status != (int)SiloStatus.Dead)
+            {
+                return false;
+            }
+
+            var lastUpdate = Max(LogFormatter.ParseDate(StartTime), LogFormatter.ParseDate(IAmAliveTime));
+
+            if (SuspectTimes != null)
+            {
+                foreach (var suspectTime in SuspectTimes)
+                {
+                    lastUpdate = Max(lastUpdate, LogFormatter.ParseDate(suspectTime.IAmAliveTime));
+                }
+            }
+
+            return lastUpdate.Ticks < beforeUtc.Ticks;
+        }
+
+        private static DateTime Max(DateTime lhs, DateTime rhs)
+        {
+            return lhs.Ticks >= rhs.Ticks ? lhs : rhs;
+        }
+
         public Uri ToGatewayUri()
         {
             var siloAddress = SiloAddressClass.FromParsableString(SiloAddress);

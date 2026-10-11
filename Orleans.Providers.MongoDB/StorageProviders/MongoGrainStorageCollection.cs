@@ -6,6 +6,7 @@ using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.StorageProviders.Serializers;
 using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
+using Orleans.Serialization.Serializers;
 using Orleans.Storage;
 
 namespace Orleans.Providers.MongoDB.StorageProviders
@@ -17,6 +18,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
         private const string FieldEtag = "_etag";
         private readonly string collectionName;
         private readonly IGrainStateSerializer serializer;
+        private readonly IActivatorProvider activatorProvider;
         private readonly GrainStorageKeyGenerator keyGenerator;
 
         public MongoGrainStorageCollection(
@@ -26,11 +28,13 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             Action<MongoCollectionSettings> collectionConfigurator,
             bool createShardKey,
             IGrainStateSerializer serializer,
+            IActivatorProvider activatorProvider,
             GrainStorageKeyGenerator keyGenerator)
             : base(mongoClient, databaseName, collectionConfigurator, createShardKey)
         {
             this.collectionName = collectionName;
             this.serializer = serializer;
+            this.activatorProvider = activatorProvider;
             this.keyGenerator = keyGenerator;
         }
 
@@ -63,6 +67,10 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
                     grainState.State = serializer.Deserialize<T>(existing);
                 }
+            }
+            else
+            {
+                ResetState(grainState);
             }
         }
 
@@ -98,7 +106,7 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                     var document = new BsonDocument
                     {
                         [FieldId] = grainKey,
-                        [FieldEtag] = grainKey,
+                        [FieldEtag] = newETag,
                         [FieldDoc] = newData
                     };
 
@@ -127,13 +135,34 @@ namespace Orleans.Providers.MongoDB.StorageProviders
             grainState.ETag = newETag;
         }
 
-        public Task ClearAsync<T>(GrainId grainId, IGrainState<T> grainState)
+        public async Task ClearAsync<T>(GrainId grainId, IGrainState<T> grainState)
         {
             var grainKey = keyGenerator(grainId);
 
-            grainState.RecordExists = false;
+            var result = await Collection.DeleteOneAsync(
+                Filter.And(
+                    Filter.Eq(FieldId, grainKey),
+                    Filter.Eq(FieldEtag, grainState.ETag)));
 
-            return Collection.DeleteManyAsync(Filter.Eq(FieldId, grainKey));
+            if (result.DeletedCount == 0)
+            {
+                await ThrowForOtherEtag(grainKey, grainState.ETag, null);
+
+                // Documents from before the etag was introduced have no etag to check, so they are deleted like they are overwritten.
+                await Collection.DeleteOneAsync(
+                    Filter.And(
+                        Filter.Eq(FieldId, grainKey),
+                        Filter.Exists(FieldEtag, false)));
+            }
+
+            ResetState(grainState);
+        }
+
+        private void ResetState<T>(IGrainState<T> grainState)
+        {
+            grainState.ETag = null;
+            grainState.RecordExists = false;
+            grainState.State = activatorProvider.GetActivator<T>().Create();
         }
 
         private async Task ThrowForOtherEtag(string key, string etag, Exception ex)
@@ -144,7 +173,11 @@ namespace Orleans.Providers.MongoDB.StorageProviders
 
             if (existingEtag != null && existingEtag.Contains(FieldEtag))
             {
-                throw new InconsistentStateException(existingEtag[FieldEtag].AsString, etag, ex);
+                var storedEtag = existingEtag[FieldEtag].AsString;
+
+                var message = ex?.Message ?? $"Version conflict: stored ETag {storedEtag} does not match current ETag {etag}.";
+
+                throw new InconsistentStateException(message, storedEtag, etag, ex);
             }
         }
     }

@@ -28,6 +28,16 @@ namespace Orleans.Providers.MongoDB.UnitTest.Storage.TestGrains
                     throw new ProviderStateException(ex.Message);
                 }
             }
+
+            public Task<string> GetName()
+            {
+                return Task.FromResult(state.State.Name);
+            }
+
+            public async Task ClearName()
+            {
+                await state.ClearStateAsync();
+            }
         }
     }
 }

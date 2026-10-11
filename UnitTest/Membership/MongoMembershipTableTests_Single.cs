@@ -1,58 +1,23 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Orleans.Messaging;
 using Orleans.Providers.MongoDB.Configuration;
-using Orleans.Providers.MongoDB.Membership;
 using Orleans.Providers.MongoDB.UnitTest.Fixtures;
+using Orleans.Providers.MongoDB.Utils;
 using TestExtensions;
 using UnitTests;
-using UnitTests.MembershipTests;
 using Xunit;
 
 namespace Orleans.Providers.MongoDB.UnitTest.Membership
 {
-    [TestCategory("Membership")]
-    [TestCategory("Mongo")]
-    public class MongoMembershipTableTests_Single : MembershipTableTestsBase
+    public class MongoMembershipTableTests_Single : MongoMembershipTableTestsBase
     {
         public MongoMembershipTableTests_Single(ConnectionStringFixture fixture, TestEnvironmentFixture environment)
-            : base(fixture, environment, new LoggerFilterOptions())
+            : base(fixture, environment)
         {
         }
 
-        protected override IMembershipTable CreateMembershipTable(ILogger logger)
-        {
-            var options = Options.Create(new MongoDBMembershipTableOptions
-            {
-                CollectionPrefix = "Test_",
-                DatabaseName = "OrleansTest",
-                Strategy = MongoDBMembershipStrategy.SingleDocument
-            });
+        protected override MongoDBMembershipStrategy Strategy => MongoDBMembershipStrategy.SingleDocument;
 
-            return new MongoMembershipTable(
-                MongoDatabaseFixture.DatabaseFactory,
-                loggerFactory.CreateLogger<MongoMembershipTable>(),
-                _clusterOptions,
-                options);
-        }
-
-        protected override IGatewayListProvider CreateGatewayListProvider(ILogger logger)
-        {
-            var options = Options.Create(new MongoDBGatewayListProviderOptions
-            {
-                CollectionPrefix = "Test_",
-                DatabaseName = "OrleansTest",
-                Strategy = MongoDBMembershipStrategy.SingleDocument
-            });
-
-            return new MongoGatewayListProvider(
-                MongoDatabaseFixture.DatabaseFactory,
-                loggerFactory.CreateLogger<MongoGatewayListProvider>(),
-                _clusterOptions,
-                _gatewayOptions,
-                options);
-        }
+        protected override IMongoClientFactory ClientFactory => MongoDatabaseFixture.DatabaseFactory;
 
         protected override Task<string> GetConnectionString()
         {
@@ -80,37 +45,37 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
         [Fact, TestCategory("Functional")]
         public async Task Test_InsertRow()
         {
-            await MembershipTable_InsertRow(true);
+            await MembershipTable_InsertRow();
         }
 
         [Fact, TestCategory("Functional")]
         public async Task Test_ReadRow_Insert_Read()
         {
-            await MembershipTable_ReadRow_Insert_Read(true);
+            await MembershipTable_ReadRow_Insert_Read();
         }
 
         [Fact, TestCategory("Functional")]
         public async Task Test_ReadAll_Insert_ReadAll()
         {
-            await MembershipTable_ReadAll_Insert_ReadAll(true);
+            await MembershipTable_ReadAll_Insert_ReadAll();
         }
 
         [Fact, TestCategory("Functional")]
         public async Task Test_UpdateRow()
         {
-            await MembershipTable_UpdateRow(true);
+            await MembershipTable_UpdateRow();
         }
 
         [Fact, TestCategory("Functional")]
         public async Task Test_UpdateRowInParallel()
         {
-            await MembershipTable_UpdateRowInParallel(true);
+            await MembershipTable_UpdateRowInParallel();
         }
 
         [Fact, TestCategory("Functional")]
         public async Task Test_UpdateIAmAlive()
         {
-            await MembershipTable_UpdateIAmAlive(true);
+            await MembershipTable_UpdateIAmAlive();
         }
     }
 }
