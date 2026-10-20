@@ -5,11 +5,11 @@ using MongoDB.Driver;
 using Orleans.Hosting;
 using Orleans.Providers.MongoDB.StorageProviders.Serializers;
 using Orleans.Providers.MongoDB.UnitTest.Fixtures;
+using Orleans.Providers.MongoDB.UnitTest.Storage.TestGrains;
 using System;
 using System.Threading.Tasks;
 using TestExtensions;
 using Xunit;
-using static Orleans.Providers.MongoDB.UnitTest.Storage.TestGrains.StorageTests;
 
 namespace Orleans.Providers.MongoDB.UnitTest.Storage
 {
@@ -34,7 +34,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Storage
                 })
                 .Build();
 
-            await host.StartAsync();
+            await host.StartAsync(TestContext.Current.CancellationToken);
 
             var client = host.Services.GetRequiredService<IClusterClient>();
             var mongoClient = client.ServiceProvider.GetRequiredService<IMongoClient>();
@@ -44,7 +44,8 @@ namespace Orleans.Providers.MongoDB.UnitTest.Storage
             await collection.Indexes.CreateOneAsync(
                 new CreateIndexModel<ConstrainedGrainState>(
                     Builders<ConstrainedGrainState>.IndexKeys.Ascending(f => f.Name),
-                    new CreateIndexOptions { Unique = true }));
+                    new CreateIndexOptions { Unique = true }),
+                cancellationToken: TestContext.Current.CancellationToken);
 
             var guid = Guid.NewGuid().ToString();
 
@@ -53,7 +54,8 @@ namespace Orleans.Providers.MongoDB.UnitTest.Storage
 
             await database.GetCollection<BsonDocument>("GrainsConstrainedGrain").UpdateOneAsync(
                     Builders<BsonDocument>.Filter.Eq("_id", "constrained/0"),
-                    Builders<BsonDocument>.Update.Set("_etag", Guid.NewGuid().ToString()));
+                    Builders<BsonDocument>.Update.Set("_etag", Guid.NewGuid().ToString()),
+                    cancellationToken: TestContext.Current.CancellationToken);
 
             var exception0 = await Assert.ThrowsAsync<ProviderStateException>(async () => await grain0.SetName(Guid.NewGuid().ToString()));
             Assert.Equal("A write operation resulted in an error. WriteError: { Category : \"DuplicateKey\", Code : 11000, Message : \"E11000 duplicate key error collection: OrleansTestApp.GrainsConstrainedGrain index: _id_ dup key: { _id: \"constrained/0\" }\" }.", exception0.Message);

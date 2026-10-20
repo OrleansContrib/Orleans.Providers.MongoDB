@@ -28,7 +28,9 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: |
+          8.0.x
+          10.0.x
 
     - name: Build
       run: |
@@ -38,7 +40,7 @@ jobs:
     - name: Test
       run: |
         cd UnitTest
-        dotnet test Orleans.Providers.MongoDB.UnitTest.csproj \
+        dotnet test --project Orleans.Providers.MongoDB.UnitTest.csproj \
           --configuration Release \
           -p:MongoVersion=${{ matrix.mongo-version }}
 
@@ -60,7 +62,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 10.0.x
 
     - name: Pack
       run: |

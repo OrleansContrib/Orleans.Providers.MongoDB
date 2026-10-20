@@ -89,7 +89,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Serializers
                 })
                 .Build();
 
-            await host.StartAsync();
+            await host.StartAsync(TestContext.Current.CancellationToken);
 
             var client = host.Services.GetRequiredService<IClusterClient>();
 

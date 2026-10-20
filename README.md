@@ -112,9 +112,16 @@ var silo = new SiloHostBuilder()
     {
         options.DatabaseName = dbName;
         options.CreateShardKeyForCosmos = createShardKey;
+        options.CreateIndexes = false;
     })
     ...
     .Build();
+```
+
+By default, the provider creates and manages the `ByGrainHash` index for the `OrleansReminderV2` collection. Set `CreateIndexes` to `false` when indexes are provisioned and managed externally, or when the connection string does not have permission to manage indexes. In that case, ensure that an index named `ByGrainHash` with the following definition exists to avoid inefficient reminder range queries:
+
+```text
+{ ServiceId: 1, GrainHash: 1 }
 ```
 
 ### Storage
@@ -176,7 +183,7 @@ As you can see you have to pass in the connection string to each provider. But w
 
 ## Building the unit tests
 
-In order to make use of many tests already defined in [Orleans](https://github.com/dotnet/orleans/), the [unit test project of this module](https://github.com/OrleansContrib/Orleans.Providers.MongoDB/tree/master/UnitTest) depends on [TesterInternal](https://github.com/dotnet/orleans/tree/main/test/TesterInternal), which is added as a project reference from the local path [./libs](https://github.com/OrleansContrib/Orleans.Providers.MongoDB/tree/master/libs) where the whole Orleans source code is mirrored as a [git submodule](https://git-scm.com/docs/git-submodule).
+In order to make use of tests and test infrastructure from [Orleans](https://github.com/dotnet/orleans/), the [unit test project of this module](https://github.com/OrleansContrib/Orleans.Providers.MongoDB/tree/master/UnitTest) references projects from the local [./libs](https://github.com/OrleansContrib/Orleans.Providers.MongoDB/tree/master/libs) git submodule.
 
 This comes with two caveats:
 * Depending on your git client, the submodules are sometimes not pulled automatically. If you find the ./libs subdirectory to be empty, execute ```git pull --recurse-submodules``` manually from the command shell
