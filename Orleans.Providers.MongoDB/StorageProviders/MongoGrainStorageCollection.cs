@@ -118,6 +118,13 @@ namespace Orleans.Providers.MongoDB.StorageProviders
                         }
                     }
                 }
+                else if (ex is MongoWriteException { WriteError: null, WriteConcernError: not null })
+                {
+                    // The update was applied on the primary, so the stored document already carries the new ETag.
+                    grainState.ETag = newETag;
+
+                    throw;
+                }
                 else
                 {
                     throw;

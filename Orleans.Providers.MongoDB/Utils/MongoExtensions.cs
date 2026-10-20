@@ -14,9 +14,8 @@ namespace Orleans.Providers.MongoDB.Utils
                 return true;
             }
 
-            if (ex is MongoWriteException w
-                && w.WriteError.Category == ServerErrorCategory.DuplicateKey
-                && w.WriteError.Message.Contains("index: _id_ ", StringComparison.Ordinal))
+            if (ex is MongoWriteException { WriteError: { Category: ServerErrorCategory.DuplicateKey } writeError }
+                && writeError.Message.Contains("index: _id_ ", StringComparison.Ordinal))
             {
                 return true;
             }
